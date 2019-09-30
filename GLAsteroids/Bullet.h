@@ -1,5 +1,5 @@
-#ifndef bullet_h
-#define	bullet_h
+#ifndef asteroids_bullet_h
+#define	asteroids_bullet_h
 
 #include <array>
 
@@ -32,5 +32,5 @@ private:
 };
 
 } // end asteroids
-#endif // bullet_h	
+#endif // asteroids_bullet_h	
 

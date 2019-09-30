@@ -1,5 +1,5 @@
-#ifndef ship_h
-#define	ship_h
+#ifndef asteroids_ship_h
+#define	asteroids_ship_h
 
 #include <array>
 #include <map>
@@ -40,5 +40,5 @@ private:
 };
 
 } // end asteroids
-#endif	// ship_h 
+#endif	// asteroids_ship_h 
 

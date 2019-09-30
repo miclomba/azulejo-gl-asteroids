@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <vector>
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
@@ -12,27 +13,10 @@ using asteroids::State;
 
 namespace
 {
-const int WIN_WIDTH = 600;
-const int WIN_HEIGHT = 480;
-const int NUMBER_KEYS = 256;
 const int ROCK_NUMBER = 6;
-const int INIT_WIN_X = 100;
-const int INIT_WIN_Y = 100;
-const std::string TITLE = "Asteroids";
 const std::string SHIP_KEY = "Ship";
 const std::string ROCK_KEY = "Rock";
 }
-
-/*======================== CALLBACK POINTER ==================================*/
-Asteroids* Asteroids::callbackInstance_(nullptr);
-/*============================================================================*/
-
-Asteroids::Asteroids() = default;
-
-void Asteroids::Run() 
-{ 
-	glutMainLoop(); 
-};
 
 Asteroids::SharedEntity& Asteroids::GetRock(const std::string& key)
 {
@@ -49,71 +33,8 @@ Asteroids::SharedEntity& Asteroids::GetShip()
 	return GetAggregatedMember(SHIP_KEY);
 }
 
-void Asteroids::RegisterCallbacks() 
+Asteroids::Asteroids() 
 {
-	glutDisplayFunc(DisplayWrapper);   glutReshapeFunc(ReshapeWrapper);
-	glutKeyboardFunc(KeyboardWrapper); glutKeyboardUpFunc(KeyboardUpWrapper);
-}
-
-void Asteroids::DisplayWrapper() 
-{
-	callbackInstance_->Draw();
-}
-
-void Asteroids::ReshapeWrapper(const int _w, const int _h) 
-{
-	callbackInstance_->Reshape(_w, _h);
-}
-
-void Asteroids::KeyboardWrapper(const unsigned char _chr, const int _x, const int _y) 
-{
-	callbackInstance_->Keyboard(_chr, _x, _y);
-}
-
-void Asteroids::KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y) 
-{
-	callbackInstance_->KeyboardUp(_chr, _x, _y);
-}
-
-void Asteroids::InitGlut(int _argc, char* _argv[])
-{
-	glutInit(&_argc, _argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowPosition(INIT_WIN_X, INIT_WIN_Y);
-	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	glutCreateWindow(TITLE.c_str());
-}
-
-void Asteroids::InitServer()
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
-	glDepthRange(0, 1);
-	glEnable(GL_AUTO_NORMAL);
-	glEnable(GL_NORMALIZE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-}
-
-void Asteroids::InitClient()
-{
-    glEnableClientState(GL_VERTEX_ARRAY);
-}
-
-Asteroids::Asteroids(int _argc, char* _argv[]) 
-{
-    if (!callbackInstance_)
-        callbackInstance_ = this;
-
-	fill(keysPressed_.begin(), keysPressed_.end(), false);
-
-	InitGlut(_argc, _argv);
-    RegisterCallbacks();
-	InitServer();
-	InitClient();
-
 	for (GLint i = 0; i < ROCK_NUMBER; i++) 
 		AggregateMember(ROCK_KEY + std::to_string(i));
 	AggregateMember(SHIP_KEY);
@@ -264,108 +185,6 @@ void Asteroids::DetermineCollisions()
 	}
 }
 
-void Asteroids::Draw() 
-{
-    KeyboardUpdateState();
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	DrawRockAndShip();
-
-    orientationAngle_ = 0.0f;
-    thrust_ = 0.0f;
-
-	DrawGameInfo();
-
-    // RENDER
-    glFlush();
-    glutSwapBuffers();
-
-	DetermineCollisions();
-}
-
-void Asteroids::Reshape(const int _w, const int _h) 
-{
-    //========================= DEFINE VIEWPORT ==============================*/
-    glViewport(0,0,_w,_h);
-    /*========================= ORTHO PROJECTION =============================*/
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    
-    if ( _w <= _h )
-        glOrtho(-10.0,10.0,-10.0*((GLfloat)_h / (GLfloat)_w),
-                 10.0*((GLfloat)_h / (GLfloat)_w),10,-10);
-    else
-        glOrtho(-10.0*((GLfloat)_w / (GLfloat)_h),
-                 10.0*((GLfloat)_w / (GLfloat)_h),-10.0,10.0,10,-10);
-    /*========================= REDISPLAY ====================================*/
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
-}
-
-void Asteroids::Keyboard(const unsigned char _chr, const int _x, const int _y) 
-{
-    keysPressed_[_chr] = true;
-}
-
-void Asteroids::KeyboardUp(const unsigned char _chr, const int _x, const int _y) 
-{
-    keysPressed_[_chr] = false;
-}
-
-void Asteroids::KeyboardUpdateState() 
-{
-	auto Reset = [this](SharedEntity& ship)
-	{
-		ClearRocks();
-		ship.reset();
-		score_ = 0;
-		InitGame();
-	};
-
-    for (int i = 0; i < NUMBER_KEYS; i++) 
-	{
-		SharedEntity& sharedShip = GetShip();
-        if (keysPressed_[i]) {
-            switch (i)
-            {
-                case 's':
-                    orientationAngle_ = 0.15f; break;
-                case 'f':
-                    orientationAngle_ = -0.15f; break;
-                case 'e':
-                    thrust_ = 0.01f; break;
-                case 'j':
-					if (sharedShip)
-					{
-						Ship* ship = static_cast<Ship*>(sharedShip.get());
-						ship->Fire();
-					}
-					break;
-                case 'x':
-					Reset(sharedShip); break;
-                case 'X':
-					Reset(sharedShip); break;
-                default:
-                    break;
-            }
-        }
-    }
-}
-
-void Asteroids::TimerCallback(int _idx) 
-{
-    switch (_idx)
-    {
-        case 0:
-            glutPostRedisplay();
-            glutTimerFunc(25,TimerCallback,0);
-            break;
-        default:
-            break;
-    }
-}
-
 Rock* Asteroids::Collision(Bullet* _bullet) 
 {
     GLfloat epsilon;
@@ -455,7 +274,6 @@ void Asteroids::CalculateConservationOfMomentum(Bullet* bullet, Rock* rock)
 	rock->GetUnitVelocity()[1][0] = sin(momentumAngle);
 }
 
-
 std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, const bool halfMass, const bool clockwise)
 {
 	GLint massDenominator = halfMass ? 2 : 1;
@@ -544,4 +362,45 @@ void Asteroids::ComputeCollision(Bullet* bullet, Rock* rock) {
     }
 
 	DestroyGeometry(bullet, rock);
+}
+
+void Asteroids::ResetGame()
+{
+	ClearRocks();
+
+	SharedEntity& ship = GetShip();
+	ship.reset();
+	score_ = 0;
+	InitGame();
+}
+
+void Asteroids::ResetThrustAndRotation()
+{
+	orientationAngle_ = 0.0f;
+	thrust_ = 0.0f;
+}
+
+void Asteroids::Fire()
+{
+	SharedEntity& sharedShip = GetShip();
+	if (sharedShip)
+	{
+		Ship* ship = static_cast<Ship*>(sharedShip.get());
+		ship->Fire();
+	}
+}
+
+void Asteroids::RotateLeft()
+{
+	orientationAngle_ = 0.15f; 
+}
+
+void Asteroids::RotateRight()
+{
+	orientationAngle_ = -0.15f; 
+}
+
+void Asteroids::Thrust()
+{
+	thrust_ = 0.01f; 
 }

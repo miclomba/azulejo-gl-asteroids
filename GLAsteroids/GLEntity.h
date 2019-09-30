@@ -1,5 +1,5 @@
-#ifndef object_h 
-#define object_h	
+#ifndef asteroids_glentity_h 
+#define asteroids_glentity_h	
 
 #include <array>
 #include <math.h>
@@ -39,4 +39,4 @@ private:
 
 } // end asteroids
 
-#endif // object_h	
+#endif // asteroids_glentity_h	

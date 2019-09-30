@@ -1,5 +1,5 @@
-#ifndef rock_h
-#define	rock_h
+#ifndef asteroids_rock_h
+#define	asteroids_rock_h
 
 #include <array>
 #include <cstdlib>
@@ -47,5 +47,5 @@ private:
 };
 
 } // end asteroids
-#endif	// rock_h
+#endif	// asteroids_rock_h
 

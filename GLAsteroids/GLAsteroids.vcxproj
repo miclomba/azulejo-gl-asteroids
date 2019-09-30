@@ -23,12 +23,14 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="GLEntity.h" />
+    <ClInclude Include="GLGame.h" />
     <ClInclude Include="Rock.h" />
     <ClInclude Include="Ship.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Asteroids.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="GLGame.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GLEntity.cpp" />
     <ClCompile Include="Rock.cpp" />
