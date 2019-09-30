@@ -57,7 +57,7 @@ GLint Ship::BulletNumber()
 	return 10;
 }
 
-Ship::SharedEntity& Ship::GetBullet(const std::string& key)
+Ship::SharedEntity& Ship::GetBullet(const std::string& key) const
 {
 	return GetAggregatedMember(key);
 }

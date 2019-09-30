@@ -44,18 +44,20 @@ GLGame::GLGame(int _argc, char* _argv[])
 	InitClient();
 }
 
-void GLGame::Run()
+void GLGame::Run() const
 {
 	glutMainLoop();
 };
 
-void GLGame::RegisterCallbacks()
+void GLGame::RegisterCallbacks() const
 {
-	glutDisplayFunc(DisplayWrapper);   glutReshapeFunc(ReshapeWrapper);
-	glutKeyboardFunc(KeyboardWrapper); glutKeyboardUpFunc(KeyboardUpWrapper);
+	glutDisplayFunc(DisplayWrapper);   
+	glutReshapeFunc(ReshapeWrapper);
+	glutKeyboardFunc(KeyboardWrapper); 
+	glutKeyboardUpFunc(KeyboardUpWrapper);
 }
 
-void GLGame::InitGlut(int _argc, char* _argv[])
+void GLGame::InitGlut(int _argc, char* _argv[]) const
 {
 	glutInit(&_argc, _argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -64,7 +66,7 @@ void GLGame::InitGlut(int _argc, char* _argv[])
 	glutCreateWindow(TITLE.c_str());
 }
 
-void GLGame::InitServer()
+void GLGame::InitServer() const
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glShadeModel(GL_SMOOTH);
@@ -77,7 +79,7 @@ void GLGame::InitServer()
 	glCullFace(GL_BACK);
 }
 
-void GLGame::InitClient()
+void GLGame::InitClient() const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 }
@@ -115,7 +117,7 @@ void GLGame::Display()
 	glutSwapBuffers();
 }
 
-void GLGame::Reshape(const int _w, const int _h)
+void GLGame::Reshape(const int _w, const int _h) const
 {
 	//========================= DEFINE VIEWPORT ==============================*/
 	glViewport(0, 0, _w, _h);

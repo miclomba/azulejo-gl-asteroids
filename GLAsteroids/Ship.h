@@ -25,7 +25,7 @@ public:
 
 	static GLint BulletNumber();
 
-	SharedEntity& GetBullet(const std::string& key);
+	SharedEntity& GetBullet(const std::string& key) const;
 	std::vector<Key> GetBulletKeys() const;
 
 private:

@@ -123,7 +123,7 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
     glPopMatrix();
 }
 
-bool Bullet::IsOutOfBounds()
+bool Bullet::IsOutOfBounds() const
 {
 	return outOfBounds_;
 }

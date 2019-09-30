@@ -20,9 +20,7 @@ public:
 
     void Draw(const GLfloat _velocityAngle, const GLfloat _speed);
 
-	bool IsOutOfBounds();
-
-	static GLint BulletNumber();
+	bool IsOutOfBounds() const;
     
 private:
 	void InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed);

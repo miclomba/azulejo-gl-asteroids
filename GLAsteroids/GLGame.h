@@ -19,22 +19,21 @@ public:
 	GLGame& operator=(const GLGame&) = delete;
 	GLGame& operator=(GLGame&&) = delete;
 
-	void Run();
+	void Run() const;
 	static void TimerCallback(int _idx);
 
-	/*======================== GLUT CALLBACK MECHANISM =======================*/
 	static GLGame* callbackInstance_;
 
 private:
-	void RegisterCallbacks();
-	void InitGlut(int _argc, char* _argv[]);
-	void InitServer();
-	void InitClient();
+	void RegisterCallbacks() const;
+	void InitGlut(int _argc, char* _argv[]) const;
+	void InitServer() const;
+	void InitClient() const;
 
 	void Display();
 	static void DisplayWrapper();
 
-	void Reshape(const int _w, const int _h);
+	void Reshape(const int _w, const int _h) const;
 	static void ReshapeWrapper(const int _w, const int _h);
 
 	void Keyboard(const unsigned char _chr, const int _x, const int _y);
@@ -45,7 +44,6 @@ private:
 
 	void KeyboardUpdateState();
 
-	/*========================= COLLISION DETECTION ==========================*/
 	std::array<bool, 256> keysPressed_;
 	Asteroids game;
 };
