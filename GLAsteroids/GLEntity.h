@@ -16,6 +16,11 @@ public:
 	typedef std::array<GLfloat, 3> Row3;
 
     GLEntity();
+	~GLEntity();
+	GLEntity(const GLEntity&);
+	GLEntity(GLEntity&&);
+	GLEntity& operator=(const GLEntity&);
+	GLEntity& operator=(GLEntity&&);
 
 	std::array<Row4,4>& GetFrame();
 	std::array<Row4,4>& GetUnitVelocity();

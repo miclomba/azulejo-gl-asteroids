@@ -14,6 +14,12 @@ class Ship : public GLEntity
 {
 public:
 	Ship(const Ship::Key& key);
+	~Ship();
+	Ship(const Ship&);
+	Ship(Ship&&);
+	Ship& operator=(const Ship&);
+	Ship& operator=(Ship&&);
+
 	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust);
 	void Fire();
 

@@ -16,6 +16,11 @@ class Asteroids : public GLEntity
 {
 public:
 	Asteroids();
+	~Asteroids();
+	Asteroids(const Asteroids&);
+	Asteroids(Asteroids&&);
+	Asteroids& operator=(const Asteroids&);
+	Asteroids& operator=(Asteroids&&);
 
 	void Draw();
 

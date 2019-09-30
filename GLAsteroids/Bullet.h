@@ -12,6 +12,12 @@ class Bullet : public GLEntity
 {
 public:
     Bullet(const GLfloat _x, const GLfloat _y);
+	~Bullet();
+	Bullet(const Bullet&);
+	Bullet(Bullet&&);
+	Bullet& operator=(const Bullet&);
+	Bullet& operator=(Bullet&&);
+
     void Draw(const GLfloat _velocityAngle, const GLfloat _speed);
 
 	bool IsOutOfBounds();

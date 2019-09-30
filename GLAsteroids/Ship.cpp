@@ -11,7 +11,46 @@ using asteroids::Ship;
 namespace
 {
 const std::string BULLET_PREFIX = "bullet_";
+} // end namespace
+
+Ship::Ship(const Ship::Key& key)
+{
+	SetKey(key);
+
+	for (int i = 0; i < BulletNumber(); ++i)
+		AggregateMember(BULLET_PREFIX + std::to_string(i));
+
+	GetVelocityAngle() = M_PI / 2;
+
+	shipVertices_ = {
+		Row3{-0.5f,-0.5f,0.5f}, Row3{0.5f,-0.0f,0.5f},
+		Row3{0.5f,0.0f,0.5f}, Row3{-0.5f,0.5f,0.5f},
+		Row3{-0.5f,-0.5f,1.0f}, Row3{0.1f,-0.0f,1.0f},
+		Row3{0.1f,0.0f,1.0f}, Row3{-0.5f,0.5f,1.0f}
+	};
+
+	shipIndices_ = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+
+	unitOrientation_ = {
+		Row4{0.0f,   0.0f,0.0f,0.0f},
+		Row4{1.0f,   0.0f,0.0f,0.0f},
+		Row4{0.0f,   0.0f,0.0f,0.0f},
+		Row4{1.0f,   0.0f,0.0f,0.0f}
+	};
+
+	GetUnitVelocity() = {
+		Row4{0.0f,   0.0f,0.0f,0.0f},
+		Row4{1.0f,   0.0f,0.0f,0.0f},
+		Row4{0.0f,   0.0f,0.0f,0.0f},
+		Row4{1.0f,   0.0f,0.0f,0.0f}
+	};
 }
+
+Ship::~Ship() = default;
+Ship::Ship(const Ship&) = default;
+Ship::Ship(Ship&&) = default;
+Ship& Ship::operator=(const Ship&) = default;
+Ship& Ship::operator=(Ship&&) = default;
 
 GLint Ship::BulletNumber()
 {
@@ -26,39 +65,6 @@ Ship::SharedEntity& Ship::GetBullet(const std::string& key)
 std::vector<Ship::Key> Ship::GetBulletKeys() const
 {
 	return GetAggregatedMemberKeys();
-}
-
-Ship::Ship(const Ship::Key& key) 
-{   
-	SetKey(key);
-
-	for (int i = 0; i < BulletNumber(); ++i)
-		AggregateMember(BULLET_PREFIX + std::to_string(i));
-
-    GetVelocityAngle() = M_PI/2;
-
-    shipVertices_ = { 
-		Row3{-0.5f,-0.5f,0.5f}, Row3{0.5f,-0.0f,0.5f},
-        Row3{0.5f,0.0f,0.5f}, Row3{-0.5f,0.5f,0.5f},
-        Row3{-0.5f,-0.5f,1.0f}, Row3{0.1f,-0.0f,1.0f},
-        Row3{0.1f,0.0f,1.0f}, Row3{-0.5f,0.5f,1.0f}
-	};
-
-    shipIndices_ = {0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4};
-
-	unitOrientation_ = { 
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
-
-    GetUnitVelocity() = { 
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
 }
 
 void Ship::RecomputeShipVelocity(const GLfloat _thrust)

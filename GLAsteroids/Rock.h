@@ -16,6 +16,12 @@ class Rock : public GLEntity
 public:
 
 	Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _index);
+	~Rock();
+	Rock(const Rock&);
+	Rock(Rock&&);
+	Rock& operator=(const Rock&);
+	Rock& operator=(Rock&&);
+
 	void Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
 
     GLint GetIndex() const;
@@ -42,8 +48,6 @@ private:
     /*=============================== Geometry ===============================*/
     std::array<Row3, 8> rockVertices_;
     std::array<GLubyte, 24> rockIndices_;
-
-    Rock();
 };
 
 } // end asteroids

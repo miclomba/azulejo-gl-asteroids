@@ -12,12 +12,15 @@ namespace asteroids {
 class GLGame : public GLEntity
 {
 public:
-	virtual ~GLGame();
-
-	static void TimerCallback(int _idx);
-
 	GLGame(int _argc, char* _argv[]);
+	~GLGame();
+	GLGame(const GLGame&) = delete;
+	GLGame(GLGame&&) = delete;
+	GLGame& operator=(const GLGame&) = delete;
+	GLGame& operator=(GLGame&&) = delete;
+
 	void Run();
+	static void TimerCallback(int _idx);
 
 	/*======================== GLUT CALLBACK MECHANISM =======================*/
 	static GLGame* callbackInstance_;

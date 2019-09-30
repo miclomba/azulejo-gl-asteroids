@@ -18,6 +18,21 @@ const std::string SHIP_KEY = "Ship";
 const std::string ROCK_KEY = "Rock";
 }
 
+Asteroids::Asteroids()
+{
+	for (GLint i = 0; i < ROCK_NUMBER; i++)
+		AggregateMember(ROCK_KEY + std::to_string(i));
+	AggregateMember(SHIP_KEY);
+
+	InitGame();
+}
+
+Asteroids::~Asteroids() = default;
+Asteroids::Asteroids(const Asteroids&) = default;
+Asteroids::Asteroids(Asteroids&&) = default;
+Asteroids& Asteroids::operator=(const Asteroids&) = default;
+Asteroids& Asteroids::operator=(Asteroids&&) = default;
+
 Asteroids::SharedEntity& Asteroids::GetRock(const std::string& key)
 {
 	return GetAggregatedMember(key);
@@ -31,15 +46,6 @@ std::vector<Asteroids::Key> Asteroids::GetRockKeys() const
 Asteroids::SharedEntity& Asteroids::GetShip()
 {
 	return GetAggregatedMember(SHIP_KEY);
-}
-
-Asteroids::Asteroids() 
-{
-	for (GLint i = 0; i < ROCK_NUMBER; i++) 
-		AggregateMember(ROCK_KEY + std::to_string(i));
-	AggregateMember(SHIP_KEY);
-
-    InitGame();
 }
 
 void Asteroids::InitGame() 

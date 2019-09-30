@@ -29,8 +29,6 @@ const std::array<GLEntity::Row3,8> rockVerticesS = {
 std::array<GLubyte, 24> rockIndices = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
 }
 
-Rock::Rock() = default;
-
 Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _index) : 
 	state_(_state), index_(_index)
 {
@@ -65,6 +63,12 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _
         Row4{1.0f,   0.0f,0.0f,0.0f}
 	};
 }
+
+Rock::~Rock() = default;
+Rock::Rock(const Rock&) = default;
+Rock::Rock(Rock&&) = default;
+Rock& Rock::operator=(const Rock&) = default;
+Rock& Rock::operator=(Rock&&) = default;
 
 void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin)
 {

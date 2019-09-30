@@ -13,6 +13,12 @@ GLEntity::GLEntity()
 		std::fill(row.begin(), row.end(), 0.0);
 }
 
+GLEntity::~GLEntity() = default;
+GLEntity::GLEntity(const GLEntity&) = default;
+GLEntity::GLEntity(GLEntity&&) = default;
+GLEntity& GLEntity::operator=(const GLEntity&) = default;
+GLEntity& GLEntity::operator=(GLEntity&&) = default;
+
 std::array<GLEntity::Row4, 4>& GLEntity::GetFrame()
 {
 	return frame_;
