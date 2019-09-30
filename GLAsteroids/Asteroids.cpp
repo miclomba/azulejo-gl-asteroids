@@ -121,6 +121,14 @@ void Asteroids::DrawGameInfo()
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }
 
+void Asteroids::Draw()
+{
+	DrawRockAndShip();
+	DrawGameInfo();
+	DetermineCollisions();
+	ResetThrustAndRotation();
+}
+
 void Asteroids::ClearRocks()
 {
 	std::vector<Key> rockKeys = GetRockKeys();

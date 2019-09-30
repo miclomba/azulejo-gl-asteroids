@@ -17,16 +17,14 @@ class Asteroids : public GLEntity
 public:
 	Asteroids();
 
-	void DrawRockAndShip();
-	void DrawGameInfo();
-	void DetermineCollisions();
-	void ResetGame();
-	void ResetThrustAndRotation();
+	void Draw();
 
+	// commands
 	void Fire();
 	void RotateLeft();
 	void RotateRight();
 	void Thrust();
+	void ResetGame();
 
 private:
 	SharedEntity& GetShip();
@@ -44,6 +42,11 @@ private:
 	void DestroyGeometry(Bullet* bullet, Rock* rock);
 
     void InitGame();
+
+	void DrawRockAndShip();
+	void DrawGameInfo();
+	void DetermineCollisions();
+	void ResetThrustAndRotation();
 
     /*========================= COLLISION DETECTION ==========================*/
     Rock* Collision(Bullet* bullet);

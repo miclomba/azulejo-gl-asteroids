@@ -108,15 +108,11 @@ void GLGame::Display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	game.DrawRockAndShip();
-	game.ResetThrustAndRotation();
-	game.DrawGameInfo();
+	game.Draw();
 
 	// RENDER
 	glFlush();
 	glutSwapBuffers();
-
-	game.DetermineCollisions();
 }
 
 void GLGame::Reshape(const int _w, const int _h)
