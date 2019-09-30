@@ -279,13 +279,13 @@ void Asteroids::CalculateConservationOfMomentum(Bullet* bullet, Rock* rock)
 	else if (yCompMomentumR < 0)
 		momentumAngle += 2 * M_PI;
 
-	rock->GetMass() = rock->GetMass() + bullet->GetMass();
-	rock->GetSpeed() = momentumMagnitude / rock->GetMass();
+	rock->SetMass(rock->GetMass() + bullet->GetMass());
+	rock->SetSpeed(momentumMagnitude / rock->GetMass());
 
-	rock->GetVelocityAngle() = momentumAngle;
+	rock->SetVelocityAngle(momentumAngle);
 
-	rock->GetUnitVelocity()[0][0] = cos(momentumAngle);
-	rock->GetUnitVelocity()[1][0] = sin(momentumAngle);
+	rock->SetUnitVelocity(0,0,cos(momentumAngle));
+	rock->SetUnitVelocity(1,0,sin(momentumAngle));
 }
 
 std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, const bool halfMass, const bool clockwise)
@@ -296,13 +296,13 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame()[0][0], rock->GetFrame()[1][0], rockCount_);
 	rock1->SetKey(ROCK_KEY + std::to_string(rockCount_++));
 
-	rock1->GetMass() = rock->GetMass() / massDenominator;
-	rock1->GetSpeed() = rock->GetSpeed();
-	rock1->GetSpin() = rock->GetSpin();
-	rock1->GetSpinEpsilon() = rock->GetSpinEpsilon();
-	rock1->GetVelocityAngle() = rock->GetVelocityAngle() + angleMultiplier * M_PI / 4;
-	rock1->GetUnitVelocity()[0][0] = cos(rock1->GetVelocityAngle());
-	rock1->GetUnitVelocity()[1][0] = sin(rock1->GetVelocityAngle());
+	rock1->SetMass(rock->GetMass() / massDenominator);
+	rock1->SetSpeed(rock->GetSpeed());
+	rock1->SetSpin(rock->GetSpin());
+	rock1->SetSpinEpsilon(rock->GetSpinEpsilon());
+	rock1->SetVelocityAngle(rock->GetVelocityAngle() + angleMultiplier * M_PI / 4);
+	rock1->SetUnitVelocity(0,0,cos(rock1->GetVelocityAngle()));
+	rock1->SetUnitVelocity(1,0,sin(rock1->GetVelocityAngle()));
 	rock1->SetRockInitialized(true);
 
 	return rock1;

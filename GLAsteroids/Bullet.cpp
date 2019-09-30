@@ -9,7 +9,7 @@ const GLfloat BULLET_SPEED_ = 0.5;
 
 Bullet::Bullet(const GLfloat _x, const GLfloat _y) 
 {
-    GetMass() = 0.5f;
+    SetMass(0.5f);
     bulletIndices_ = {0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4};
 
     bulletVertices_ = {
@@ -19,19 +19,19 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y)
         Row3{0.2f,0.0f,1.0f}, Row3{-0.2f,0.1f,1.0f}
 	};
 
-    GetFrame() = {
+    SetFrame({
 		Row4{_x,   0.0f,0.0f,0.0f},
 		Row4{_y,   0.0f,0.0f,0.0f},
 		Row4{0.0f,   0.0f,0.0f,0.0f},
 		Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+	});
 
-    GetUnitVelocity() = {
+    SetUnitVelocity({
 		Row4{1.0f,   0.0f,0.0f,0.0f},
         Row4{0.0f,   0.0f,0.0f,0.0f},
         Row4{0.0f,   0.0f,0.0f,0.0f},
         Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+	});
 }
 
 Bullet::~Bullet() = default;
@@ -42,10 +42,10 @@ Bullet& Bullet::operator=(Bullet&&) = default;
 
 void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed)
 {
-	GetSpeed() = _speed + BULLET_SPEED_;
-	GetVelocityAngle() = _velocityAngle;
-	GetUnitVelocity()[0][0] = cos(_velocityAngle);
-	GetUnitVelocity()[1][0] = sin(_velocityAngle);
+	SetSpeed(_speed + BULLET_SPEED_);
+	SetVelocityAngle(_velocityAngle);
+	SetUnitVelocity(0,0,cos(_velocityAngle));
+	SetUnitVelocity(1,0,sin(_velocityAngle));
 }
 
 void Bullet::SetSMatrix()

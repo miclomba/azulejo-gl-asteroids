@@ -25,11 +25,14 @@ public:
 	void Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
 
     GLint GetIndex() const;
-    GLfloat& GetSpin();
-    GLfloat& GetSpinEpsilon();
+    GLfloat GetSpin() const;
+    GLfloat GetSpinEpsilon() const;
     GLint GetSpinDirection() const;
     State GetState() const;
     void SetRockInitialized(const bool state);
+
+    void SetSpin(const GLfloat);
+    void SetSpinEpsilon(const GLfloat);
 
 private:
 	void InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);

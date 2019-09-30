@@ -36,9 +36,9 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _
     randy = randy%2;
     spinDirection_ = pow(-1,randy);
 
-    GetVelocityAngle() = 0.0f;
-    GetSpeed() = 0.02f;
-    GetMass() = 5.0f;
+    SetVelocityAngle(0.0f);
+    SetSpeed(0.02f);
+    SetMass(5.0f);
 
     if (state_ == State::LARGE) 
 		rockVertices_ = rockVerticesL;
@@ -75,8 +75,8 @@ void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, co
 	if (rockInitialized_ == true)
 		return;
 
-	GetSpeed() += _speed;
-	GetVelocityAngle() = _velocityAngle;
+	SetSpeed(GetSpeed() + _speed);
+	SetVelocityAngle(_velocityAngle);
 	/*==================== COMPUTE ROCK VELOCITY =========================*/
 	GetUnitVelocity()[0][0] = cos(_velocityAngle);
 	GetUnitVelocity()[1][0] = sin(_velocityAngle);
@@ -139,20 +139,20 @@ void Rock::WrapAroundMoveRock()
 	bottom = -1 * top;
 
 	if (GetFrame()[0][0] <= left - epsilon) {
-		GetFrame()[0][0] = right + epsilon;
-		GetFrame()[1][0] *= -1;
+		SetFrame(0,0,right + epsilon);
+		SetFrame(1,0, GetFrame()[1][0] * -1);
 	}
 	else if (GetFrame()[0][0] >= right + epsilon) {
-		GetFrame()[0][0] = left - epsilon;
-		GetFrame()[1][0] *= -1;
+		SetFrame(0,0,left - epsilon);
+		SetFrame(1,0, GetFrame()[1][0] * -1);
 	}
 	else if (GetFrame()[1][0] >= top + epsilon) {
-		GetFrame()[1][0] = bottom - epsilon;
-		GetFrame()[0][0] *= -1;
+		SetFrame(1,0,bottom - epsilon);
+		SetFrame(0,0, GetFrame()[0][0] * -1);
 	}
 	else if (GetFrame()[1][0] <= bottom - epsilon) {
-		GetFrame()[1][0] = top + epsilon;
-		GetFrame()[0][0] *= -1;
+		SetFrame(1,0,top + epsilon);
+		SetFrame(0,0, GetFrame()[0][0] * -1);
 	}
 }
 
@@ -183,12 +183,12 @@ GLint Rock::GetIndex() const
 	return index_;
 }
 
-GLfloat& Rock::GetSpin()
+GLfloat Rock::GetSpin() const
 {
 	return spin_;
 }
 
-GLfloat& Rock::GetSpinEpsilon()
+GLfloat Rock::GetSpinEpsilon() const
 {
 	return spinEpsilon_;
 }
@@ -201,6 +201,16 @@ GLint Rock::GetSpinDirection() const
 State Rock::GetState() const
 {
 	return state_;
+}
+
+void Rock::SetSpin(const GLfloat spin)
+{
+	spin_ = spin;
+}
+
+void Rock::SetSpinEpsilon(const GLfloat spinEpsilon)
+{
+	spinEpsilon_ = spinEpsilon;
 }
 
 void Rock::SetRockInitialized(const bool state)

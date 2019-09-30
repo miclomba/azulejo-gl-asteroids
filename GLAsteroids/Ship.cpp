@@ -20,7 +20,7 @@ Ship::Ship(const Ship::Key& key)
 	for (int i = 0; i < BulletNumber(); ++i)
 		AggregateMember(BULLET_PREFIX + std::to_string(i));
 
-	GetVelocityAngle() = M_PI / 2;
+	SetVelocityAngle(M_PI / 2);
 
 	shipVertices_ = {
 		Row3{-0.5f,-0.5f,0.5f}, Row3{0.5f,-0.0f,0.5f},
@@ -83,18 +83,18 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	xComponentVelocity += xComponentOrientation;
 	yComponentVelocity += yComponentOrientation;
 
-	GetSpeed() = sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2));
+	SetSpeed(sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2)));
 	GetUnitVelocity()[0][0] = xComponentVelocity / GetSpeed();
 	GetUnitVelocity()[1][0] = yComponentVelocity / GetSpeed();
 
 	if (GetSpeed() > 5.0f)
-		GetSpeed() = 5.0f;
+		SetSpeed(5.0f);
 
-	GetVelocityAngle() = (GLfloat)(atan(GetUnitVelocity()[1][0] / GetUnitVelocity()[0][0]));
+	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity()[1][0] / GetUnitVelocity()[0][0])));
 	if (GetUnitVelocity()[0][0] < 0)
-		GetVelocityAngle() += M_PI;
+		SetVelocityAngle(GetVelocityAngle() + M_PI);
 	else if (GetUnitVelocity()[1][0] < 0)
-		GetVelocityAngle() += 2 * M_PI;
+		SetVelocityAngle(GetVelocityAngle() + 2 * M_PI);
 }
 
 void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
@@ -157,20 +157,20 @@ void Ship::WrapAroundMoveShip()
 	GLfloat bottom = -1 * top;
 
 	if (GetFrame()[0][0] <= left - epsilon) {
-		GetFrame()[0][0] = right + epsilon;
-		GetFrame()[1][0] *= -1;
+		SetFrame(0,0,right + epsilon);
+		SetFrame(1,0, GetFrame()[1][0] * -1);
 	}
 	else if (GetFrame()[0][0] >= right + epsilon) {
-		GetFrame()[0][0] = left - epsilon;
-		GetFrame()[1][0] *= -1;
+		SetFrame(0,0,left - epsilon);
+		SetFrame(1,0, GetFrame()[1][0] * -1);
 	}
 	else if (GetFrame()[1][0] >= top + epsilon) {
-		GetFrame()[1][0] = bottom - epsilon;
-		GetFrame()[0][0] *= -1;
+		SetFrame(1,0,bottom - epsilon);
+		SetFrame(0,0, GetFrame()[0][0] * -1);
 	}
 	else if (GetFrame()[1][0] <= bottom - epsilon) {
-		GetFrame()[1][0] = top + epsilon;
-		GetFrame()[0][0] *= -1;
+		SetFrame(1,0,top + epsilon);
+		SetFrame(0,0, GetFrame()[0][0] * -1);
 	}
 }
 

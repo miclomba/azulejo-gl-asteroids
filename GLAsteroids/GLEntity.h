@@ -24,9 +24,17 @@ public:
 
 	std::array<Row4,4>& GetFrame();
 	std::array<Row4,4>& GetUnitVelocity();
-	GLfloat& GetSpeed();
-	GLfloat& GetMass();
-	GLfloat& GetVelocityAngle();
+	GLfloat GetSpeed() const;
+	GLfloat GetMass() const;
+	GLfloat GetVelocityAngle() const;
+
+	void SetFrame(int i, int j, GLfloat val);
+	void SetFrame(const std::array<Row4,4>& frame);
+	void SetUnitVelocity(int i, int j, GLfloat val);
+	void SetUnitVelocity(const std::array<Row4,4>& unitVelocity);
+	void SetSpeed(const GLfloat);
+	void SetMass(const GLfloat);
+	void SetVelocityAngle(const GLfloat);
 
 protected:
 	std::array<Row4, 4> S_;
