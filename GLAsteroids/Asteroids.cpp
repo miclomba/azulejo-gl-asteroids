@@ -24,7 +24,7 @@ Asteroids::Asteroids()
 		AggregateMember(ROCK_KEY + std::to_string(i));
 	AggregateMember(SHIP_KEY);
 
-	InitGame();
+	ResetGame();
 }
 
 Asteroids::~Asteroids() = default;
@@ -48,7 +48,7 @@ Asteroids::SharedEntity& Asteroids::GetShip()
 	return GetAggregatedMember(SHIP_KEY);
 }
 
-void Asteroids::InitGame() 
+void Asteroids::ResetGame() 
 {
 	auto CreateRock = [this](const GLint randy1, const GLint randy2, const GLint i)
 	{
@@ -61,6 +61,8 @@ void Asteroids::InitGame()
 		SharedEntity& sharedShip = GetShip();
 		sharedShip = std::make_shared<Ship>(SHIP_KEY);
 	};
+
+	ClearRocks();
 
     GLint randy1, randy2;
     for (GLint i = 0; i < ROCK_NUMBER; i++) {
@@ -75,8 +77,11 @@ void Asteroids::InitGame()
 
 		CreateRock(randy1, randy2, i);
     }
-    rockCount_ = ROCK_NUMBER;
+
 	CreateShip();
+
+    rockCount_ = ROCK_NUMBER;
+	score_ = 0;
 }
 
 void Asteroids::DrawRockAndShip()
@@ -175,28 +180,38 @@ void Asteroids::DetermineCollisions()
 
 	for (Ship::Key& bulletKey : bulletKeys)
 	{
-		SharedEntity& sharedShipEntity = GetShip();
-		if (!sharedShipEntity)
-			break;
-
-		Ship* ship = static_cast<Ship*>(sharedShipEntity.get());
 		Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
 		if (sharedBullet) {
 			Bullet* bullet = static_cast<Bullet*>(sharedBullet.get());
-			Rock* ithRock = Collision(bullet);
+			Rock* rock = Collision(bullet);
 
-			if (ithRock)
-				ComputeCollision(bullet, ithRock);
+			if (rock)
+				ProcessCollision(bullet, rock);
+
+			if (!HasRocks()) 
+			{
+				ResetGame();
+				return;
+			}
 		}
 	}
 
-	if (Bump() != -1) 
+	if (ShipCollision()) 
+		ResetGame();
+}
+
+void Asteroids::ProcessCollision(Bullet* bullet, Rock* rock) {
+
+	score_ += 1;
+
+	if (rock->GetState() != State::SMALL)
 	{
-		ClearRocks();
-		SharedEntity& sharedShipEntity = GetShip();
-		sharedShipEntity.reset();
-		InitGame();
+		CalculateConservationOfMomentum(bullet, rock);
+		BreakRock(rock);
 	}
+
+	DestroyBullet(bullet);
+	DestroyRock(rock);
 }
 
 Rock* Asteroids::Collision(Bullet* _bullet) 
@@ -228,7 +243,7 @@ Rock* Asteroids::Collision(Bullet* _bullet)
     return nullptr;
 }
 
-GLint Asteroids::Bump() {
+Rock* Asteroids::ShipCollision() {
     GLfloat epsilon;
     GLfloat ray;
 
@@ -255,10 +270,10 @@ GLint Asteroids::Bump() {
 				epsilon = 1.0f;
 
 			if (ray < epsilon)
-				return rock->GetIndex();
+				return rock;
 		}
 	}
-    return -1;
+    return nullptr;
 }
 
 void Asteroids::CalculateConservationOfMomentum(Bullet* bullet, Rock* rock)
@@ -351,41 +366,6 @@ void Asteroids::DestroyRock(Rock* rock)
 		SharedEntity& sharedRock = GetRock(rock->GetKey());
 		sharedRock.reset();
 	}
-}
-
-void Asteroids::DestroyGeometry(Bullet* bullet, Rock* rock)
-{
-	DestroyBullet(bullet);
-	DestroyRock(rock);
-
-	if (!HasRocks()) {
-		SharedEntity& sharedShip = GetShip();
-		sharedShip.reset();
-		InitGame();
-	}
-}
-
-void Asteroids::ComputeCollision(Bullet* bullet, Rock* rock) {
-
-    score_ += 1;
-
-    if (rock->GetState() != State::SMALL) 
-	{
-		CalculateConservationOfMomentum(bullet, rock);
-		BreakRock(rock);
-    }
-
-	DestroyGeometry(bullet, rock);
-}
-
-void Asteroids::ResetGame()
-{
-	ClearRocks();
-
-	SharedEntity& ship = GetShip();
-	ship.reset();
-	score_ = 0;
-	InitGame();
 }
 
 void Asteroids::ResetThrustAndRotation()
