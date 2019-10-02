@@ -11,7 +11,7 @@ namespace asteroids {
 
 enum class State {LARGE,MEDIUM,SMALL};
 
-class Rock : public GLEntity 
+class ASTEROIDS_DLL_EXPORT Rock : public GLEntity
 {
 public:
 

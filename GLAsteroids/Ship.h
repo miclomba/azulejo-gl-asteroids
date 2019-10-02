@@ -10,7 +10,7 @@
 
 namespace asteroids {
 
-class Ship : public GLEntity 
+class ASTEROIDS_DLL_EXPORT Ship : public GLEntity
 {
 public:
 	Ship(const Ship::Key& key);

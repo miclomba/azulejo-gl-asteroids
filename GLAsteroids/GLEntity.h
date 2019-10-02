@@ -9,7 +9,7 @@
 
 namespace asteroids {
 
-class GLEntity : public entity::Entity
+class ASTEROIDS_DLL_EXPORT GLEntity : public entity::Entity
 {
 public:
 	typedef std::array<GLfloat, 4> Row4;

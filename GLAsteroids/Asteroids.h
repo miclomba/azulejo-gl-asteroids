@@ -12,7 +12,7 @@
 
 namespace asteroids {
 
-class Asteroids : public GLEntity
+class ASTEROIDS_DLL_EXPORT Asteroids : public GLEntity
 {
 public:
 	Asteroids();

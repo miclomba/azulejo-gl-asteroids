@@ -1,4 +1,4 @@
-#ifndef config_h
+#ifndef asteroids_config_h
 
 #if defined (__APPLE__) || defined (MACOSX)
 #include <GLUT/glut.h>
@@ -9,5 +9,9 @@
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
+
+#define BOOST_ALL_DYN_LINK 1
+
+#define ASTEROIDS_DLL_EXPORT __declspec(dllexport)
 
 #endif // end config_h

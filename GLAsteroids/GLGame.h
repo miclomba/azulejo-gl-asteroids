@@ -9,7 +9,7 @@
 
 namespace asteroids {
 
-class GLGame : public GLEntity
+class ASTEROIDS_DLL_EXPORT GLGame : public GLEntity
 {
 public:
 	GLGame(int _argc, char* _argv[]);

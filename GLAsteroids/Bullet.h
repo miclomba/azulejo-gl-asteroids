@@ -8,7 +8,7 @@
 
 namespace asteroids {
 
-class Bullet : public GLEntity
+class ASTEROIDS_DLL_EXPORT Bullet : public GLEntity
 {
 public:
     Bullet(const GLfloat _x, const GLfloat _y);

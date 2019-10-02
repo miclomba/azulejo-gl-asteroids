@@ -127,12 +127,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Program Files\freeglut\include;..\..\Backend\X</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\freeglut\include;C:\Program Files\boost\boost_1_69_0;..\..\Backend\X</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\freeglut\lib\x64;..\..\Backend\X\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\freeglut\lib\x64;C:\Program Files\boost\boost_1_69_0\stage\lib;..\..\Backend\X\x64\Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>freeglut.lib;Entities.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
