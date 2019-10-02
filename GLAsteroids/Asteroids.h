@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "config.h"
 #include "Rock.h"
 #include "Ship.h"
@@ -30,6 +32,9 @@ public:
 	void RotateRight();
 	void Thrust();
 	void ResetGame();
+
+	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
 	SharedEntity& GetShip();

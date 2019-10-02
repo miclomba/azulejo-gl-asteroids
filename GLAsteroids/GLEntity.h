@@ -3,13 +3,16 @@
 
 #include <array>
 #include <math.h>
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
-#include "Entities/Entity.h"
+#include "Entities/ISerializableEntity.h"
 
 namespace asteroids {
 
-class ASTEROIDS_DLL_EXPORT GLEntity : public entity::Entity
+class ASTEROIDS_DLL_EXPORT GLEntity : public entity::ISerializableEntity
 {
 public:
 	typedef std::array<GLfloat, 4> Row4;
@@ -40,6 +43,9 @@ protected:
 	std::array<Row4, 4> S_;
 	std::array<Row4, 4> T_;
 	std::array<Row4, 4> R_;
+
+	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
 	std::array<Row4,4> frame_;

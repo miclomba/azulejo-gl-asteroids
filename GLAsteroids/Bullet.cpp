@@ -1,5 +1,9 @@
 #include "Bullet.h"
 
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
+
 using asteroids::Bullet;
 
 namespace
@@ -128,3 +132,10 @@ bool Bullet::IsOutOfBounds() const
 	return outOfBounds_;
 }
 
+void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) const
+{
+}
+
+void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
+{
+}

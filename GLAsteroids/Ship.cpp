@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
+
 using asteroids::Bullet;
 using asteroids::Ship;
 
@@ -235,5 +237,13 @@ void Ship::Fire()
 		bulletFired_ = true;
 		break;
 	}
+}
+
+void Ship::Save(boost::property_tree::ptree& tree, const std::string& path) const
+{
+}
+
+void Ship::Load(boost::property_tree::ptree& tree, const std::string& path)
+{
 }
 

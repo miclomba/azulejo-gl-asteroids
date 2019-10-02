@@ -1,6 +1,9 @@
 #include "Rock.h"
 
 #include <array>
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
 
 using asteroids::GLEntity;
 using asteroids::Rock;
@@ -216,4 +219,12 @@ void Rock::SetSpinEpsilon(const GLfloat spinEpsilon)
 void Rock::SetRockInitialized(const bool state)
 {
 	rockInitialized_ = state;
+}
+
+void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) const
+{
+}
+
+void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
+{
 }

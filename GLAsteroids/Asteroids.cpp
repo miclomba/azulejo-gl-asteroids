@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/property_tree/ptree.hpp>
+
 using asteroids::Asteroids;
 using asteroids::Bullet;
 using asteroids::Rock;
@@ -397,4 +399,12 @@ void Asteroids::RotateRight()
 void Asteroids::Thrust()
 {
 	thrust_ = 0.01f; 
+}
+
+void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
+{
+}
+
+void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
+{
 }

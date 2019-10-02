@@ -2,6 +2,9 @@
 #define	asteroids_bullet_h
 
 #include <array>
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
 #include "GLEntity.h"
@@ -21,6 +24,9 @@ public:
     void Draw(const GLfloat _velocityAngle, const GLfloat _speed);
 
 	bool IsOutOfBounds() const;
+
+	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
     
 private:
 	void InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed);

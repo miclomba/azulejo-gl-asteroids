@@ -3,6 +3,9 @@
 
 #include <array>
 #include <map>
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
 #include "Bullet.h"
@@ -27,6 +30,9 @@ public:
 
 	SharedEntity& GetBullet(const std::string& key) const;
 	std::vector<Key> GetBulletKeys() const;
+
+	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
 	void RecomputeShipVelocity(const GLfloat _thrust);

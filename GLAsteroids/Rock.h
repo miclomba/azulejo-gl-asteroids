@@ -3,6 +3,9 @@
 
 #include <array>
 #include <cstdlib>
+#include <string>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
 #include "GLEntity.h"
@@ -33,6 +36,9 @@ public:
 
     void SetSpin(const GLfloat);
     void SetSpinEpsilon(const GLfloat);
+
+	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
 	void InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);

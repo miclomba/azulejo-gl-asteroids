@@ -1,5 +1,11 @@
 #include "GLGame.h"
 
+#include "Entities/EntityAggregationDeserializer.h"
+#include "Entities/EntityAggregationSerializer.h"
+
+using entity::EntityAggregationDeserializer;
+using entity::EntityAggregationSerializer;
+
 using asteroids::GLGame;
 
 namespace
@@ -10,6 +16,9 @@ const int NUMBER_KEYS = 256;
 const int INIT_WIN_X = 100;
 const int INIT_WIN_Y = 100;
 const std::string TITLE = "Asteroids";
+
+EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
+EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
 } // end namespace
 
 /*======================== CALLBACK POINTER ==================================*/

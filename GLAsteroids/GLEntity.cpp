@@ -79,3 +79,10 @@ void GLEntity::SetVelocityAngle(const GLfloat velocityAngle)
 	velocityAngle_ = velocityAngle;
 }
 
+void GLEntity::Save(boost::property_tree::ptree& tree, const std::string& path) const 
+{
+}
+
+void GLEntity::Load(boost::property_tree::ptree& tree, const std::string& path) 
+{
+}
