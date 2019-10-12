@@ -28,7 +28,6 @@ namespace
 {
 const int ROCK_NUMBER = 6;
 const std::string SHIP_KEY = "Ship";
-const std::string ROCK_KEY = "Rock";
 const std::string SCORE_KEY = "score";
 const std::string ROCK_COUNT_KEY = "rock_count";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
@@ -85,7 +84,7 @@ void Asteroids::ResetGame()
 	auto CreateRock = [this](const GLint randy1, const GLint randy2, const std::string& uuidStr)
 	{
         SharedEntity rock = std::make_shared<Rock>(State::LARGE,randy1,randy2);
-		rock->SetKey(ROCK_KEY + uuidStr);
+		rock->SetKey(Rock::RockPrefix() + uuidStr);
 		AggregateMember(rock);
 		Deserializer->RegisterEntity<Rock>(rock->GetKey());
 	};
@@ -346,7 +345,7 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 
 	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame()[0][0], rock->GetFrame()[1][0]);
 
-	rock1->SetKey(ROCK_KEY + GenerateUUID()); 
+	rock1->SetKey(Rock::RockPrefix() + GenerateUUID()); 
 
 	rock1->SetMass(rock->GetMass() / massDenominator);
 	rock1->SetSpeed(rock->GetSpeed());

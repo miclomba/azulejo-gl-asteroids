@@ -18,6 +18,11 @@ const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
 const std::string TRUE_VAL = "true";
 } // end namespace
 
+std::string Bullet::BulletPrefix()
+{
+	return "Bullet";
+}
+
 Bullet::Bullet()
 {
 	bulletIndices_ = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };

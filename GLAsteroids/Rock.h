@@ -40,6 +40,8 @@ public:
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+	static std::string RockPrefix();
+
 private:
 	void InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
 	void UpdateSpin();

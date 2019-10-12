@@ -6,12 +6,16 @@
 
 #include "Entities/EntityAggregationDeserializer.h"
 #include "Entities/EntityAggregationSerializer.h"
+#include "Bullet.h"
+#include "Rock.h"
 
 using boost::property_tree::ptree;
 using entity::EntityAggregationDeserializer;
 using entity::EntityAggregationSerializer;
 
+using asteroids::Bullet;
 using asteroids::GLGame;
+using asteroids::Rock;
 
 namespace fs = std::filesystem;
 
@@ -28,6 +32,22 @@ const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop
 
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
+
+std::string RegisterRocksAndBullets(const ptree& tree)
+{
+	for (const std::pair<std::string, ptree>& keyValue : tree)
+	{
+		std::string nodeKey = keyValue.first;
+		ptree node = keyValue.second;
+
+		if (nodeKey.substr(0,Rock::RockPrefix().length()) == Rock::RockPrefix())
+			Deserializer->RegisterEntity<asteroids::Rock>(nodeKey);
+		else if (nodeKey.substr(0,Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			Deserializer->RegisterEntity<asteroids::Bullet>(nodeKey);
+		RegisterRocksAndBullets(node);
+	}
+	return "";
+}
 } // end namespace
 
 /*======================== CALLBACK POINTER ==================================*/
@@ -62,9 +82,17 @@ GLGame::GLGame(int _argc, char* _argv[])
 	InitClient();
 
 	game.SetKey(TITLE);
-
-
 	Deserializer->RegisterEntity<Asteroids>(TITLE);
+	if (fs::exists(SERIALIZATION_PATH))
+	{
+		game.ClearGame();
+		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+		
+		ptree serializationStructure = Deserializer->GetSerializationStructure();
+		RegisterRocksAndBullets(serializationStructure);
+
+		Deserializer->Deserialize(game);
+	}
 }
 
 void GLGame::Run() const

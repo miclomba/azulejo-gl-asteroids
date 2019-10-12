@@ -41,6 +41,11 @@ const std::array<GLEntity::Row3,8> rockVerticesS = {
 	GLEntity::Row3{0.25f,0.25f,1.0f}, GLEntity::Row3{-0.25f,0.25f,1.0f}
 };
 std::array<GLubyte, 24> rockIndices = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+} // end namespace
+
+std::string Rock::RockPrefix()
+{
+	return "Rock";
 }
 
 Rock::Rock() = default;

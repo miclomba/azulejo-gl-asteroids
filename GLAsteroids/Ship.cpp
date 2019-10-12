@@ -20,7 +20,6 @@ using entity::EntityAggregationDeserializer;
 
 namespace
 {
-const std::string BULLET_PREFIX = "bullet_";
 const std::string SHIP_VERTICES_KEY = "ship_vertices";
 const std::string SHIP_INDICES_KEY = "ship_indices";
 const std::string UNIT_ORIENTATION_KEY = "unit_orientation";
@@ -275,7 +274,7 @@ void Ship::Fire()
 	if (bullets.size() > BulletNumber())
 		return;
 
-	std::string key = BULLET_PREFIX + GenerateUUID();
+	std::string key = Bullet::BulletPrefix() + GenerateUUID();
 
 	SharedEntity bullet = std::make_shared<Bullet>(GetFrame()[0][0], GetFrame()[1][0]);
 	bullet->SetKey(key);
