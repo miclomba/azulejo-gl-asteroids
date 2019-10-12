@@ -18,7 +18,8 @@ class ASTEROIDS_DLL_EXPORT Rock : public GLEntity
 {
 public:
 
-	Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _index);
+	Rock();
+	Rock(const State _state, const GLfloat _x, const GLfloat _y);
 	~Rock();
 	Rock(const Rock&);
 	Rock(Rock&&);
@@ -27,7 +28,6 @@ public:
 
 	void Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
 
-    GLint GetIndex() const;
     GLfloat GetSpin() const;
     GLfloat GetSpinEpsilon() const;
     GLint GetSpinDirection() const;

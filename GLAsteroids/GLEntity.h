@@ -47,6 +47,15 @@ protected:
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+	boost::property_tree::ptree GetSerialMatrix(const std::array<GLEntity::Row4, 4>& matrixData) const;
+	boost::property_tree::ptree GetRow3SerialMatrix(const std::array<GLEntity::Row3, 8>& matrixData) const;
+	std::array<GLEntity::Row4, 4> GetMatrix(const boost::property_tree::ptree& serialMatrixData) const;
+	std::array<GLEntity::Row3, 8> GetRow3Matrix(const boost::property_tree::ptree& serialMatrixData) const;
+	boost::property_tree::ptree GetSerialArray(const std::array<GLubyte, 24>& arrayData) const;
+	boost::property_tree::ptree GetSerialArray16(const std::array<GLfloat, 16>& arrayData) const;
+	std::array<GLubyte, 24> GetArray(const boost::property_tree::ptree& serialArrayData) const;
+	std::array<GLfloat, 16> GetArray16(const boost::property_tree::ptree& serialArrayData) const;
+
 private:
 	std::array<Row4,4> frame_;
     std::array<Row4,4> unitVelocity_;

@@ -3,28 +3,43 @@
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+#include "Entities/EntityAggregationDeserializer.h"
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
 using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
+using entity::EntityAggregationDeserializer;
+
+namespace pt = boost::property_tree;
 
 namespace
 {
 const int ROCK_NUMBER = 6;
 const std::string SHIP_KEY = "Ship";
 const std::string ROCK_KEY = "Rock";
+const std::string SCORE_KEY = "score";
+const std::string ROCK_COUNT_KEY = "rock_count";
+const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
+const std::string THRUST_KEY = "thrust";
+EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 }
 
 Asteroids::Asteroids()
 {
-	for (GLint i = 0; i < ROCK_NUMBER; i++)
-		AggregateMember(ROCK_KEY + std::to_string(i));
 	AggregateMember(SHIP_KEY);
+	Deserializer->RegisterEntity<Ship>(SHIP_KEY);
 
 	ResetGame();
 }
@@ -50,13 +65,29 @@ Asteroids::SharedEntity& Asteroids::GetShip()
 	return GetAggregatedMember(SHIP_KEY);
 }
 
+void Asteroids::ClearGame()
+{
+	std::vector<Key> rockKeys = GetRockKeys();
+	for (Key& key : rockKeys)
+		RemoveMember(key);
+	RemoveMember(GetShip()->GetKey());
+}
+
+std::string Asteroids::GenerateUUID() const
+{
+	boost::uuids::uuid tag = boost::uuids::random_generator()();
+	std::string val = boost::lexical_cast<std::string>(tag);
+	return val;
+}
+
 void Asteroids::ResetGame() 
 {
-	auto CreateRock = [this](const GLint randy1, const GLint randy2, const GLint i)
+	auto CreateRock = [this](const GLint randy1, const GLint randy2, const std::string& uuidStr)
 	{
-		SharedEntity& rock = GetRock(ROCK_KEY + std::to_string(i));
-        rock = std::make_shared<Rock>(State::LARGE,randy1,randy2,i);
-		rock->SetKey(ROCK_KEY + std::to_string(i));
+        SharedEntity rock = std::make_shared<Rock>(State::LARGE,randy1,randy2);
+		rock->SetKey(ROCK_KEY + uuidStr);
+		AggregateMember(rock);
+		Deserializer->RegisterEntity<Rock>(rock->GetKey());
 	};
 	auto CreateShip = [this]()
 	{
@@ -67,22 +98,20 @@ void Asteroids::ResetGame()
 	ClearRocks();
 
     GLint randy1, randy2;
-    for (GLint i = 0; i < ROCK_NUMBER; i++) {
+    for (GLint nextRock = 0; nextRock < 10; ++nextRock) {
         do {
             randy1 = rand();
             randy2 = rand();
-            randy1 = pow(-1,i) * randy1;
+            randy1 = pow(-1,nextRock) * randy1;
             randy1 = randy1 % 15;
-            randy2 = pow(-1,i % 2) * randy2;
+            randy2 = pow(-1,nextRock % 2) * randy2;
             randy2 = randy2 % 15;
         } while (fabs(randy1) < 3 || fabs(randy2) < 3);
 
-		CreateRock(randy1, randy2, i);
+		CreateRock(randy1, randy2, GenerateUUID()); 
     }
 
 	CreateShip();
-
-    rockCount_ = ROCK_NUMBER;
 	score_ = 0;
 }
 
@@ -148,14 +177,8 @@ void Asteroids::ClearRocks()
 	for (Key& key : rockKeys)
 	{
 		SharedEntity& sharedRock = GetRock(key);
-		if (sharedRock)
-		{
-			Rock* rock = static_cast<Rock*>(sharedRock.get());
-			if (rock->GetIndex() >= ROCK_NUMBER)
-				RemoveMember(sharedRock);
-			else
-				sharedRock.reset();
-		}
+		Rock* rock = static_cast<Rock*>(sharedRock.get());
+		RemoveMember(sharedRock);
 	}
 }
 
@@ -171,6 +194,12 @@ bool Asteroids::HasRocks()
 	return false;
 }
 
+bool Asteroids::HasRock(const std::string& key) const
+{
+	std::vector<Key> rockKeys = GetRockKeys();
+	return std::any_of(rockKeys.begin(), rockKeys.end(), [&key](const std::string& rockKey) { return rockKey == key; });
+}
+
 void Asteroids::DetermineCollisions()
 {
 	SharedEntity& sharedShip = GetShip();
@@ -180,17 +209,24 @@ void Asteroids::DetermineCollisions()
 	Ship* ship = static_cast<Ship*>(sharedShip.get());
 	std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys();
 
+	std::vector<std::pair<Bullet*, Key>> collisionPairs;
 	for (Ship::Key& bulletKey : bulletKeys)
 	{
 		Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
-		if (sharedBullet) {
-			Bullet* bullet = static_cast<Bullet*>(sharedBullet.get());
-			Rock* rock = Collision(bullet);
+		Bullet* bullet = static_cast<Bullet*>(sharedBullet.get());
+		Rock* rock = Collision(bullet);
 
-			if (rock)
-				ProcessCollision(bullet, rock);
+		if (rock)
+			collisionPairs.push_back(std::make_pair(bullet,rock->GetKey()));
+	}
 
-			if (!HasRocks()) 
+	for (std::pair<Bullet*, Key>& collisions : collisionPairs)
+	{
+		if (HasRock(collisions.second))
+		{
+			SharedEntity& rock = GetRock(collisions.second);
+			ProcessCollision(collisions.first, static_cast<Rock*>(rock.get()));
+			if (!HasRocks())
 			{
 				ResetGame();
 				return;
@@ -202,18 +238,16 @@ void Asteroids::DetermineCollisions()
 		ResetGame();
 }
 
-void Asteroids::ProcessCollision(Bullet* bullet, Rock* rock) {
-
+void Asteroids::ProcessCollision(Bullet* bullet, Rock* rock) 
+{
 	score_ += 1;
-
 	if (rock->GetState() != State::SMALL)
 	{
 		CalculateConservationOfMomentum(bullet, rock);
 		BreakRock(rock);
 	}
-
-	DestroyBullet(bullet);
 	DestroyRock(rock);
+	DestroyBullet(bullet);
 }
 
 Rock* Asteroids::Collision(Bullet* _bullet) 
@@ -310,8 +344,9 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	GLint massDenominator = halfMass ? 2 : 1;
 	GLfloat angleMultiplier = clockwise ? 1.0 : -1.0;
 
-	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame()[0][0], rock->GetFrame()[1][0], rockCount_);
-	rock1->SetKey(ROCK_KEY + std::to_string(rockCount_++));
+	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame()[0][0], rock->GetFrame()[1][0]);
+
+	rock1->SetKey(ROCK_KEY + GenerateUUID()); 
 
 	rock1->SetMass(rock->GetMass() / massDenominator);
 	rock1->SetSpeed(rock->GetSpeed());
@@ -341,6 +376,8 @@ void Asteroids::BreakRock(Rock* rock)
 	}
 	AggregateMember(rock1);
 	AggregateMember(rock2);
+	Deserializer->RegisterEntity<Rock>(rock1->GetKey());
+	Deserializer->RegisterEntity<Rock>(rock2->GetKey());
 }
 
 void Asteroids::DestroyBullet(Bullet* bullet)
@@ -352,22 +389,12 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 	Ship* ship = static_cast<Ship*>(sharedShip.get());
 
 	std::string bulletKey = bullet->GetKey(); 
-	Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
-	sharedBullet.reset();
+	ship->RemoveBullet(bulletKey);
 }
 
 void Asteroids::DestroyRock(Rock* rock)
 {
-	GLint id = rock->GetIndex();
-	if (id >= ROCK_NUMBER)
-	{
-		RemoveMember(ROCK_KEY + std::to_string(id));
-	}
-	else
-	{
-		SharedEntity& sharedRock = GetRock(rock->GetKey());
-		sharedRock.reset();
-	}
+	RemoveMember(rock->GetKey());
 }
 
 void Asteroids::ResetThrustAndRotation()
@@ -403,8 +430,14 @@ void Asteroids::Thrust()
 
 void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+	tree.put(SCORE_KEY, score_);
+	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
+	tree.put(THRUST_KEY, thrust_);
 }
 
 void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
 {
+	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
+	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
+	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }

@@ -32,17 +32,21 @@ public:
 	void RotateRight();
 	void Thrust();
 	void ResetGame();
+	void ClearGame();
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
+	std::string GenerateUUID() const;
+
 	SharedEntity& GetShip();
 	SharedEntity& GetRock(const std::string& key);
 	std::vector<Key> GetRockKeys() const;
 
 	void ClearRocks();
 	bool HasRocks();
+	bool HasRock(const std::string& key) const;
 	void BreakRock(Rock* rock);
 	void DestroyRock(Rock* rock);
 	std::shared_ptr<Rock> MakeRock(const State rockSize, Rock* rock, const bool halfMass, const bool clockwise);

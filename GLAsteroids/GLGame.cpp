@@ -1,12 +1,19 @@
 #include "GLGame.h"
 
+#include <filesystem>
+#include <string>
+#include <boost/property_tree/ptree.hpp>
+
 #include "Entities/EntityAggregationDeserializer.h"
 #include "Entities/EntityAggregationSerializer.h"
 
+using boost::property_tree::ptree;
 using entity::EntityAggregationDeserializer;
 using entity::EntityAggregationSerializer;
 
 using asteroids::GLGame;
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -15,7 +22,9 @@ const int WIN_HEIGHT = 480;
 const int NUMBER_KEYS = 256;
 const int INIT_WIN_X = 100;
 const int INIT_WIN_Y = 100;
+
 const std::string TITLE = "Asteroids";
+const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
 
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
@@ -51,6 +60,11 @@ GLGame::GLGame(int _argc, char* _argv[])
 	RegisterCallbacks();
 	InitServer();
 	InitClient();
+
+	game.SetKey(TITLE);
+
+
+	Deserializer->RegisterEntity<Asteroids>(TITLE);
 }
 
 void GLGame::Run() const
@@ -157,9 +171,11 @@ void GLGame::KeyboardUp(const unsigned char _chr, const int _x, const int _y)
 
 void GLGame::KeyboardUpdateState()
 {
+	ptree tree;
 	for (int i = 0; i < NUMBER_KEYS; i++)
 	{
-		if (keysPressed_[i]) {
+		if (keysPressed_[i]) 
+		{
 			switch (i)
 			{
 			case 's':
@@ -172,8 +188,15 @@ void GLGame::KeyboardUpdateState()
 				game.Fire(); break;
 			case 'x':
 				game.ResetGame(); break;
-			case 'X':
-				game.ResetGame(); break;
+			case 'u':
+				Serializer->SetSerializationPath(SERIALIZATION_PATH.string());
+				Serializer->Serialize(game);
+				break;
+			case 'i':
+				game.ClearGame();
+				Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+				Deserializer->Deserialize(game);
+				break;
 			default:
 				break;
 			}

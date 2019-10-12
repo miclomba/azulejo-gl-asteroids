@@ -14,6 +14,7 @@ namespace asteroids {
 class ASTEROIDS_DLL_EXPORT Bullet : public GLEntity
 {
 public:
+	Bullet();
     Bullet(const GLfloat _x, const GLfloat _y);
 	~Bullet();
 	Bullet(const Bullet&);

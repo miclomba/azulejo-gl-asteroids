@@ -16,6 +16,7 @@ namespace asteroids {
 class ASTEROIDS_DLL_EXPORT Ship : public GLEntity
 {
 public:
+	Ship();
 	Ship(const Ship::Key& key);
 	~Ship();
 	Ship(const Ship&);
@@ -30,11 +31,16 @@ public:
 
 	SharedEntity& GetBullet(const std::string& key) const;
 	std::vector<Key> GetBulletKeys() const;
+	void RemoveBullet(const Key& key);
+	void AddBullet(const SharedEntity& bullet);
+	bool HasBullet(const Key& key) const;
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
+	std::string GenerateUUID() const;
+
 	void RecomputeShipVelocity(const GLfloat _thrust);
 	void ChangeShipOrientation(const GLfloat _orientationAngle);
 	void MoveShip();

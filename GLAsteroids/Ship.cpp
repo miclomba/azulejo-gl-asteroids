@@ -5,23 +5,33 @@
 #include <memory>
 #include <string>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
+#include "Entities/EntityAggregationDeserializer.h"
+
+using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::Ship;
+using entity::EntityAggregationDeserializer;
 
 namespace
 {
 const std::string BULLET_PREFIX = "bullet_";
+const std::string SHIP_VERTICES_KEY = "ship_vertices";
+const std::string SHIP_INDICES_KEY = "ship_indices";
+const std::string UNIT_ORIENTATION_KEY = "unit_orientation";
+const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
+const std::string BULLET_FIRED_KEY = "bullet_fired";
+const std::string TRUE_VAL = "true";
+EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 } // end namespace
 
-Ship::Ship(const Ship::Key& key)
+Ship::Ship()
 {
-	SetKey(key);
-
-	for (int i = 0; i < BulletNumber(); ++i)
-		AggregateMember(BULLET_PREFIX + std::to_string(i));
-
 	SetVelocityAngle(M_PI / 2);
 
 	shipVertices_ = {
@@ -48,11 +58,24 @@ Ship::Ship(const Ship::Key& key)
 	};
 }
 
+Ship::Ship(const Ship::Key& key) :
+	Ship()
+{
+	SetKey(key);
+}
+
 Ship::~Ship() = default;
 Ship::Ship(const Ship&) = default;
 Ship::Ship(Ship&&) = default;
 Ship& Ship::operator=(const Ship&) = default;
 Ship& Ship::operator=(Ship&&) = default;
+
+std::string Ship::GenerateUUID() const
+{
+	boost::uuids::uuid tag = boost::uuids::random_generator()();
+	std::string val = boost::lexical_cast<std::string>(tag);
+	return val;
+}
 
 GLint Ship::BulletNumber()
 {
@@ -185,13 +208,14 @@ void Ship::DrawBullets()
 
 	std::map<Key, SharedEntity>& bullets = GetAggregatedMembers();
 
+	std::vector<std::string> bulletsToRemove;
 	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
 	{
 		SharedEntity& sharedEntity = iter->second;
 		Bullet* bullet = static_cast<Bullet*>(sharedEntity.get());
 		if (bullet && bullet->IsOutOfBounds())
 		{
-			sharedEntity.reset();
+			bulletsToRemove.push_back(bullet->GetKey());
 		}
 		else if (bullet)
 		{
@@ -199,6 +223,9 @@ void Ship::DrawBullets()
 			bulletFired_ = true;
 		}
 	}
+
+	for (std::string& bulletKey : bulletsToRemove)
+		RemoveBullet(bulletKey);
 }
 
 void Ship::DrawShip()
@@ -224,26 +251,61 @@ void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust)
     glPopMatrix();
 }
 
+void Ship::RemoveBullet(const Ship::Key& key)
+{
+	RemoveMember(key);
+}
+
+void Ship::AddBullet(const SharedEntity& bullet)
+{
+	AggregateMember(bullet);
+	if (!Deserializer->HasSerializationKey(bullet->GetKey()))
+		Deserializer->RegisterEntity<Bullet>(bullet->GetKey());
+}
+
+bool Ship::HasBullet(const Ship::Key& key) const
+{
+	std::vector<std::string> bulletKeys = GetBulletKeys();
+	return std::any_of(bulletKeys.begin(), bulletKeys.end(), [&key](const std::string& bulletKey) { return bulletKey == key; });
+}
+
 void Ship::Fire()
 {
 	std::map<Key, SharedEntity>& bullets = GetAggregatedMembers();
-	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
-	{
-		SharedEntity& bullet = iter->second;
-		if (bullet)
-			continue;
-		bullet = std::make_shared<Bullet>(GetFrame()[0][0],GetFrame()[1][0]);
-		bullet->SetKey(iter->first);
-		bulletFired_ = true;
-		break;
-	}
+	if (bullets.size() > BulletNumber())
+		return;
+
+	std::string key = BULLET_PREFIX + GenerateUUID();
+
+	SharedEntity bullet = std::make_shared<Bullet>(GetFrame()[0][0], GetFrame()[1][0]);
+	bullet->SetKey(key);
+	bulletFired_ = true;
+
+	AddBullet(bullet);
 }
 
-void Ship::Save(boost::property_tree::ptree& tree, const std::string& path) const
+void Ship::Save(ptree& tree, const std::string& path) const
 {
+	GLEntity::Save(tree, path);
+
+	tree.put(BULLET_FIRED_KEY, bulletFired_);
+	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
+	ptree unitOrientation = GetSerialMatrix(unitOrientation_);
+	tree.add_child(UNIT_ORIENTATION_KEY, unitOrientation);
+	ptree shipVertices = GetRow3SerialMatrix(shipVertices_);
+	tree.add_child(SHIP_VERTICES_KEY, shipVertices);
+	ptree shipIndices = GetSerialArray(shipIndices_);
+	tree.add_child(SHIP_INDICES_KEY, shipIndices);
 }
 
-void Ship::Load(boost::property_tree::ptree& tree, const std::string& path)
+void Ship::Load(ptree& tree, const std::string& path)
 {
+	GLEntity::Load(tree, path);
+
+	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
+	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
+	unitOrientation_ = GetMatrix(tree.get_child(UNIT_ORIENTATION_KEY));
+	shipVertices_ = GetRow3Matrix(tree.get_child(SHIP_VERTICES_KEY));
+	shipIndices_ = GetArray(tree.get_child(SHIP_INDICES_KEY));
 }
 

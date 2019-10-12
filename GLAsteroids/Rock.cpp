@@ -5,12 +5,23 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+using boost::property_tree::ptree;
 using asteroids::GLEntity;
 using asteroids::Rock;
 using asteroids::State;
 
 namespace
 {
+const std::string& INDEX_KEY = "index";
+const std::string& SPIN_KEY = "spin";
+const std::string& SPIN_EPSILON_KEY = "spin_epsilon";
+const std::string& SPIN_DIRECTION_KEY = "spin_direction";
+const std::string& STATE_KEY = "state";
+const std::string& ROCK_INITIALIZED_KEY = "rock_initialized";
+const std::string& ROCK_VERTICES_KEY = "rock_vertices";
+const std::string& ROCK_INDICES_KEY = "rock_indices";
+const std::string TRUE_VAL = "true";
+
 const std::array<GLEntity::Row3,8> rockVerticesL = { 
 	GLEntity::Row3{-1.5f,-1.5f,0.5f}, GLEntity::Row3{1.5f,-1.5f,0.5f},
 	GLEntity::Row3{1.5f,1.5f,0.5f}, GLEntity::Row3{-1.5f,1.5f,0.5f},
@@ -32,8 +43,10 @@ const std::array<GLEntity::Row3,8> rockVerticesS = {
 std::array<GLubyte, 24> rockIndices = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
 }
 
-Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y, const GLint _index) : 
-	state_(_state), index_(_index)
+Rock::Rock() = default;
+
+Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : 
+	state_(_state)
 {
     GLint randy = rand();
     randy = randy%2;
@@ -181,11 +194,6 @@ void Rock::Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloa
     glPopMatrix();
 }
 
-GLint Rock::GetIndex() const
-{
-	return index_;
-}
-
 GLfloat Rock::GetSpin() const
 {
 	return spin_;
@@ -223,8 +231,29 @@ void Rock::SetRockInitialized(const bool state)
 
 void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+	GLEntity::Save(tree, path);
+
+	tree.put(SPIN_KEY, spin_);
+	tree.put(SPIN_EPSILON_KEY, spinEpsilon_);
+	tree.put(SPIN_DIRECTION_KEY, spinDirection_);
+	tree.put(STATE_KEY, static_cast<int>(state_));
+	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
+
+	ptree rockVertices = GetRow3SerialMatrix(rockVertices_);
+	tree.add_child(ROCK_VERTICES_KEY, rockVertices);
+	ptree rockIndices = GetSerialArray(rockIndices_);
+	tree.add_child(ROCK_INDICES_KEY, rockIndices);
 }
 
 void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 {
+	GLEntity::Load(tree, path);
+
+	spin_ = std::stof(tree.get_child(SPIN_KEY).data());
+	spinEpsilon_ = std::stof(tree.get_child(SPIN_EPSILON_KEY).data());
+	spinDirection_ = std::stoi(tree.get_child(SPIN_DIRECTION_KEY).data());
+	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
+	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
+	rockVertices_ = GetRow3Matrix(tree.get_child(ROCK_VERTICES_KEY));
+	rockIndices_ = GetArray(tree.get_child(ROCK_INDICES_KEY));
 }

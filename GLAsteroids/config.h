@@ -14,4 +14,10 @@
 
 #define ASTEROIDS_DLL_EXPORT __declspec(dllexport)
 
+#ifdef _WIN32
+#define USERS_PATH "c:/users"
+#else
+#define USERS_PATH "/users"
+#endif
+
 #endif // end config_h
