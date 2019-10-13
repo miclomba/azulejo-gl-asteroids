@@ -2,6 +2,8 @@
 
 #include <filesystem>
 #include <string>
+#include <utility>
+
 #include <boost/property_tree/ptree.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
@@ -44,13 +46,13 @@ void RegisterEntities(const ptree& tree)
 		ptree node = keyValue.second;
 
 		if (nodeKey.substr(0,Rock::RockPrefix().length()) == Rock::RockPrefix())
-			Deserializer->RegisterEntity<asteroids::Rock>(nodeKey);
+			Deserializer->RegisterEntity<Rock>(nodeKey);
 		else if (nodeKey.substr(0,Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
-			Deserializer->RegisterEntity<asteroids::Bullet>(nodeKey);
+			Deserializer->RegisterEntity<Bullet>(nodeKey);
 		else if (nodeKey == Ship::ShipKey())
-			Deserializer->RegisterEntity<asteroids::Ship>(nodeKey);
+			Deserializer->RegisterEntity<Ship>(nodeKey);
 		else if (nodeKey == Asteroids::AsteroidsKey())
-			Deserializer->RegisterEntity<asteroids::Asteroids>(nodeKey);
+			Deserializer->RegisterEntity<Asteroids>(nodeKey);
 		RegisterEntities(node);
 	}
 }

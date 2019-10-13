@@ -1,9 +1,9 @@
 #include "Ship.h"
 
-#include <array>
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -12,9 +12,13 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
+#include "Bullet.h"
+#include "GLSerializer.h"
+#include "Ship.h"
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
+using asteroids::GLSerializer;
 using asteroids::Ship;
 using entity::EntityAggregationDeserializer;
 
@@ -287,11 +291,11 @@ void Ship::Save(ptree& tree, const std::string& path) const
 
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
-	ptree unitOrientation = GetSerialMatrix(unitOrientation_);
+	ptree unitOrientation = GLSerializer::GetSerial4x4Matrix(unitOrientation_);
 	tree.add_child(UNIT_ORIENTATION_KEY, unitOrientation);
-	ptree shipVertices = GetRow3SerialMatrix(shipVertices_);
+	ptree shipVertices = GLSerializer::GetSerial8x3Matrix(shipVertices_);
 	tree.add_child(SHIP_VERTICES_KEY, shipVertices);
-	ptree shipIndices = GetSerialArray(shipIndices_);
+	ptree shipIndices = GLSerializer::GetSerialArray24(shipIndices_);
 	tree.add_child(SHIP_INDICES_KEY, shipIndices);
 }
 
@@ -301,8 +305,8 @@ void Ship::Load(ptree& tree, const std::string& path)
 
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
-	unitOrientation_ = GetMatrix(tree.get_child(UNIT_ORIENTATION_KEY));
-	shipVertices_ = GetRow3Matrix(tree.get_child(SHIP_VERTICES_KEY));
-	shipIndices_ = GetArray(tree.get_child(SHIP_INDICES_KEY));
+	unitOrientation_ = GLSerializer::Get4x4Matrix(tree.get_child(UNIT_ORIENTATION_KEY));
+	shipVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(SHIP_VERTICES_KEY));
+	shipIndices_ = GLSerializer::GetArray24(tree.get_child(SHIP_INDICES_KEY));
 }
 

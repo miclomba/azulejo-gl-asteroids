@@ -4,8 +4,12 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Bullet.h"
+#include "GLSerializer.h"
+
 using boost::property_tree::ptree;
 using asteroids::Bullet;
+using asteroids::GLSerializer;
 
 namespace
 {
@@ -155,11 +159,11 @@ void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) co
 
 	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
-	ptree bulletVertices = GetRow3SerialMatrix(bulletVertices_);
+	ptree bulletVertices = GLSerializer::GetSerial8x3Matrix(bulletVertices_);
 	tree.add_child(BULLET_VERTICES_KEY, bulletVertices);
-	ptree bulletIndices = GetSerialArray(bulletIndices_);
+	ptree bulletIndices = GLSerializer::GetSerialArray24(bulletIndices_);
 	tree.add_child(BULLET_INDICES_KEY, bulletIndices);
-	ptree projectMatrix = GetSerialArray16(projectionMatrix_);
+	ptree projectMatrix = GLSerializer::GetSerialArray16(projectionMatrix_);
 	tree.add_child(PROJECTION_MATRIX_KEY, projectMatrix);
 }
 
@@ -169,7 +173,7 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
-	bulletVertices_ = GetRow3Matrix(tree.get_child(BULLET_VERTICES_KEY));
-	bulletIndices_ = GetArray(tree.get_child(BULLET_INDICES_KEY));
-	projectionMatrix_ = GetArray16(tree.get_child(PROJECTION_MATRIX_KEY));
+	bulletVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(BULLET_VERTICES_KEY));
+	bulletIndices_ = GLSerializer::GetArray24(tree.get_child(BULLET_INDICES_KEY));
+	projectionMatrix_ = GLSerializer::GetArray16(tree.get_child(PROJECTION_MATRIX_KEY));
 }

@@ -5,8 +5,13 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "GLEntity.h"
+#include "GLSerializer.h"
+#include "Rock.h"
+
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
+using asteroids::GLSerializer;
 using asteroids::Rock;
 using asteroids::State;
 
@@ -244,9 +249,9 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 	tree.put(STATE_KEY, static_cast<int>(state_));
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
-	ptree rockVertices = GetRow3SerialMatrix(rockVertices_);
+	ptree rockVertices = GLSerializer::GetSerial8x3Matrix(rockVertices_);
 	tree.add_child(ROCK_VERTICES_KEY, rockVertices);
-	ptree rockIndices = GetSerialArray(rockIndices_);
+	ptree rockIndices = GLSerializer::GetSerialArray24(rockIndices_);
 	tree.add_child(ROCK_INDICES_KEY, rockIndices);
 }
 
@@ -259,6 +264,6 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	spinDirection_ = std::stoi(tree.get_child(SPIN_DIRECTION_KEY).data());
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
-	rockVertices_ = GetRow3Matrix(tree.get_child(ROCK_VERTICES_KEY));
-	rockIndices_ = GetArray(tree.get_child(ROCK_INDICES_KEY));
+	rockVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(ROCK_VERTICES_KEY));
+	rockIndices_ = GLSerializer::GetArray24(tree.get_child(ROCK_INDICES_KEY));
 }

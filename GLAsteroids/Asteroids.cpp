@@ -1,5 +1,6 @@
 #include "Asteroids.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
 #include <string>
@@ -14,6 +15,9 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
+#include "Bullet.h"
+#include "Rock.h"
+#include "Ship.h"
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
