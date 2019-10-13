@@ -5,11 +5,10 @@
 
 #include "config.h"
 #include "Asteroids.h"
-#include "GLEntity.h"
 
 namespace asteroids {
 
-class ASTEROIDS_DLL_EXPORT GLGame : public GLEntity
+class ASTEROIDS_DLL_EXPORT GLGame 
 {
 public:
 	GLGame(int _argc, char* _argv[]);
