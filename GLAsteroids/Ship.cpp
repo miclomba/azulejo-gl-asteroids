@@ -29,6 +29,11 @@ const std::string TRUE_VAL = "true";
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 } // end namespace
 
+std::string Ship::ShipKey()
+{
+	return "Ship";
+}
+
 Ship::Ship()
 {
 	SetVelocityAngle(M_PI / 2);
@@ -74,11 +79,6 @@ std::string Ship::GenerateUUID() const
 	boost::uuids::uuid tag = boost::uuids::random_generator()();
 	std::string val = boost::lexical_cast<std::string>(tag);
 	return val;
-}
-
-GLint Ship::BulletNumber()
-{
-	return 10;
 }
 
 Ship::SharedEntity& Ship::GetBullet(const std::string& key) const
@@ -258,14 +258,12 @@ void Ship::RemoveBullet(const Ship::Key& key)
 void Ship::AddBullet(const SharedEntity& bullet)
 {
 	AggregateMember(bullet);
-	if (!Deserializer->HasSerializationKey(bullet->GetKey()))
-		Deserializer->RegisterEntity<Bullet>(bullet->GetKey());
+	Deserializer->RegisterEntity<Bullet>(bullet->GetKey());
 }
 
-bool Ship::HasBullet(const Ship::Key& key) const
+GLint Ship::BulletNumber()
 {
-	std::vector<std::string> bulletKeys = GetBulletKeys();
-	return std::any_of(bulletKeys.begin(), bulletKeys.end(), [&key](const std::string& bulletKey) { return bulletKey == key; });
+	return 5;
 }
 
 void Ship::Fire()

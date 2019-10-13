@@ -27,18 +27,22 @@ namespace pt = boost::property_tree;
 namespace
 {
 const int ROCK_NUMBER = 6;
-const std::string SHIP_KEY = "Ship";
 const std::string SCORE_KEY = "score";
 const std::string ROCK_COUNT_KEY = "rock_count";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string THRUST_KEY = "thrust";
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
+} // end namespace
+
+std::string Asteroids::AsteroidsKey()
+{
+	return "Asteroids";
 }
 
 Asteroids::Asteroids()
 {
-	AggregateMember(SHIP_KEY);
-	Deserializer->RegisterEntity<Ship>(SHIP_KEY);
+	AggregateMember(Ship::ShipKey());
+	Deserializer->RegisterEntity<Ship>(Ship::ShipKey());
 
 	ResetGame();
 }
@@ -61,7 +65,7 @@ std::vector<Asteroids::Key> Asteroids::GetRockKeys() const
 
 Asteroids::SharedEntity& Asteroids::GetShip()
 {
-	return GetAggregatedMember(SHIP_KEY);
+	return GetAggregatedMember(Ship::ShipKey());
 }
 
 void Asteroids::ClearGame()
@@ -91,7 +95,7 @@ void Asteroids::ResetGame()
 	auto CreateShip = [this]()
 	{
 		SharedEntity& sharedShip = GetShip();
-		sharedShip = std::make_shared<Ship>(SHIP_KEY);
+		sharedShip = std::make_shared<Ship>(Ship::ShipKey());
 	};
 
 	ClearRocks();
@@ -387,13 +391,18 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 
 	Ship* ship = static_cast<Ship*>(sharedShip.get());
 
-	std::string bulletKey = bullet->GetKey(); 
+	std::string bulletKey = bullet->GetKey();
+
+	Deserializer->UnregisterEntity(bulletKey);
 	ship->RemoveBullet(bulletKey);
 }
 
 void Asteroids::DestroyRock(Rock* rock)
 {
-	RemoveMember(rock->GetKey());
+	std::string rockKey = rock->GetKey();
+
+	Deserializer->UnregisterEntity(rockKey);
+	RemoveMember(rockKey);
 }
 
 void Asteroids::ResetThrustAndRotation()

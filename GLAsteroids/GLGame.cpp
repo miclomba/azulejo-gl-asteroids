@@ -6,16 +6,20 @@
 
 #include "Entities/EntityAggregationDeserializer.h"
 #include "Entities/EntityAggregationSerializer.h"
+#include "Asteroids.h"
 #include "Bullet.h"
 #include "Rock.h"
+#include "Ship.h"
 
 using boost::property_tree::ptree;
 using entity::EntityAggregationDeserializer;
 using entity::EntityAggregationSerializer;
 
+using asteroids::Asteroids;
 using asteroids::Bullet;
 using asteroids::GLGame;
 using asteroids::Rock;
+using asteroids::Ship;
 
 namespace fs = std::filesystem;
 
@@ -27,13 +31,12 @@ const int NUMBER_KEYS = 256;
 const int INIT_WIN_X = 100;
 const int INIT_WIN_Y = 100;
 
-const std::string TITLE = "Asteroids";
 const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
 
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
 
-std::string RegisterRocksAndBullets(const ptree& tree)
+void RegisterEntities(const ptree& tree)
 {
 	for (const std::pair<std::string, ptree>& keyValue : tree)
 	{
@@ -44,9 +47,12 @@ std::string RegisterRocksAndBullets(const ptree& tree)
 			Deserializer->RegisterEntity<asteroids::Rock>(nodeKey);
 		else if (nodeKey.substr(0,Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
 			Deserializer->RegisterEntity<asteroids::Bullet>(nodeKey);
-		RegisterRocksAndBullets(node);
+		else if (nodeKey == Ship::ShipKey())
+			Deserializer->RegisterEntity<asteroids::Ship>(nodeKey);
+		else if (nodeKey == Asteroids::AsteroidsKey())
+			Deserializer->RegisterEntity<asteroids::Asteroids>(nodeKey);
+		RegisterEntities(node);
 	}
-	return "";
 }
 } // end namespace
 
@@ -81,15 +87,15 @@ GLGame::GLGame(int _argc, char* _argv[])
 	InitServer();
 	InitClient();
 
-	game.SetKey(TITLE);
-	Deserializer->RegisterEntity<Asteroids>(TITLE);
+	game.SetKey(Asteroids::AsteroidsKey());
+	Deserializer->RegisterEntity<Asteroids>(Asteroids::AsteroidsKey());
 	if (fs::exists(SERIALIZATION_PATH))
 	{
 		game.ClearGame();
-		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
 		
-		ptree serializationStructure = Deserializer->GetSerializationStructure();
-		RegisterRocksAndBullets(serializationStructure);
+		Deserializer->UnregisterAll();
+		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+		RegisterEntities(Deserializer->GetSerializationStructure());
 
 		Deserializer->Deserialize(game);
 	}
@@ -114,7 +120,7 @@ void GLGame::InitGlut(int _argc, char* _argv[]) const
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowPosition(INIT_WIN_X, INIT_WIN_Y);
 	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	glutCreateWindow(TITLE.c_str());
+	glutCreateWindow(Asteroids::AsteroidsKey().c_str());
 }
 
 void GLGame::InitServer() const
@@ -221,8 +227,11 @@ void GLGame::KeyboardUpdateState()
 				Serializer->Serialize(game);
 				break;
 			case 'i':
-				game.ClearGame();
+				Deserializer->UnregisterAll();
 				Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+				RegisterEntities(Deserializer->GetSerializationStructure());
+
+				game.ClearGame();
 				Deserializer->Deserialize(game);
 				break;
 			default:

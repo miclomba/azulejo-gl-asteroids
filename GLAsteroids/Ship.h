@@ -33,10 +33,11 @@ public:
 	std::vector<Key> GetBulletKeys() const;
 	void RemoveBullet(const Key& key);
 	void AddBullet(const SharedEntity& bullet);
-	bool HasBullet(const Key& key) const;
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
+
+	static std::string ShipKey();
 
 private:
 	std::string GenerateUUID() const;
