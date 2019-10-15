@@ -1,8 +1,13 @@
 #include "Bullet.h"
 
+#include <memory>
 #include <string>
 
 #include <boost/property_tree/ptree.hpp>
+
+#include "Resources/Resource.h"
+#include "Resources/ResourceDeserializer.h"
+#include "Resources/ResourceSerializer.h"
 
 #include "Bullet.h"
 #include "GLSerializer.h"
@@ -10,6 +15,10 @@
 using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLSerializer;
+using resource::IResource;
+using resource::Resource;
+using resource::ResourceDeserializer;
+using resource::ResourceSerializer;
 
 namespace
 {
@@ -29,7 +38,8 @@ std::string Bullet::BulletPrefix()
 
 Bullet::Bullet()
 {
-	bulletIndices_ = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+	bulletIndices_.Data() = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+	projectionMatrix_.Data().resize(16);
 
 	bulletVertices_ = {
 		Row3{-0.2f,-0.1f,0.5f}, Row3{0.2f,-0.0f,0.5f},
@@ -37,6 +47,12 @@ Bullet::Bullet()
 		Row3{-0.2f,-0.1f,1.0f}, Row3{0.2f,-0.0f,1.0f},
 		Row3{0.2f,0.0f,1.0f}, Row3{-0.2f,0.1f,1.0f}
 	};
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	if (!deserializer->HasSerializationKey(BULLET_INDICES_KEY))
+		deserializer->RegisterResource<std::vector<GLubyte>>(BULLET_INDICES_KEY);
+	if (!deserializer->HasSerializationKey(PROJECTION_MATRIX_KEY))
+		deserializer->RegisterResource<std::vector<GLfloat>>(PROJECTION_MATRIX_KEY);
 }
 
 Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
@@ -97,9 +113,9 @@ void Bullet::SetBulletOutOfBounds()
 {
 	GLfloat epsilon = 3.0f;
 
-	GLfloat right = (1 / fabs(projectionMatrix_[0]));
+	GLfloat right = (1 / fabs(projectionMatrix_.Data()[0]));
 	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(projectionMatrix_[5]));
+	GLfloat top = (1 / fabs(projectionMatrix_.Data()[5]));
 	GLfloat bottom = -1 * top;
 
 	if ((GetFrame()[0][0] <= left - epsilon) || (GetFrame()[0][0] >= right + epsilon) ||
@@ -134,10 +150,10 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		glLoadIdentity();
 		glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
 		glRotatef(GetVelocityAngle()*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.data());
+		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data().data());
 	};
 
-	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix_.data());
+	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix_.Data().data());
 
     glPushMatrix();
 	{
@@ -161,10 +177,12 @@ void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) co
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
 	ptree bulletVertices = GLSerializer::GetSerial8x3Matrix(bulletVertices_);
 	tree.add_child(BULLET_VERTICES_KEY, bulletVertices);
-	ptree bulletIndices = GLSerializer::GetSerialArray24(bulletIndices_);
-	tree.add_child(BULLET_INDICES_KEY, bulletIndices);
-	ptree projectMatrix = GLSerializer::GetSerialArray16(projectionMatrix_);
-	tree.add_child(PROJECTION_MATRIX_KEY, projectMatrix);
+
+	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
+	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+
+	serializer->Serialize(bulletIndices_, BULLET_INDICES_KEY);
+	serializer->Serialize(projectionMatrix_, PROJECTION_MATRIX_KEY);
 }
 
 void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
@@ -174,6 +192,12 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 	bulletVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(BULLET_VERTICES_KEY));
-	bulletIndices_ = GLSerializer::GetArray24(tree.get_child(BULLET_INDICES_KEY));
-	projectionMatrix_ = GLSerializer::GetArray16(tree.get_child(PROJECTION_MATRIX_KEY));
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
+
+	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(BULLET_INDICES_KEY);
+	bulletIndices_ = *static_cast<Resource<std::vector<GLubyte>>*>(deserializedResource.get());
+	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
+	projectionMatrix_ = *static_cast<Resource<std::vector<GLfloat>>*>(deserializedProjection.get());
 }

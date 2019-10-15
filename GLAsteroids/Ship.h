@@ -4,8 +4,11 @@
 #include <array>
 #include <map>
 #include <string>
+#include <vector>
 
 #include <boost/property_tree/ptree.hpp>
+
+#include "Resources/Resource.h"
 
 #include "config.h"
 #include "Bullet.h"
@@ -55,7 +58,7 @@ private:
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };
 
     std::array<Row3,8> shipVertices_;
-    std::array<GLubyte, 24> shipIndices_;
+	resource::Resource<std::vector<GLubyte>> shipIndices_;
 };
 
 } // end asteroids

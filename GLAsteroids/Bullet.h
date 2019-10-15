@@ -6,6 +6,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Resources/Resource.h"
+
 #include "config.h"
 #include "GLEntity.h"
 
@@ -40,8 +42,9 @@ private:
     bool bulletInitialized_ = false;
     bool outOfBounds_ = false;
 	std::array<Row3, 8> bulletVertices_; 
-    std::array<GLubyte, 24> bulletIndices_;
-	std::array<GLfloat, 16> projectionMatrix_;
+
+	resource::Resource<std::vector<GLubyte>> bulletIndices_;
+	resource::Resource<std::vector<GLfloat>> projectionMatrix_;
 };
 
 } // end asteroids

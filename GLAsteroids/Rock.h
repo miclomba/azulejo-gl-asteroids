@@ -7,6 +7,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Resources/Resource.h"
+
 #include "config.h"
 #include "GLEntity.h"
 
@@ -58,7 +60,8 @@ private:
 	bool rockInitialized_{false};
     /*=============================== Geometry ===============================*/
     std::array<Row3, 8> rockVertices_;
-    std::array<GLubyte, 24> rockIndices_;
+
+	resource::Resource<std::vector<GLubyte>> rockIndices_;
 };
 
 } // end asteroids

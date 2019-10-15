@@ -12,6 +12,10 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
+#include "Resources/Resource.h"
+#include "Resources/ResourceDeserializer.h"
+#include "Resources/ResourceSerializer.h"
+
 #include "Bullet.h"
 #include "GLSerializer.h"
 #include "Ship.h"
@@ -21,6 +25,10 @@ using asteroids::Bullet;
 using asteroids::GLSerializer;
 using asteroids::Ship;
 using entity::EntityAggregationDeserializer;
+using resource::IResource;
+using resource::Resource;
+using resource::ResourceDeserializer;
+using resource::ResourceSerializer;
 
 namespace
 {
@@ -49,7 +57,7 @@ Ship::Ship()
 		Row3{0.1f,0.0f,1.0f}, Row3{-0.5f,0.5f,1.0f}
 	};
 
-	shipIndices_ = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+	shipIndices_.Data() = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
 
 	unitOrientation_ = {
 		Row4{0.0f,   0.0f,0.0f,0.0f},
@@ -64,6 +72,10 @@ Ship::Ship()
 		Row4{0.0f,   0.0f,0.0f,0.0f},
 		Row4{1.0f,   0.0f,0.0f,0.0f}
 	};
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
+		deserializer->RegisterResource<std::vector<GLubyte>>(SHIP_INDICES_KEY);
 }
 
 Ship::Ship(const Ship::Key& key) :
@@ -238,7 +250,7 @@ void Ship::DrawShip()
 	glLoadIdentity();
 	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.data());
+	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data().data());
 }
 
 void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust) 
@@ -295,8 +307,10 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	tree.add_child(UNIT_ORIENTATION_KEY, unitOrientation);
 	ptree shipVertices = GLSerializer::GetSerial8x3Matrix(shipVertices_);
 	tree.add_child(SHIP_VERTICES_KEY, shipVertices);
-	ptree shipIndices = GLSerializer::GetSerialArray24(shipIndices_);
-	tree.add_child(SHIP_INDICES_KEY, shipIndices);
+
+	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
+	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
 }
 
 void Ship::Load(ptree& tree, const std::string& path)
@@ -307,6 +321,10 @@ void Ship::Load(ptree& tree, const std::string& path)
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 	unitOrientation_ = GLSerializer::Get4x4Matrix(tree.get_child(UNIT_ORIENTATION_KEY));
 	shipVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(SHIP_VERTICES_KEY));
-	shipIndices_ = GLSerializer::GetArray24(tree.get_child(SHIP_INDICES_KEY));
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(SHIP_INDICES_KEY);
+	shipIndices_ = *static_cast<Resource<std::vector<GLubyte>>*>(deserializedResource.get());
 }
 
