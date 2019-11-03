@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -50,9 +51,9 @@ Bullet::Bullet()
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(BULLET_INDICES_KEY))
-		deserializer->RegisterResource<std::vector<GLubyte>>(BULLET_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(BULLET_INDICES_KEY);
 	if (!deserializer->HasSerializationKey(PROJECTION_MATRIX_KEY))
-		deserializer->RegisterResource<std::vector<GLfloat>>(PROJECTION_MATRIX_KEY);
+		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY);
 }
 
 Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
@@ -197,7 +198,7 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
 
 	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(BULLET_INDICES_KEY);
-	bulletIndices_ = *static_cast<Resource<std::vector<GLubyte>>*>(deserializedResource.get());
+	bulletIndices_ = *static_cast<Resource<GLubyte>*>(deserializedResource.get());
 	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
-	projectionMatrix_ = *static_cast<Resource<std::vector<GLfloat>>*>(deserializedProjection.get());
+	projectionMatrix_ = *static_cast<Resource<GLfloat>*>(deserializedProjection.get());
 }

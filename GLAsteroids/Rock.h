@@ -61,7 +61,7 @@ private:
     /*=============================== Geometry ===============================*/
     std::array<Row3, 8> rockVertices_;
 
-	resource::Resource<std::vector<GLubyte>> rockIndices_;
+	resource::Resource<GLubyte> rockIndices_;
 };
 
 } // end asteroids

@@ -58,7 +58,7 @@ private:
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };
 
     std::array<Row3,8> shipVertices_;
-	resource::Resource<std::vector<GLubyte>> shipIndices_;
+	resource::Resource<GLubyte> shipIndices_;
 };
 
 } // end asteroids

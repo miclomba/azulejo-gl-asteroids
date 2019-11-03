@@ -43,8 +43,8 @@ private:
     bool outOfBounds_ = false;
 	std::array<Row3, 8> bulletVertices_; 
 
-	resource::Resource<std::vector<GLubyte>> bulletIndices_;
-	resource::Resource<std::vector<GLfloat>> projectionMatrix_;
+	resource::Resource<GLubyte> bulletIndices_;
+	resource::Resource<GLfloat> projectionMatrix_;
 };
 
 } // end asteroids

@@ -67,7 +67,7 @@ Rock::Rock()
 {
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_INDICES_KEY))
-		deserializer->RegisterResource<std::vector<GLubyte>>(ROCK_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY);
 }
 
 Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : 
@@ -288,5 +288,5 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
 	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(ROCK_INDICES_KEY);
-	rockIndices_ = *static_cast<Resource<std::vector<GLubyte>>*>(deserializedResource.get());
+	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedResource.get());
 }

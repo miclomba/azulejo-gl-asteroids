@@ -75,7 +75,7 @@ Ship::Ship()
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
-		deserializer->RegisterResource<std::vector<GLubyte>>(SHIP_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY);
 }
 
 Ship::Ship(const Ship::Key& key) :
@@ -325,6 +325,6 @@ void Ship::Load(ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
 	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(SHIP_INDICES_KEY);
-	shipIndices_ = *static_cast<Resource<std::vector<GLubyte>>*>(deserializedResource.get());
+	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedResource.get());
 }
 
