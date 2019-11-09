@@ -57,7 +57,7 @@ Ship::Ship()
 		Row3{0.1f,0.0f,1.0f}, Row3{-0.5f,0.5f,1.0f}
 	};
 
-	shipIndices_.Data() = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+	shipIndices_ = Resource<GLubyte>({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
 
 	unitOrientation_ = {
 		Row4{0.0f,   0.0f,0.0f,0.0f},
@@ -250,7 +250,7 @@ void Ship::DrawShip()
 	glLoadIdentity();
 	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data().data());
+	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data()[0].data());
 }
 
 void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust) 

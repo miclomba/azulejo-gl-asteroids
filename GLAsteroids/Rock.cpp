@@ -55,7 +55,7 @@ const std::array<GLEntity::Row3,8> rockVerticesS = {
 	GLEntity::Row3{-0.25f,-0.25f,1.0f}, GLEntity::Row3{0.25f,-0.25f,1.0f},
 	GLEntity::Row3{0.25f,0.25f,1.0f}, GLEntity::Row3{-0.25f,0.25f,1.0f}
 };
-std::vector<GLubyte> rockIndices = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
+Resource<GLubyte> rockIndices({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
 } // end namespace
 
 std::string Rock::RockPrefix()
@@ -90,7 +90,7 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) :
     else
 		rockVertices_ = rockVerticesS;
 
-    rockIndices_.Data() = rockIndices;
+    rockIndices_ = rockIndices;
 
     GetFrame() = { 
 		Row4{_x,   0.0f,0.0f,0.0f},
@@ -206,7 +206,7 @@ void Rock::DrawRock()
 	glLoadIdentity();
 	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
 	glRotatef(spin_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data().data());
+	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data()[0].data());
 }
 
 void Rock::Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin) 

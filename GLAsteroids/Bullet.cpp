@@ -39,8 +39,8 @@ std::string Bullet::BulletPrefix()
 
 Bullet::Bullet()
 {
-	bulletIndices_.Data() = { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 };
-	projectionMatrix_.Data().resize(16);
+	bulletIndices_ = Resource<GLubyte>({{0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4}});
+	projectionMatrix_ = Resource<GLfloat>({std::vector<GLfloat>(16)}); 
 
 	bulletVertices_ = {
 		Row3{-0.2f,-0.1f,0.5f}, Row3{0.2f,-0.0f,0.5f},
@@ -114,9 +114,9 @@ void Bullet::SetBulletOutOfBounds()
 {
 	GLfloat epsilon = 3.0f;
 
-	GLfloat right = (1 / fabs(projectionMatrix_.Data()[0]));
+	GLfloat right = (1 / fabs(projectionMatrix_.Data(0,0)));
 	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(projectionMatrix_.Data()[5]));
+	GLfloat top = (1 / fabs(projectionMatrix_.Data(0,5)));
 	GLfloat bottom = -1 * top;
 
 	if ((GetFrame()[0][0] <= left - epsilon) || (GetFrame()[0][0] >= right + epsilon) ||
@@ -151,10 +151,12 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		glLoadIdentity();
 		glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
 		glRotatef(GetVelocityAngle()*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data().data());
+		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data()[0].data());
 	};
 
-	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix_.Data().data());
+	std::vector<std::vector<GLfloat>> buffer({ std::vector<GLfloat>(16) });
+	glGetFloatv(GL_PROJECTION_MATRIX, buffer[0].data());
+	projectionMatrix_ = Resource<GLfloat>(buffer);
 
     glPushMatrix();
 	{
