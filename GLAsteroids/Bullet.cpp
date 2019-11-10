@@ -1,5 +1,6 @@
 #include "Bullet.h"
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -20,6 +21,8 @@ using resource::IResource;
 using resource::Resource;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -183,13 +186,16 @@ bool Bullet::IsOutOfBounds() const
 
 void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+	if (!fs::exists(path))
+		fs::create_directories(path);
+
 	GLEntity::Save(tree, path);
 
 	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
 
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->SetSerializationPath(path);
 
 	serializer->Serialize(bulletVertices_, BULLET_VERTICES_KEY);
 	serializer->Serialize(bulletIndices_, BULLET_INDICES_KEY);
@@ -204,7 +210,7 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
 	bulletVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.release());

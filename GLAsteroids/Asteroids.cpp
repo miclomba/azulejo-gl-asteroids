@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
@@ -26,6 +27,7 @@ using asteroids::Ship;
 using asteroids::State;
 using entity::EntityAggregationDeserializer;
 
+namespace fs = std::filesystem;
 namespace pt = boost::property_tree;
 
 namespace
@@ -442,6 +444,9 @@ void Asteroids::Thrust()
 
 void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+	if (!fs::exists(path))
+		fs::create_directories(path);
+
 	tree.put(SCORE_KEY, score_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
 	tree.put(THRUST_KEY, thrust_);

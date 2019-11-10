@@ -1,6 +1,7 @@
 #include "Rock.h"
 
 #include <array>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,6 +25,8 @@ using resource::IResource;
 using resource::Resource;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -267,6 +270,9 @@ void Rock::SetRockInitialized(const bool state)
 
 void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+	if (!fs::exists(path))
+		fs::create_directories(path);
+
 	GLEntity::Save(tree, path);
 
 	tree.put(SPIN_KEY, spin_);
@@ -276,7 +282,8 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->SetSerializationPath(path);
+
 	serializer->Serialize(rockVertices_, ROCK_VERTICES_KEY);
 	serializer->Serialize(rockIndices_, ROCK_INDICES_KEY);
 }
@@ -292,7 +299,8 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	deserializer->SetSerializationPath(path);
+
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
 	rockVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);

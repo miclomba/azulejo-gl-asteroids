@@ -1,5 +1,6 @@
 #include "Ship.h"
 
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
@@ -29,6 +30,8 @@ using resource::IResource;
 using resource::Resource;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
+
+namespace fs = std::filesystem;
 
 namespace
 {
@@ -323,13 +326,17 @@ void Ship::Fire()
 
 void Ship::Save(ptree& tree, const std::string& path) const
 {
+	if (!fs::exists(path))
+		fs::create_directories(path);
+
 	GLEntity::Save(tree, path);
 
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
 
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->SetSerializationPath(path);
+
 	serializer->Serialize(shipVertices_, SHIP_VERTICES_KEY);
 	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
 	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
@@ -343,7 +350,8 @@ void Ship::Load(ptree& tree, const std::string& path)
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	deserializer->SetSerializationPath(path);
+
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
 	shipVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
