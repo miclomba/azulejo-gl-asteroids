@@ -41,8 +41,8 @@ private:
 
     bool bulletInitialized_ = false;
     bool outOfBounds_ = false;
-	std::array<Row3, 8> bulletVertices_; 
 
+	resource::Resource<GLfloat> bulletVertices_;
 	resource::Resource<GLubyte> bulletIndices_;
 	resource::Resource<GLfloat> projectionMatrix_;
 };
