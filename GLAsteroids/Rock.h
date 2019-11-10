@@ -59,8 +59,7 @@ private:
     State state_;
 	bool rockInitialized_{false};
     /*=============================== Geometry ===============================*/
-    std::array<Row3, 8> rockVertices_;
-
+    resource::Resource<GLfloat> rockVertices_;
 	resource::Resource<GLubyte> rockIndices_;
 };
 

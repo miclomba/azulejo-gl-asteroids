@@ -37,24 +37,24 @@ const std::string& ROCK_VERTICES_KEY = "rock_vertices";
 const std::string& ROCK_INDICES_KEY = "rock_indices";
 const std::string TRUE_VAL = "true";
 
-const std::array<GLEntity::Row3,8> rockVerticesL = { 
-	GLEntity::Row3{-1.5f,-1.5f,0.5f}, GLEntity::Row3{1.5f,-1.5f,0.5f},
-	GLEntity::Row3{1.5f,1.5f,0.5f}, GLEntity::Row3{-1.5f,1.5f,0.5f},
-	GLEntity::Row3{-1.0f,-1.0f,1.0f}, GLEntity::Row3{1.0f,-1.0f,1.0f},
-	GLEntity::Row3{1.0f,1.0f,1.0f}, GLEntity::Row3{-1.0f,1.0f,1.0f} 
-};
-const std::array<GLEntity::Row3, 8> rockVerticesM = { 
-	GLEntity::Row3{-1.0f,-1.0f,0.5f},	GLEntity::Row3{1.0f,-1.0f,0.5f},
-	GLEntity::Row3{1.0f,1.0f,0.5f}, GLEntity::Row3{-1.0f,1.0f,0.5f},
-	GLEntity::Row3{-0.75f,-0.75f,1.0f}, GLEntity::Row3{0.75f,-0.75f,1.0f},
-	GLEntity::Row3{0.75f,0.75f,1.0f}, GLEntity::Row3{-0.75f,0.75f,1.0f}
-};
-const std::array<GLEntity::Row3,8> rockVerticesS = { 
-	GLEntity::Row3{-0.5f,-0.5f,0.5f}, GLEntity::Row3{0.5f,-0.5f,0.5f},
-	GLEntity::Row3{0.5f,0.5f,0.5f}, GLEntity::Row3{-0.5f,0.5f,0.5f},
-	GLEntity::Row3{-0.25f,-0.25f,1.0f}, GLEntity::Row3{0.25f,-0.25f,1.0f},
-	GLEntity::Row3{0.25f,0.25f,1.0f}, GLEntity::Row3{-0.25f,0.25f,1.0f}
-};
+const Resource<GLfloat> rockVerticesL({ 
+	{-1.5f,-1.5f,0.5f}, {1.5f,-1.5f,0.5f},
+	{1.5f,1.5f,0.5f}, {-1.5f,1.5f,0.5f},
+	{-1.0f,-1.0f,1.0f}, {1.0f,-1.0f,1.0f},
+	{1.0f,1.0f,1.0f}, {-1.0f,1.0f,1.0f} 
+});
+const Resource<GLfloat> rockVerticesM({ 
+	{-1.0f,-1.0f,0.5f},	{1.0f,-1.0f,0.5f},
+	{1.0f,1.0f,0.5f}, {-1.0f,1.0f,0.5f},
+	{-0.75f,-0.75f,1.0f}, {0.75f,-0.75f,1.0f},
+	{0.75f,0.75f,1.0f}, {-0.75f,0.75f,1.0f}
+});
+const Resource<GLfloat> rockVerticesS({ 
+	{-0.5f,-0.5f,0.5f}, {0.5f,-0.5f,0.5f},
+	{0.5f,0.5f,0.5f}, {-0.5f,0.5f,0.5f},
+	{-0.25f,-0.25f,1.0f}, {0.25f,-0.25f,1.0f},
+	{0.25f,0.25f,1.0f}, {-0.25f,0.25f,1.0f}
+});
 Resource<GLubyte> rockIndices({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
 } // end namespace
 
@@ -66,6 +66,8 @@ std::string Rock::RockPrefix()
 Rock::Rock()
 {
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
+		deserializer->RegisterResource<GLfloat>(ROCK_VERTICES_KEY);
 	if (!deserializer->HasSerializationKey(ROCK_INDICES_KEY))
 		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY);
 }
@@ -201,7 +203,14 @@ void Rock::WrapAroundMoveRock()
 
 void Rock::DrawRock()
 {
-	glVertexPointer(3, GL_FLOAT, 0, rockVertices_.data());
+	std::array<std::array<GLfloat, 3>, 8> vertices;
+	for (size_t i = 0; i < rockVertices_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < rockVertices_.Data()[i].size(); ++j)
+			vertices[i][j] = rockVertices_.Data(i, j);
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, vertices.data());
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glLoadIdentity();
 	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
@@ -266,11 +275,9 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 	tree.put(STATE_KEY, static_cast<int>(state_));
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
-	ptree rockVertices = GLSerializer::GetSerial8x3Matrix(rockVertices_);
-	tree.add_child(ROCK_VERTICES_KEY, rockVertices);
-
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
 	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->Serialize(rockVertices_, ROCK_VERTICES_KEY);
 	serializer->Serialize(rockIndices_, ROCK_INDICES_KEY);
 }
 
@@ -283,10 +290,11 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	spinDirection_ = std::stoi(tree.get_child(SPIN_DIRECTION_KEY).data());
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
-	rockVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(ROCK_VERTICES_KEY));
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
-	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(ROCK_INDICES_KEY);
-	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedResource.get());
+	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
+	rockVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
+	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
+	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
 }
