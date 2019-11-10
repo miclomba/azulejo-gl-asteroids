@@ -53,11 +53,10 @@ private:
 	void DrawShip();
 
 	bool bulletFired_{false};
-
-    std::array<Row4,4> unitOrientation_;
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };
 
-    std::array<Row3,8> shipVertices_;
+    resource::Resource<GLfloat> unitOrientation_;
+    resource::Resource<GLfloat> shipVertices_;
 	resource::Resource<GLubyte> shipIndices_;
 };
 

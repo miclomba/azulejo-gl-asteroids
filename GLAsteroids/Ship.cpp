@@ -50,21 +50,21 @@ Ship::Ship()
 {
 	SetVelocityAngle(M_PI / 2);
 
-	shipVertices_ = {
-		Row3{-0.5f,-0.5f,0.5f}, Row3{0.5f,-0.0f,0.5f},
-		Row3{0.5f,0.0f,0.5f}, Row3{-0.5f,0.5f,0.5f},
-		Row3{-0.5f,-0.5f,1.0f}, Row3{0.1f,-0.0f,1.0f},
-		Row3{0.1f,0.0f,1.0f}, Row3{-0.5f,0.5f,1.0f}
-	};
+	shipVertices_ = Resource<GLfloat>({
+		{-0.5f,-0.5f,0.5f}, {0.5f,-0.0f,0.5f},
+		{0.5f,0.0f,0.5f}, {-0.5f,0.5f,0.5f},
+		{-0.5f,-0.5f,1.0f}, {0.1f,-0.0f,1.0f},
+		{0.1f,0.0f,1.0f}, {-0.5f,0.5f,1.0f}
+	});
 
 	shipIndices_ = Resource<GLubyte>({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
 
-	unitOrientation_ = {
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-		Row4{1.0f,   0.0f,0.0f,0.0f},
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-		Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+	unitOrientation_ = Resource<GLfloat>({
+		{0.0f,   0.0f,0.0f,0.0f},
+		{1.0f,   0.0f,0.0f,0.0f},
+		{0.0f,   0.0f,0.0f,0.0f},
+		{1.0f,   0.0f,0.0f,0.0f}
+	});
 
 	GetUnitVelocity() = {
 		Row4{0.0f,   0.0f,0.0f,0.0f},
@@ -74,8 +74,12 @@ Ship::Ship()
 	};
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
+		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY);
 	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
 		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY);
+	if (!deserializer->HasSerializationKey(UNIT_ORIENTATION_KEY))
+		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY);
 }
 
 Ship::Ship(const Ship::Key& key) :
@@ -149,15 +153,28 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 		Row4{0.0f,0.0f,0.0f,1.0f} 
 	};
 
-	glLoadMatrixf((GLfloat*)unitOrientation_.data());
-	glMultMatrixf((GLfloat*)R_.data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)unitOrientation_.data());
+	std::array<std::array<GLfloat, 4>, 4> orientation;
+	for (size_t i = 0; i < unitOrientation_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < unitOrientation_.Data()[i].size(); ++j)
+			orientation[i][j] = unitOrientation_.Data(i, j);
+	}
 
-	orientationAngle_ = (GLfloat)(atan(unitOrientation_[1][0] /
-		unitOrientation_[0][0]));
-	if (unitOrientation_[0][0] < 0)
+	glLoadMatrixf((GLfloat*)orientation.data());
+	glMultMatrixf((GLfloat*)R_.data());
+	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)orientation.data());
+
+	for (size_t i = 0; i < orientation.size(); ++i)
+	{
+		for (size_t j = 0; j < orientation[i].size(); ++j)
+			unitOrientation_.Data(i, j) = orientation[i][j];
+	}
+
+	orientationAngle_ = (GLfloat)(atan(unitOrientation_.Data(1,0) /
+		unitOrientation_.Data(0,0)));
+	if (unitOrientation_.Data(0,0) < 0)
 		orientationAngle_ += M_PI;
-	else if (unitOrientation_[1][0] < 0)
+	else if (unitOrientation_.Data(1,0) < 0)
 		orientationAngle_ += 2 * M_PI;
 }
 
@@ -245,7 +262,14 @@ void Ship::DrawBullets()
 
 void Ship::DrawShip()
 {
-	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.data());
+	std::array<std::array<GLfloat, 3>, 8> vertices;
+	for (size_t i = 0; i < shipVertices_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < shipVertices_.Data()[i].size(); ++j)
+			vertices[i][j] = shipVertices_.Data(i, j);
+	}
+
+	glVertexPointer(3, GL_FLOAT, 0, vertices.data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
 	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
@@ -303,14 +327,12 @@ void Ship::Save(ptree& tree, const std::string& path) const
 
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
-	ptree unitOrientation = GLSerializer::GetSerial4x4Matrix(unitOrientation_);
-	tree.add_child(UNIT_ORIENTATION_KEY, unitOrientation);
-	ptree shipVertices = GLSerializer::GetSerial8x3Matrix(shipVertices_);
-	tree.add_child(SHIP_VERTICES_KEY, shipVertices);
 
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
 	serializer->SetSerializationPath("c:/users/miclomba/Desktop");
+	serializer->Serialize(shipVertices_, SHIP_VERTICES_KEY);
 	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
+	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
 }
 
 void Ship::Load(ptree& tree, const std::string& path)
@@ -319,12 +341,14 @@ void Ship::Load(ptree& tree, const std::string& path)
 
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
-	unitOrientation_ = GLSerializer::Get4x4Matrix(tree.get_child(UNIT_ORIENTATION_KEY));
-	shipVertices_ = GLSerializer::Get8x3Matrix(tree.get_child(SHIP_VERTICES_KEY));
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath("c:/users/miclomba/Desktop");
-	std::unique_ptr<IResource> deserializedResource = deserializer->Deserialize(SHIP_INDICES_KEY);
-	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedResource.get());
+	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
+	shipVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
+	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
+	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
+	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
+	unitOrientation_ = *static_cast<Resource<GLfloat>*>(deserializedOrientation.get());
 }
 
