@@ -7,10 +7,17 @@
 
 #include "GLEntity.h"
 #include "GLSerializer.h"
+#include "Resources/Resource.h"
+#include "Resources/ResourceDeserializer.h"
+#include "Resources/ResourceSerializer.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
 using asteroids::GLSerializer;
+using resource::IResource;
+using resource::Resource;
+using resource::ResourceDeserializer;
+using resource::ResourceSerializer;
 
 namespace
 {
@@ -28,8 +35,17 @@ GLEntity::GLEntity()
 {
 	for (Row4& row : frame_)
 		std::fill(row.begin(), row.end(), 0.0);
-	for (Row4& row : unitVelocity_)
-		std::fill(row.begin(), row.end(), 0.0);
+
+	unitVelocity_ = Resource<GLfloat>({
+		{0.0,0.0,0.0,0.0},
+		{0.0,0.0,0.0,0.0},
+		{0.0,0.0,0.0,0.0},
+		{0.0,0.0,0.0,0.0}
+	});
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	if (!deserializer->HasSerializationKey(UNIT_VELOCITY_KEY))
+		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY);
 }
 
 GLEntity::~GLEntity() = default;
@@ -43,7 +59,7 @@ std::array<GLEntity::Row4, 4>& GLEntity::GetFrame()
 	return frame_;
 }
 
-std::array<GLEntity::Row4, 4>& GLEntity::GetUnitVelocity()
+Resource<GLfloat>& GLEntity::GetUnitVelocity()
 {
 	return unitVelocity_;
 }
@@ -75,10 +91,10 @@ void GLEntity::SetFrame(const std::array<Row4, 4>& frame)
 
 void GLEntity::SetUnitVelocity(const int i, const int j, const GLfloat val)
 {
-	unitVelocity_[i][j] = val;
+	unitVelocity_.Data(i,j) = val;
 }
 
-void GLEntity::SetUnitVelocity(const std::array<Row4, 4>& unitVelocity)
+void GLEntity::SetUnitVelocity(const Resource<GLfloat>& unitVelocity)
 {
 	unitVelocity_ = unitVelocity;
 }
@@ -98,12 +114,10 @@ void GLEntity::SetVelocityAngle(const GLfloat velocityAngle)
 	velocityAngle_ = velocityAngle;
 }
 
-void GLEntity::Save(ptree& tree, const std::string&) const 
+void GLEntity::Save(ptree& tree, const std::string& path) const 
 {
 	ptree frameMatrix = GLSerializer::GetSerial4x4Matrix(frame_);
 	tree.add_child(FRAME_KEY, frameMatrix);
-	ptree unitVelMatrix = GLSerializer::GetSerial4x4Matrix(unitVelocity_);
-	tree.add_child(UNIT_VELOCITY_KEY, unitVelMatrix);
 	ptree sMatrix = GLSerializer::GetSerial4x4Matrix(S_);
 	tree.add_child(S_KEY, sMatrix);
 	ptree tMatrix = GLSerializer::GetSerial4x4Matrix(T_);
@@ -114,12 +128,16 @@ void GLEntity::Save(ptree& tree, const std::string&) const
 	tree.put(VELOCITY_ANGLE_KEY, velocityAngle_);
 	tree.put(SPEED_KEY, speed_);
 	tree.put(MASS_KEY, mass_);
+
+	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
+	serializer->SetSerializationPath(path);
+
+	serializer->Serialize(unitVelocity_, UNIT_VELOCITY_KEY);
 }
 
-void GLEntity::Load(ptree& tree, const std::string&) 
+void GLEntity::Load(ptree& tree, const std::string& path) 
 {
 	frame_ = GLSerializer::Get4x4Matrix(tree.get_child(FRAME_KEY));
-	unitVelocity_ = GLSerializer::Get4x4Matrix(tree.get_child(UNIT_VELOCITY_KEY));
 	S_ = GLSerializer::Get4x4Matrix(tree.get_child(S_KEY));
 	T_ = GLSerializer::Get4x4Matrix(tree.get_child(T_KEY));
 	R_ = GLSerializer::Get4x4Matrix(tree.get_child(R_KEY));
@@ -127,4 +145,10 @@ void GLEntity::Load(ptree& tree, const std::string&)
 	velocityAngle_ = std::stof(tree.get_child(VELOCITY_ANGLE_KEY).data());
 	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
 	mass_ = std::stof(tree.get_child(MASS_KEY).data());
+
+	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
+	deserializer->SetSerializationPath(path);
+
+	std::unique_ptr<IResource> deserializedUnitVelocity = deserializer->Deserialize(UNIT_VELOCITY_KEY);
+	unitVelocity_ = *static_cast<Resource<GLfloat>*>(deserializedUnitVelocity.get());
 }

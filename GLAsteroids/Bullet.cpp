@@ -16,6 +16,7 @@
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
+using asteroids::GLEntity;
 using asteroids::GLSerializer;
 using resource::IResource;
 using resource::Resource;
@@ -40,7 +41,8 @@ std::string Bullet::BulletPrefix()
 	return "Bullet";
 }
 
-Bullet::Bullet()
+Bullet::Bullet() :
+	GLEntity()
 {
 	bulletIndices_ = Resource<GLubyte>({{0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4}});
 	projectionMatrix_ = Resource<GLfloat>({std::vector<GLfloat>(16)}); 
@@ -73,12 +75,12 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
 		Row4{1.0f,   0.0f,0.0f,0.0f}
 	});
 
-    SetUnitVelocity({
-		Row4{1.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f}
-	});
+    SetUnitVelocity(Resource<GLfloat>({
+		{1.0f,   0.0f,0.0f,0.0f},
+        {0.0f,   0.0f,0.0f,0.0f},
+        {0.0f,   0.0f,0.0f,0.0f},
+        {1.0f,   0.0f,0.0f,0.0f}
+	}));
 }
 
 Bullet::~Bullet() = default;
@@ -143,7 +145,14 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		SetSMatrix();
 		SetTMatrix();
 
-		glLoadMatrixf(GetUnitVelocity().data()->data());
+		std::array<std::array<GLfloat, 4>, 4> unitVelocity;
+		for (size_t i = 0; i < GetUnitVelocity().Data().size(); ++i)
+		{
+			for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
+				unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
+		}
+
+		glLoadMatrixf((GLfloat*)unitVelocity.data());
 		glMultMatrixf(S_.data()->data());
 		glMultMatrixf(T_.data()->data());
 		glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().data()->data());

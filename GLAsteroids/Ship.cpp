@@ -23,6 +23,7 @@
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
+using asteroids::GLEntity;
 using asteroids::GLSerializer;
 using asteroids::Ship;
 using entity::EntityAggregationDeserializer;
@@ -49,7 +50,8 @@ std::string Ship::ShipKey()
 	return "Ship";
 }
 
-Ship::Ship()
+Ship::Ship() :
+	GLEntity()
 {
 	SetVelocityAngle(M_PI / 2);
 
@@ -69,12 +71,12 @@ Ship::Ship()
 		{1.0f,   0.0f,0.0f,0.0f}
 	});
 
-	GetUnitVelocity() = {
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-		Row4{1.0f,   0.0f,0.0f,0.0f},
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-		Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+	GetUnitVelocity() = Resource<GLfloat>({
+		{0.0f,   0.0f,0.0f,0.0f},
+		{1.0f,   0.0f,0.0f,0.0f},
+		{0.0f,   0.0f,0.0f,0.0f},
+		{1.0f,   0.0f,0.0f,0.0f}
+	});
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
@@ -131,16 +133,16 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	yComponentVelocity += yComponentOrientation;
 
 	SetSpeed(sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2)));
-	GetUnitVelocity()[0][0] = xComponentVelocity / GetSpeed();
-	GetUnitVelocity()[1][0] = yComponentVelocity / GetSpeed();
+	GetUnitVelocity().Data(0,0) = xComponentVelocity / GetSpeed();
+	GetUnitVelocity().Data(1,0) = yComponentVelocity / GetSpeed();
 
 	if (GetSpeed() > 5.0f)
 		SetSpeed(5.0f);
 
-	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity()[1][0] / GetUnitVelocity()[0][0])));
-	if (GetUnitVelocity()[0][0] < 0)
+	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity().Data(1,0) / GetUnitVelocity().Data(0,0))));
+	if (GetUnitVelocity().Data(0,0) < 0)
 		SetVelocityAngle(GetVelocityAngle() + M_PI);
-	else if (GetUnitVelocity()[1][0] < 0)
+	else if (GetUnitVelocity().Data(1,0) < 0)
 		SetVelocityAngle(GetVelocityAngle() + 2 * M_PI);
 }
 
@@ -198,7 +200,14 @@ void Ship::MoveShip()
 	};
 
 	/*======================= p = av + frame =============================*/
-	glLoadMatrixf((GLfloat*)GetUnitVelocity().data());
+	std::array<std::array<GLfloat, 4>, 4> unitVelocity;
+	for (size_t i = 0; i < GetUnitVelocity().Data().size(); ++i)
+	{
+		for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
+			unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
+	}
+
+	glLoadMatrixf((GLfloat*)unitVelocity.data());
 	glMultMatrixf((GLfloat*)S_.data());
 	glMultMatrixf((GLfloat*)T_.data());
 	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)GetFrame().data());

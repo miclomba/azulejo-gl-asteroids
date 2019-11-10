@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "Entities/ISerializableEntity.h"
+#include "Resources/Resource.h"
 
 namespace asteroids {
 
@@ -26,7 +27,7 @@ public:
 	GLEntity& operator=(GLEntity&&);
 
 	std::array<Row4,4>& GetFrame();
-	std::array<Row4,4>& GetUnitVelocity();
+	resource::Resource<GLfloat>& GetUnitVelocity();
 	GLfloat GetSpeed() const;
 	GLfloat GetMass() const;
 	GLfloat GetVelocityAngle() const;
@@ -34,7 +35,7 @@ public:
 	void SetFrame(int i, int j, GLfloat val);
 	void SetFrame(const std::array<Row4,4>& frame);
 	void SetUnitVelocity(int i, int j, GLfloat val);
-	void SetUnitVelocity(const std::array<Row4,4>& unitVelocity);
+	void SetUnitVelocity(const resource::Resource<GLfloat>& unitVelocity);
 	void SetSpeed(const GLfloat);
 	void SetMass(const GLfloat);
 	void SetVelocityAngle(const GLfloat);
@@ -49,7 +50,7 @@ protected:
 
 private:
 	std::array<Row4,4> frame_;
-    std::array<Row4,4> unitVelocity_;
+	resource::Resource<GLfloat> unitVelocity_;
 
     GLfloat velocityAngle_ = 0.0;
     GLfloat speed_ = 0.0;

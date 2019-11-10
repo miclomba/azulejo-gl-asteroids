@@ -66,7 +66,8 @@ std::string Rock::RockPrefix()
 	return "Rock";
 }
 
-Rock::Rock()
+Rock::Rock() :
+	GLEntity()
 {
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
@@ -104,12 +105,12 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) :
         Row4{1.0f,   0.0f,0.0f,0.0f}
 	};
 
-    GetUnitVelocity() = {
-		Row4{1.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+    GetUnitVelocity() = Resource<GLfloat>({
+		{1.0f,   0.0f,0.0f,0.0f},
+        {0.0f,   0.0f,0.0f,0.0f},
+        {0.0f,   0.0f,0.0f,0.0f},
+        {1.0f,   0.0f,0.0f,0.0f}
+	});
 }
 
 Rock::~Rock() = default;
@@ -126,8 +127,8 @@ void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, co
 	SetSpeed(GetSpeed() + _speed);
 	SetVelocityAngle(_velocityAngle);
 	/*==================== COMPUTE ROCK VELOCITY =========================*/
-	GetUnitVelocity()[0][0] = cos(_velocityAngle);
-	GetUnitVelocity()[1][0] = sin(_velocityAngle);
+	GetUnitVelocity().Data(0,0) = cos(_velocityAngle);
+	GetUnitVelocity().Data(1,0) = sin(_velocityAngle);
 
 	spinEpsilon_ += _spin;
 	spinEpsilon_ *= spinDirection_;
@@ -161,7 +162,14 @@ void Rock::MoveRock()
 	};
 
 	/*======================= p = av + frame =============================*/
-	glLoadMatrixf((GLfloat*)GetUnitVelocity().data());
+	std::array<std::array<GLfloat, 4>, 4> unitVelocity;
+	for (size_t i = 0; i < GetUnitVelocity().Data().size(); ++i)
+	{
+		for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
+			unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
+	}
+
+	glLoadMatrixf((GLfloat*)unitVelocity.data());
 	glMultMatrixf((GLfloat*)S_.data());
 	glMultMatrixf((GLfloat*)T_.data());
 	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)GetFrame().data());
