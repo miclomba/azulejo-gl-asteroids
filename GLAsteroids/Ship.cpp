@@ -18,13 +18,11 @@
 #include "Resources/ResourceSerializer.h"
 
 #include "Bullet.h"
-#include "GLSerializer.h"
 #include "Ship.h"
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
-using asteroids::GLSerializer;
 using asteroids::Ship;
 using entity::EntityAggregationDeserializer;
 using resource::IResource;
@@ -151,12 +149,12 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 	if (fabs(_orientationAngle - 0.0f) <= 0.00001f)
 		return;
 
-	R_ = { 
-		Row4{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
-		Row4{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
-		Row4{0.0f,0.0f,1.0f,0.0f},
-		Row4{0.0f,0.0f,0.0f,1.0f} 
-	};
+	R_ = Resource<GLfloat>({ 
+		{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
+		{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
+		{0.0f,0.0f,1.0f,0.0f},
+		{0.0f,0.0f,0.0f,1.0f} 
+	});
 
 	std::array<std::array<GLfloat, 4>, 4> orientation;
 	for (size_t i = 0; i < unitOrientation_.Data().size(); ++i)
@@ -164,9 +162,16 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 		for (size_t j = 0; j < unitOrientation_.Data()[i].size(); ++j)
 			orientation[i][j] = unitOrientation_.Data(i, j);
 	}
-
 	glLoadMatrixf((GLfloat*)orientation.data());
-	glMultMatrixf((GLfloat*)R_.data());
+
+	std::array<std::array<GLfloat, 4>, 4> rMatrix;
+	for (size_t i = 0; i < R_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < R_.Data()[i].size(); ++j)
+			rMatrix[i][j] = R_.Data(i, j);
+	}
+	glMultMatrixf((GLfloat*)rMatrix.data());
+
 	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)orientation.data());
 
 	for (size_t i = 0; i < orientation.size(); ++i)
@@ -185,19 +190,19 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 
 void Ship::MoveShip()
 {
-	S_ = { 
-		Row4{GetSpeed(),0.0f,0.0f,0.0f},
-		Row4{0.0f,GetSpeed(),0.0f,0.0f},
-		Row4{0.0f,0.0f,GetSpeed(),0.0f},
-		Row4{0.0f,0.0f,0.0f,1.0f} 
-	};
+	S_ = Resource<GLfloat>({ 
+		{GetSpeed(),0.0f,0.0f,0.0f},
+		{0.0f,GetSpeed(),0.0f,0.0f},
+		{0.0f,0.0f,GetSpeed(),0.0f},
+		{0.0f,0.0f,0.0f,1.0f} 
+	});
 
-	T_ = { 
-		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
-		Row4{0.0f,0.0f,0.0f,1.0f} 
-	};
+	T_ = Resource<GLfloat>({ 
+		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+		{0.0f,0.0f,0.0f,1.0f} 
+	});
 
 	/*======================= p = av + frame =============================*/
 	std::array<std::array<GLfloat, 4>, 4> unitVelocity;
@@ -208,8 +213,22 @@ void Ship::MoveShip()
 	}
 
 	glLoadMatrixf((GLfloat*)unitVelocity.data());
-	glMultMatrixf((GLfloat*)S_.data());
-	glMultMatrixf((GLfloat*)T_.data());
+
+	std::array<std::array<GLfloat, 4>, 4> sMatrix;
+	for (size_t i = 0; i < S_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < S_.Data()[i].size(); ++j)
+			sMatrix[i][j] = S_.Data(i, j);
+	}
+	glMultMatrixf((GLfloat*)sMatrix.data());
+
+	std::array<std::array<GLfloat, 4>, 4> tMatrix;
+	for (size_t i = 0; i < T_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < T_.Data()[i].size(); ++j)
+			tMatrix[i][j] = T_.Data(i, j);
+	}
+	glMultMatrixf((GLfloat*)tMatrix.data());
 
 	std::array<std::array<GLfloat, 4>, 4> frame;
 	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());

@@ -17,7 +17,6 @@ class ASTEROIDS_DLL_EXPORT GLEntity : public entity::ISerializableEntity
 {
 public:
 	typedef std::array<GLfloat, 4> Row4;
-	typedef std::array<GLfloat, 3> Row3;
 
     GLEntity();
 	~GLEntity();
@@ -41,9 +40,9 @@ public:
 	void SetVelocityAngle(const GLfloat);
 
 protected:
-	std::array<Row4, 4> S_;
-	std::array<Row4, 4> T_;
-	std::array<Row4, 4> R_;
+	resource::Resource<GLfloat> S_;
+	resource::Resource<GLfloat> T_;
+	resource::Resource<GLfloat> R_;
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;

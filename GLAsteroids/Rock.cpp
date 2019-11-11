@@ -13,12 +13,10 @@
 #include "Resources/ResourceSerializer.h"
 
 #include "GLEntity.h"
-#include "GLSerializer.h"
 #include "Rock.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
-using asteroids::GLSerializer;
 using asteroids::Rock;
 using asteroids::State;
 using resource::IResource;
@@ -147,19 +145,19 @@ void Rock::UpdateSpin()
 
 void Rock::MoveRock()
 {
-	S_ = { 
-		Row4{GetSpeed(),0.0f,0.0f,0.0f},
-		Row4{0.0f,GetSpeed(),0.0f,0.0f},
-		Row4{0.0f,0.0f,GetSpeed(),0.0f},
-		Row4{0.0f,0.0f,0.0f,1.0f} 
-	};
+	S_ = Resource<GLfloat>({ 
+		{GetSpeed(),0.0f,0.0f,0.0f},
+		{0.0f,GetSpeed(),0.0f,0.0f},
+		{0.0f,0.0f,GetSpeed(),0.0f},
+		{0.0f,0.0f,0.0f,1.0f} 
+	});
 
-	T_ = { 
-		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
-		Row4{0.0f,0.0f,0.0f,1.0f} 
-	};
+	T_ = Resource<GLfloat>({ 
+		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+		{0.0f,0.0f,0.0f,1.0f} 
+	});
 
 	/*======================= p = av + frame =============================*/
 	std::array<std::array<GLfloat, 4>, 4> unitVelocity;
@@ -168,10 +166,23 @@ void Rock::MoveRock()
 		for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
 			unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
 	}
-
 	glLoadMatrixf((GLfloat*)unitVelocity.data());
-	glMultMatrixf((GLfloat*)S_.data());
-	glMultMatrixf((GLfloat*)T_.data());
+
+	std::array<std::array<GLfloat, 4>, 4> sMatrix;
+	for (size_t i = 0; i < S_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < S_.Data()[i].size(); ++j)
+			sMatrix[i][j] = S_.Data(i, j);
+	}
+	glMultMatrixf((GLfloat*)sMatrix.data());
+
+	std::array<std::array<GLfloat, 4>, 4> tMatrix;
+	for (size_t i = 0; i < T_.Data().size(); ++i)
+	{
+		for (size_t j = 0; j < T_.Data()[i].size(); ++j)
+			tMatrix[i][j] = T_.Data(i, j);
+	}
+	glMultMatrixf((GLfloat*)tMatrix.data());
 
 	std::array<std::array<GLfloat, 4>, 4> frame;
 	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());

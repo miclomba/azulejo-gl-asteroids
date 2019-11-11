@@ -6,14 +6,12 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "GLEntity.h"
-#include "GLSerializer.h"
 #include "Resources/Resource.h"
 #include "Resources/ResourceDeserializer.h"
 #include "Resources/ResourceSerializer.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
-using asteroids::GLSerializer;
 using resource::IResource;
 using resource::Resource;
 using resource::ResourceDeserializer;
@@ -53,6 +51,12 @@ GLEntity::GLEntity()
 		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY);
 	if (!deserializer->HasSerializationKey(FRAME_KEY))
 		deserializer->RegisterResource<GLfloat>(FRAME_KEY);
+	if (!deserializer->HasSerializationKey(S_KEY))
+		deserializer->RegisterResource<GLfloat>(S_KEY);
+	if (!deserializer->HasSerializationKey(R_KEY))
+		deserializer->RegisterResource<GLfloat>(R_KEY);
+	if (!deserializer->HasSerializationKey(T_KEY))
+		deserializer->RegisterResource<GLfloat>(T_KEY);
 }
 
 GLEntity::~GLEntity() = default;
@@ -123,13 +127,6 @@ void GLEntity::SetVelocityAngle(const GLfloat velocityAngle)
 
 void GLEntity::Save(ptree& tree, const std::string& path) const 
 {
-	ptree sMatrix = GLSerializer::GetSerial4x4Matrix(S_);
-	tree.add_child(S_KEY, sMatrix);
-	ptree tMatrix = GLSerializer::GetSerial4x4Matrix(T_);
-	tree.add_child(T_KEY, tMatrix);
-	ptree rMatrix = GLSerializer::GetSerial4x4Matrix(R_);
-	tree.add_child(R_KEY, rMatrix);
-
 	tree.put(VELOCITY_ANGLE_KEY, velocityAngle_);
 	tree.put(SPEED_KEY, speed_);
 	tree.put(MASS_KEY, mass_);
@@ -139,14 +136,13 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 
 	serializer->Serialize(unitVelocity_, UNIT_VELOCITY_KEY);
 	serializer->Serialize(frame_, FRAME_KEY);
+	serializer->Serialize(S_, S_KEY);
+	serializer->Serialize(R_, R_KEY);
+	serializer->Serialize(T_, T_KEY);
 }
 
 void GLEntity::Load(ptree& tree, const std::string& path) 
 {
-	S_ = GLSerializer::Get4x4Matrix(tree.get_child(S_KEY));
-	T_ = GLSerializer::Get4x4Matrix(tree.get_child(T_KEY));
-	R_ = GLSerializer::Get4x4Matrix(tree.get_child(R_KEY));
-
 	velocityAngle_ = std::stof(tree.get_child(VELOCITY_ANGLE_KEY).data());
 	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
 	mass_ = std::stof(tree.get_child(MASS_KEY).data());
@@ -158,4 +154,10 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	unitVelocity_ = *static_cast<Resource<GLfloat>*>(deserializedUnitVelocity.get());
 	std::unique_ptr<IResource> deserializedFrame = deserializer->Deserialize(FRAME_KEY);
 	frame_ = *static_cast<Resource<GLfloat>*>(deserializedFrame.get());
+	std::unique_ptr<IResource> deserializedS = deserializer->Deserialize(S_KEY);
+	S_ = *static_cast<Resource<GLfloat>*>(deserializedS.get());
+	std::unique_ptr<IResource> deserializedR = deserializer->Deserialize(R_KEY);
+	R_ = *static_cast<Resource<GLfloat>*>(deserializedR.get());
+	std::unique_ptr<IResource> deserializedT = deserializer->Deserialize(T_KEY);
+	T_ = *static_cast<Resource<GLfloat>*>(deserializedT.get());
 }

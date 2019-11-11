@@ -36,9 +36,6 @@
     <ClInclude Include="GLGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GLSerializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Asteroids.cpp">
@@ -60,9 +57,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GLGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GLSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

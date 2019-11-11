@@ -12,12 +12,10 @@
 #include "Resources/ResourceSerializer.h"
 
 #include "Bullet.h"
-#include "GLSerializer.h"
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
-using asteroids::GLSerializer;
 using resource::IResource;
 using resource::Resource;
 using resource::ResourceDeserializer;
@@ -99,22 +97,22 @@ void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed
 
 void Bullet::SetSMatrix()
 {
-	S_ = {
-		Row4{GetSpeed(),0.0f,0.0f,0.0f},
-		Row4{0.0f,GetSpeed(),0.0f,0.0f},
-		Row4{0.0f,0.0f,GetSpeed(),0.0f},
-		Row4{0.0f,0.0f,0.0f,1.0f}
-	};
+	S_ = Resource<GLfloat>({
+		{GetSpeed(),0.0f,0.0f,0.0f},
+		{0.0f,GetSpeed(),0.0f,0.0f},
+		{0.0f,0.0f,GetSpeed(),0.0f},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
 }
 
 void Bullet::SetTMatrix()
 {
-	T_ = {
-		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
-		Row4{0.0f,0.0f,0.0f,1.0f}
-	};
+	T_ = Resource<GLfloat>({
+		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
 }
 
 void Bullet::SetBulletOutOfBounds()
@@ -151,10 +149,23 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 			for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
 				unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
 		}
-
 		glLoadMatrixf((GLfloat*)unitVelocity.data());
-		glMultMatrixf(S_.data()->data());
-		glMultMatrixf(T_.data()->data());
+
+		std::array<std::array<GLfloat, 4>, 4> sMatrix;
+		for (size_t i = 0; i < S_.Data().size(); ++i)
+		{
+			for (size_t j = 0; j < S_.Data()[i].size(); ++j)
+				sMatrix[i][j] = S_.Data(i, j);
+		}
+		glMultMatrixf((GLfloat*)sMatrix.data());
+
+		std::array<std::array<GLfloat, 4>, 4> tMatrix;
+		for (size_t i = 0; i < T_.Data().size(); ++i)
+		{
+			for (size_t j = 0; j < T_.Data()[i].size(); ++j)
+				tMatrix[i][j] = T_.Data(i, j);
+		}
+		glMultMatrixf((GLfloat*)tMatrix.data());
 
 		std::array<std::array<GLfloat, 4>, 4> frame;
 		glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
