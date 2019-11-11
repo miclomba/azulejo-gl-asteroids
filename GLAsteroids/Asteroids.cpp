@@ -272,8 +272,8 @@ Rock* Asteroids::Collision(Bullet* _bullet)
 			continue;
 
 		Rock* rock = static_cast<Rock*>(sharedRock.get());
-        ray= sqrt(pow(fabs(_bullet->GetFrame()[0][0] - rock->GetFrame()[0][0]),2) +
-                pow(fabs(_bullet->GetFrame()[1][0] - rock->GetFrame()[1][0]),2));
+        ray= sqrt(pow(fabs(_bullet->GetFrame().Data(0,0) - rock->GetFrame().Data(0,0)),2) +
+                pow(fabs(_bullet->GetFrame().Data(1,0) - rock->GetFrame().Data(1,0)),2));
         
         if (rock->GetState() == State::LARGE)
             epsilon = 1.7f;
@@ -304,8 +304,8 @@ Rock* Asteroids::ShipCollision() {
 				continue;
 
 			Rock* rock = static_cast<Rock*>(sharedRock.get());
-			ray = sqrt(pow(fabs(ship->GetFrame()[0][0] - rock->GetFrame()[0][0]), 2) +
-				pow(fabs(ship->GetFrame()[1][0] - rock->GetFrame()[1][0]), 2));
+			ray = sqrt(pow(fabs(ship->GetFrame().Data(0,0) - rock->GetFrame().Data(0,0)), 2) +
+				pow(fabs(ship->GetFrame().Data(1,0) - rock->GetFrame().Data(1,0)), 2));
 
 			if (rock->GetState() == State::LARGE)
 				epsilon = 2.2f;
@@ -353,7 +353,7 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	GLint massDenominator = halfMass ? 2 : 1;
 	GLfloat angleMultiplier = clockwise ? 1.0 : -1.0;
 
-	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame()[0][0], rock->GetFrame()[1][0]);
+	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().Data(0,0), rock->GetFrame().Data(1,0));
 
 	rock1->SetKey(Rock::RockPrefix() + GenerateUUID()); 
 

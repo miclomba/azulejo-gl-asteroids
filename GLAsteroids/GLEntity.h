@@ -26,14 +26,14 @@ public:
 	GLEntity& operator=(const GLEntity&);
 	GLEntity& operator=(GLEntity&&);
 
-	std::array<Row4,4>& GetFrame();
+	resource::Resource<GLfloat>& GetFrame();
 	resource::Resource<GLfloat>& GetUnitVelocity();
 	GLfloat GetSpeed() const;
 	GLfloat GetMass() const;
 	GLfloat GetVelocityAngle() const;
 
 	void SetFrame(int i, int j, GLfloat val);
-	void SetFrame(const std::array<Row4,4>& frame);
+	void SetFrame(const resource::Resource<GLfloat>& frame);
 	void SetUnitVelocity(int i, int j, GLfloat val);
 	void SetUnitVelocity(const resource::Resource<GLfloat>& unitVelocity);
 	void SetSpeed(const GLfloat);
@@ -49,7 +49,7 @@ protected:
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
 private:
-	std::array<Row4,4> frame_;
+	resource::Resource<GLfloat> frame_;
 	resource::Resource<GLfloat> unitVelocity_;
 
     GLfloat velocityAngle_ = 0.0;

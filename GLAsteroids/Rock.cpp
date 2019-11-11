@@ -98,12 +98,12 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) :
 
     rockIndices_ = rockIndices;
 
-    GetFrame() = { 
-		Row4{_x,   0.0f,0.0f,0.0f},
-        Row4{_y,   0.0f,0.0f,0.0f},
-        Row4{0.0f,   0.0f,0.0f,0.0f},
-        Row4{1.0f,   0.0f,0.0f,0.0f}
-	};
+    GetFrame() = Resource<GLfloat>({ 
+		{_x,   0.0f,0.0f,0.0f},
+        {_y,   0.0f,0.0f,0.0f},
+        {0.0f,   0.0f,0.0f,0.0f},
+        {1.0f,   0.0f,0.0f,0.0f}
+	});
 
     GetUnitVelocity() = Resource<GLfloat>({
 		{1.0f,   0.0f,0.0f,0.0f},
@@ -155,9 +155,9 @@ void Rock::MoveRock()
 	};
 
 	T_ = { 
-		Row4{1.0f,0.0f,0.0f,GetFrame()[0][0]},
-		Row4{0.0f,1.0f,0.0f,GetFrame()[1][0]},
-		Row4{0.0f,0.0f,1.0f,GetFrame()[2][0]},
+		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
 		Row4{0.0f,0.0f,0.0f,1.0f} 
 	};
 
@@ -172,7 +172,14 @@ void Rock::MoveRock()
 	glLoadMatrixf((GLfloat*)unitVelocity.data());
 	glMultMatrixf((GLfloat*)S_.data());
 	glMultMatrixf((GLfloat*)T_.data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)GetFrame().data());
+
+	std::array<std::array<GLfloat, 4>, 4> frame;
+	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
+	for (size_t i = 0; i < GetFrame().Data().size(); ++i)
+	{
+		for (size_t j = 0; j < GetFrame().Data()[i].size(); ++j)
+			GetFrame().Data(i, j) = frame[i][j];
+	}
 }
 
 void Rock::WrapAroundMoveRock()
@@ -194,21 +201,21 @@ void Rock::WrapAroundMoveRock()
 	top = (1 / fabs(projectionMatrix[5]));
 	bottom = -1 * top;
 
-	if (GetFrame()[0][0] <= left - epsilon) {
+	if (GetFrame().Data(0,0) <= left - epsilon) {
 		SetFrame(0,0,right + epsilon);
-		SetFrame(1,0, GetFrame()[1][0] * -1);
+		SetFrame(1,0, GetFrame().Data(1,0) * -1);
 	}
-	else if (GetFrame()[0][0] >= right + epsilon) {
+	else if (GetFrame().Data(0,0) >= right + epsilon) {
 		SetFrame(0,0,left - epsilon);
-		SetFrame(1,0, GetFrame()[1][0] * -1);
+		SetFrame(1,0, GetFrame().Data(1,0) * -1);
 	}
-	else if (GetFrame()[1][0] >= top + epsilon) {
+	else if (GetFrame().Data(1,0) >= top + epsilon) {
 		SetFrame(1,0,bottom - epsilon);
-		SetFrame(0,0, GetFrame()[0][0] * -1);
+		SetFrame(0,0, GetFrame().Data(0,0) * -1);
 	}
-	else if (GetFrame()[1][0] <= bottom - epsilon) {
+	else if (GetFrame().Data(1,0) <= bottom - epsilon) {
 		SetFrame(1,0,top + epsilon);
-		SetFrame(0,0, GetFrame()[0][0] * -1);
+		SetFrame(0,0, GetFrame().Data(0,0) * -1);
 	}
 }
 
@@ -224,7 +231,7 @@ void Rock::DrawRock()
 	glVertexPointer(3, GL_FLOAT, 0, vertices.data());
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
+	glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
 	glRotatef(spin_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data()[0].data());
 }

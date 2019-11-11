@@ -193,9 +193,9 @@ void Ship::MoveShip()
 	};
 
 	T_ = { 
-		Row4{1.0f,0.0f,0.0f,GetFrame()[0][0]},
-		Row4{0.0f,1.0f,0.0f,GetFrame()[1][0]},
-		Row4{0.0f,0.0f,1.0f,GetFrame()[2][0]},
+		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
 		Row4{0.0f,0.0f,0.0f,1.0f} 
 	};
 
@@ -210,7 +210,14 @@ void Ship::MoveShip()
 	glLoadMatrixf((GLfloat*)unitVelocity.data());
 	glMultMatrixf((GLfloat*)S_.data());
 	glMultMatrixf((GLfloat*)T_.data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)GetFrame().data());
+
+	std::array<std::array<GLfloat, 4>, 4> frame;
+	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
+	for (size_t i = 0; i < GetFrame().Data().size(); ++i)
+	{
+		for (size_t j = 0; j < GetFrame().Data()[i].size(); ++j)
+			GetFrame().Data(i, j) = frame[i][j];
+	}
 }
 
 void Ship::WrapAroundMoveShip()
@@ -225,21 +232,21 @@ void Ship::WrapAroundMoveShip()
 	GLfloat top = (1 / fabs(projectionMatrix[5]));
 	GLfloat bottom = -1 * top;
 
-	if (GetFrame()[0][0] <= left - epsilon) {
+	if (GetFrame().Data(0,0) <= left - epsilon) {
 		SetFrame(0,0,right + epsilon);
-		SetFrame(1,0, GetFrame()[1][0] * -1);
+		SetFrame(1,0, GetFrame().Data(1,0) * -1);
 	}
-	else if (GetFrame()[0][0] >= right + epsilon) {
+	else if (GetFrame().Data(0,0) >= right + epsilon) {
 		SetFrame(0,0,left - epsilon);
-		SetFrame(1,0, GetFrame()[1][0] * -1);
+		SetFrame(1,0, GetFrame().Data(1,0) * -1);
 	}
-	else if (GetFrame()[1][0] >= top + epsilon) {
+	else if (GetFrame().Data(1,0) >= top + epsilon) {
 		SetFrame(1,0,bottom - epsilon);
-		SetFrame(0,0, GetFrame()[0][0] * -1);
+		SetFrame(0,0, GetFrame().Data(0,0) * -1);
 	}
-	else if (GetFrame()[1][0] <= bottom - epsilon) {
+	else if (GetFrame().Data(1,0) <= bottom - epsilon) {
 		SetFrame(1,0,top + epsilon);
-		SetFrame(0,0, GetFrame()[0][0] * -1);
+		SetFrame(0,0, GetFrame().Data(0,0) * -1);
 	}
 }
 
@@ -284,7 +291,7 @@ void Ship::DrawShip()
 	glVertexPointer(3, GL_FLOAT, 0, vertices.data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
+	glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data()[0].data());
 }
@@ -326,7 +333,7 @@ void Ship::Fire()
 
 	std::string key = Bullet::BulletPrefix() + GenerateUUID();
 
-	SharedEntity bullet = std::make_shared<Bullet>(GetFrame()[0][0], GetFrame()[1][0]);
+	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().Data(0,0), GetFrame().Data(1,0));
 	bullet->SetKey(key);
 	bulletFired_ = true;
 

@@ -68,12 +68,12 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
 {
     SetMass(0.5f);
 
-    SetFrame({
-		Row4{_x,   0.0f,0.0f,0.0f},
-		Row4{_y,   0.0f,0.0f,0.0f},
-		Row4{0.0f,   0.0f,0.0f,0.0f},
-		Row4{1.0f,   0.0f,0.0f,0.0f}
-	});
+    SetFrame(Resource<GLfloat>({
+		{_x,   0.0f,0.0f,0.0f},
+		{_y,   0.0f,0.0f,0.0f},
+		{0.0f,   0.0f,0.0f,0.0f},
+		{1.0f,   0.0f,0.0f,0.0f}
+	}));
 
     SetUnitVelocity(Resource<GLfloat>({
 		{1.0f,   0.0f,0.0f,0.0f},
@@ -110,9 +110,9 @@ void Bullet::SetSMatrix()
 void Bullet::SetTMatrix()
 {
 	T_ = {
-		Row4{1.0f,0.0f,0.0f,GetFrame()[0][0]},
-		Row4{0.0f,1.0f,0.0f,GetFrame()[1][0]},
-		Row4{0.0f,0.0f,1.0f,GetFrame()[2][0]},
+		Row4{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
+		Row4{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
+		Row4{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
 		Row4{0.0f,0.0f,0.0f,1.0f}
 	};
 }
@@ -126,8 +126,8 @@ void Bullet::SetBulletOutOfBounds()
 	GLfloat top = (1 / fabs(projectionMatrix_.Data(0,5)));
 	GLfloat bottom = -1 * top;
 
-	if ((GetFrame()[0][0] <= left - epsilon) || (GetFrame()[0][0] >= right + epsilon) ||
-		(GetFrame()[1][0] >= top + epsilon) || (GetFrame()[1][0] <= bottom - epsilon))
+	if ((GetFrame().Data(0,0) <= left - epsilon) || (GetFrame().Data(0,0) >= right + epsilon) ||
+		(GetFrame().Data(1,0) >= top + epsilon) || (GetFrame().Data(1,0) <= bottom - epsilon))
 	{
 		outOfBounds_ = true;
 	}
@@ -155,7 +155,14 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		glLoadMatrixf((GLfloat*)unitVelocity.data());
 		glMultMatrixf(S_.data()->data());
 		glMultMatrixf(T_.data()->data());
-		glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().data()->data());
+
+		std::array<std::array<GLfloat, 4>, 4> frame;
+		glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
+		for (size_t i = 0; i < GetFrame().Data().size(); ++i)
+		{
+			for (size_t j = 0; j < GetFrame().Data()[i].size(); ++j)
+				GetFrame().Data(i, j) = frame[i][j];
+		}
 	};
 
 	auto DrawBullet = [this]()
@@ -170,7 +177,7 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		glVertexPointer(3, GL_FLOAT, 0, vertices.data());
 		glColor3f(0.0f, 1.0f, 1.0f);
 		glLoadIdentity();
-		glTranslatef(GetFrame()[0][0], GetFrame()[1][0], GetFrame()[2][0]);
+		glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
 		glRotatef(GetVelocityAngle()*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data()[0].data());
 	};
