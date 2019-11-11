@@ -156,29 +156,9 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	std::array<std::array<GLfloat, 4>, 4> orientation;
-	for (size_t i = 0; i < unitOrientation_.Data().size(); ++i)
-	{
-		for (size_t j = 0; j < unitOrientation_.Data()[i].size(); ++j)
-			orientation[i][j] = unitOrientation_.Data(i, j);
-	}
-	glLoadMatrixf((GLfloat*)orientation.data());
-
-	std::array<std::array<GLfloat, 4>, 4> rMatrix;
-	for (size_t i = 0; i < R_.Data().size(); ++i)
-	{
-		for (size_t j = 0; j < R_.Data()[i].size(); ++j)
-			rMatrix[i][j] = R_.Data(i, j);
-	}
-	glMultMatrixf((GLfloat*)rMatrix.data());
-
-	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)orientation.data());
-
-	for (size_t i = 0; i < orientation.size(); ++i)
-	{
-		for (size_t j = 0; j < orientation[i].size(); ++j)
-			unitOrientation_.Data(i, j) = orientation[i][j];
-	}
+	glLoadMatrixf(unitOrientation_.Data());
+	glMultMatrixf(R_.Data());
+	glGetFloatv(GL_MODELVIEW_MATRIX, unitOrientation_.Data());
 
 	orientationAngle_ = (GLfloat)(atan(unitOrientation_.Data(1,0) /
 		unitOrientation_.Data(0,0)));
@@ -205,38 +185,10 @@ void Ship::MoveShip()
 	});
 
 	/*======================= p = av + frame =============================*/
-	std::array<std::array<GLfloat, 4>, 4> unitVelocity;
-	for (size_t i = 0; i < GetUnitVelocity().Data().size(); ++i)
-	{
-		for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
-			unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
-	}
-
-	glLoadMatrixf((GLfloat*)unitVelocity.data());
-
-	std::array<std::array<GLfloat, 4>, 4> sMatrix;
-	for (size_t i = 0; i < S_.Data().size(); ++i)
-	{
-		for (size_t j = 0; j < S_.Data()[i].size(); ++j)
-			sMatrix[i][j] = S_.Data(i, j);
-	}
-	glMultMatrixf((GLfloat*)sMatrix.data());
-
-	std::array<std::array<GLfloat, 4>, 4> tMatrix;
-	for (size_t i = 0; i < T_.Data().size(); ++i)
-	{
-		for (size_t j = 0; j < T_.Data()[i].size(); ++j)
-			tMatrix[i][j] = T_.Data(i, j);
-	}
-	glMultMatrixf((GLfloat*)tMatrix.data());
-
-	std::array<std::array<GLfloat, 4>, 4> frame;
-	glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
-	for (size_t i = 0; i < GetFrame().Data().size(); ++i)
-	{
-		for (size_t j = 0; j < GetFrame().Data()[i].size(); ++j)
-			GetFrame().Data(i, j) = frame[i][j];
-	}
+	glLoadMatrixf(GetUnitVelocity().Data());
+	glMultMatrixf(S_.Data());
+	glMultMatrixf(T_.Data());
+	glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().Data());
 }
 
 void Ship::WrapAroundMoveShip()
@@ -300,19 +252,12 @@ void Ship::DrawBullets()
 
 void Ship::DrawShip()
 {
-	std::array<std::array<GLfloat, 3>, 8> vertices;
-	for (size_t i = 0; i < shipVertices_.Data().size(); ++i)
-	{
-		for (size_t j = 0; j < shipVertices_.Data()[i].size(); ++j)
-			vertices[i][j] = shipVertices_.Data(i, j);
-	}
-
-	glVertexPointer(3, GL_FLOAT, 0, vertices.data());
+	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.Data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
 	glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data()[0].data());
+	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
 }
 
 void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust) 

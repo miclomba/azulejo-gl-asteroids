@@ -16,8 +16,6 @@ namespace asteroids {
 class ASTEROIDS_DLL_EXPORT GLEntity : public entity::ISerializableEntity
 {
 public:
-	typedef std::array<GLfloat, 4> Row4;
-
     GLEntity();
 	~GLEntity();
 	GLEntity(const GLEntity&);

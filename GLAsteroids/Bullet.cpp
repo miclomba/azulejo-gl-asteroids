@@ -143,54 +143,21 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		SetSMatrix();
 		SetTMatrix();
 
-		std::array<std::array<GLfloat, 4>, 4> unitVelocity;
-		for (size_t i = 0; i < GetUnitVelocity().Data().size(); ++i)
-		{
-			for (size_t j = 0; j < GetUnitVelocity().Data()[i].size(); ++j)
-				unitVelocity[i][j] = GetUnitVelocity().Data(i, j);
-		}
-		glLoadMatrixf((GLfloat*)unitVelocity.data());
+		glLoadMatrixf(GetUnitVelocity().Data());
+		glMultMatrixf(S_.Data());
+		glMultMatrixf(T_.Data());
 
-		std::array<std::array<GLfloat, 4>, 4> sMatrix;
-		for (size_t i = 0; i < S_.Data().size(); ++i)
-		{
-			for (size_t j = 0; j < S_.Data()[i].size(); ++j)
-				sMatrix[i][j] = S_.Data(i, j);
-		}
-		glMultMatrixf((GLfloat*)sMatrix.data());
-
-		std::array<std::array<GLfloat, 4>, 4> tMatrix;
-		for (size_t i = 0; i < T_.Data().size(); ++i)
-		{
-			for (size_t j = 0; j < T_.Data()[i].size(); ++j)
-				tMatrix[i][j] = T_.Data(i, j);
-		}
-		glMultMatrixf((GLfloat*)tMatrix.data());
-
-		std::array<std::array<GLfloat, 4>, 4> frame;
-		glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat*)frame.data());
-		for (size_t i = 0; i < GetFrame().Data().size(); ++i)
-		{
-			for (size_t j = 0; j < GetFrame().Data()[i].size(); ++j)
-				GetFrame().Data(i, j) = frame[i][j];
-		}
+		glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().Data());
 	};
 
 	auto DrawBullet = [this]()
 	{
-		std::array<std::array<GLfloat, 3>, 8> vertices;
-		for (size_t i = 0; i < bulletVertices_.Data().size(); ++i)
-		{
-			for (size_t j = 0; j < bulletVertices_.Data()[i].size(); ++j)
-				vertices[i][j] = bulletVertices_.Data(i,j);
-		}
-
-		glVertexPointer(3, GL_FLOAT, 0, vertices.data());
+		glVertexPointer(3, GL_FLOAT, 0, bulletVertices_.Data());
 		glColor3f(0.0f, 1.0f, 1.0f);
 		glLoadIdentity();
 		glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
 		glRotatef(GetVelocityAngle()*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
-		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data()[0].data());
+		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data());
 	};
 
 	std::vector<std::vector<GLfloat>> buffer({ std::vector<GLfloat>(16) });
