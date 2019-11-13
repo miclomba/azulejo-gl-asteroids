@@ -14,6 +14,7 @@
 
 #include "Entities/EntityAggregationDeserializer.h"
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
 #include "Resources/ResourceSerializer.h"
 
@@ -27,6 +28,7 @@ using asteroids::Ship;
 using entity::EntityAggregationDeserializer;
 using resource::IResource;
 using resource::Resource;
+using resource::Resource2D;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
 
@@ -53,23 +55,23 @@ Ship::Ship() :
 {
 	SetVelocityAngle(M_PI / 2);
 
-	shipVertices_ = Resource<GLfloat>({
+	shipVertices_ = Resource2D<GLfloat>({
 		{-0.5f,-0.5f,0.5f}, {0.5f,-0.0f,0.5f},
 		{0.5f,0.0f,0.5f}, {-0.5f,0.5f,0.5f},
 		{-0.5f,-0.5f,1.0f}, {0.1f,-0.0f,1.0f},
 		{0.1f,0.0f,1.0f}, {-0.5f,0.5f,1.0f}
 	});
 
-	shipIndices_ = Resource<GLubyte>({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
+	shipIndices_ = Resource<GLubyte>({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
 
-	unitOrientation_ = Resource<GLfloat>({
+	unitOrientation_ = Resource2D<GLfloat>({
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f}
 	});
 
-	GetUnitVelocity() = Resource<GLfloat>({
+	GetUnitVelocity() = Resource2D<GLfloat>({
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
@@ -131,16 +133,16 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	yComponentVelocity += yComponentOrientation;
 
 	SetSpeed(sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2)));
-	GetUnitVelocity().Data(0,0) = xComponentVelocity / GetSpeed();
-	GetUnitVelocity().Data(1,0) = yComponentVelocity / GetSpeed();
+	GetUnitVelocity().GetData(0,0) = xComponentVelocity / GetSpeed();
+	GetUnitVelocity().GetData(1,0) = yComponentVelocity / GetSpeed();
 
 	if (GetSpeed() > 5.0f)
 		SetSpeed(5.0f);
 
-	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity().Data(1,0) / GetUnitVelocity().Data(0,0))));
-	if (GetUnitVelocity().Data(0,0) < 0)
+	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity().GetData(1,0) / GetUnitVelocity().GetData(0,0))));
+	if (GetUnitVelocity().GetData(0,0) < 0)
 		SetVelocityAngle(GetVelocityAngle() + M_PI);
-	else if (GetUnitVelocity().Data(1,0) < 0)
+	else if (GetUnitVelocity().GetData(1,0) < 0)
 		SetVelocityAngle(GetVelocityAngle() + 2 * M_PI);
 }
 
@@ -149,7 +151,7 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 	if (fabs(_orientationAngle - 0.0f) <= 0.00001f)
 		return;
 
-	R_ = Resource<GLfloat>({ 
+	R_ = Resource2D<GLfloat>({ 
 		{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
 		{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
 		{0.0f,0.0f,1.0f,0.0f},
@@ -160,27 +162,27 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 	glMultMatrixf(R_.Data());
 	glGetFloatv(GL_MODELVIEW_MATRIX, unitOrientation_.Data());
 
-	orientationAngle_ = (GLfloat)(atan(unitOrientation_.Data(1,0) /
-		unitOrientation_.Data(0,0)));
-	if (unitOrientation_.Data(0,0) < 0)
+	orientationAngle_ = (GLfloat)(atan(unitOrientation_.GetData(1,0) /
+		unitOrientation_.GetData(0,0)));
+	if (unitOrientation_.GetData(0,0) < 0)
 		orientationAngle_ += M_PI;
-	else if (unitOrientation_.Data(1,0) < 0)
+	else if (unitOrientation_.GetData(1,0) < 0)
 		orientationAngle_ += 2 * M_PI;
 }
 
 void Ship::MoveShip()
 {
-	S_ = Resource<GLfloat>({ 
+	S_ = Resource2D<GLfloat>({ 
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	T_ = Resource<GLfloat>({ 
-		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+	T_ = Resource2D<GLfloat>({ 
+		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
@@ -203,21 +205,21 @@ void Ship::WrapAroundMoveShip()
 	GLfloat top = (1 / fabs(projectionMatrix[5]));
 	GLfloat bottom = -1 * top;
 
-	if (GetFrame().Data(0,0) <= left - epsilon) {
+	if (GetFrame().GetData(0,0) <= left - epsilon) {
 		SetFrame(0,0,right + epsilon);
-		SetFrame(1,0, GetFrame().Data(1,0) * -1);
+		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().Data(0,0) >= right + epsilon) {
+	else if (GetFrame().GetData(0,0) >= right + epsilon) {
 		SetFrame(0,0,left - epsilon);
-		SetFrame(1,0, GetFrame().Data(1,0) * -1);
+		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().Data(1,0) >= top + epsilon) {
+	else if (GetFrame().GetData(1,0) >= top + epsilon) {
 		SetFrame(1,0,bottom - epsilon);
-		SetFrame(0,0, GetFrame().Data(0,0) * -1);
+		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
-	else if (GetFrame().Data(1,0) <= bottom - epsilon) {
+	else if (GetFrame().GetData(1,0) <= bottom - epsilon) {
 		SetFrame(1,0,top + epsilon);
-		SetFrame(0,0, GetFrame().Data(0,0) * -1);
+		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
 }
 
@@ -255,7 +257,7 @@ void Ship::DrawShip()
 	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.Data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
+	glTranslatef(GetFrame().GetData(0,0), GetFrame().GetData(1,0), GetFrame().GetData(2,0));
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
 }
@@ -297,7 +299,7 @@ void Ship::Fire()
 
 	std::string key = Bullet::BulletPrefix() + GenerateUUID();
 
-	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().Data(0,0), GetFrame().Data(1,0));
+	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().GetData(0,0), GetFrame().GetData(1,0));
 	bullet->SetKey(key);
 	bulletFired_ = true;
 
@@ -333,10 +335,10 @@ void Ship::Load(ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
-	shipVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
+	shipVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
-	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
+	shipIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
 	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
-	unitOrientation_ = *static_cast<Resource<GLfloat>*>(deserializedOrientation.get());
+	unitOrientation_ = *static_cast<Resource2D<GLfloat>*>(deserializedOrientation.get());
 }
 

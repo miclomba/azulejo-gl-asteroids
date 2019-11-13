@@ -9,6 +9,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 
 #include "config.h"
 #include "Bullet.h"
@@ -55,8 +56,8 @@ private:
 	bool bulletFired_{false};
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };
 
-    resource::Resource<GLfloat> unitOrientation_;
-    resource::Resource<GLfloat> shipVertices_;
+    resource::Resource2D<GLfloat> unitOrientation_;
+    resource::Resource2D<GLfloat> shipVertices_;
 	resource::Resource<GLubyte> shipIndices_;
 };
 

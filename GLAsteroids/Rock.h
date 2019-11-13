@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 
 #include "config.h"
 #include "GLEntity.h"
@@ -59,7 +60,7 @@ private:
     State state_;
 	bool rockInitialized_{false};
     /*=============================== Geometry ===============================*/
-    resource::Resource<GLfloat> rockVertices_;
+    resource::Resource2D<GLfloat> rockVertices_;
 	resource::Resource<GLubyte> rockIndices_;
 };
 

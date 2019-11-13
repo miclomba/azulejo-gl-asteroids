@@ -7,6 +7,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 
 #include "config.h"
 #include "GLEntity.h"
@@ -42,7 +43,7 @@ private:
     bool bulletInitialized_ = false;
     bool outOfBounds_ = false;
 
-	resource::Resource<GLfloat> bulletVertices_;
+	resource::Resource2D<GLfloat> bulletVertices_;
 	resource::Resource<GLubyte> bulletIndices_;
 	resource::Resource<GLfloat> projectionMatrix_;
 };

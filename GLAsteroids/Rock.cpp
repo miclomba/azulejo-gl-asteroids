@@ -9,6 +9,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
 #include "Resources/ResourceSerializer.h"
 
@@ -21,6 +22,7 @@ using asteroids::Rock;
 using asteroids::State;
 using resource::IResource;
 using resource::Resource;
+using resource::Resource2D;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
 
@@ -38,25 +40,25 @@ const std::string& ROCK_VERTICES_KEY = "rock_vertices";
 const std::string& ROCK_INDICES_KEY = "rock_indices";
 const std::string TRUE_VAL = "true";
 
-const Resource<GLfloat> rockVerticesL({ 
+const Resource2D<GLfloat> rockVerticesL({ 
 	{-1.5f,-1.5f,0.5f}, {1.5f,-1.5f,0.5f},
 	{1.5f,1.5f,0.5f}, {-1.5f,1.5f,0.5f},
 	{-1.0f,-1.0f,1.0f}, {1.0f,-1.0f,1.0f},
 	{1.0f,1.0f,1.0f}, {-1.0f,1.0f,1.0f} 
 });
-const Resource<GLfloat> rockVerticesM({ 
+const Resource2D<GLfloat> rockVerticesM({ 
 	{-1.0f,-1.0f,0.5f},	{1.0f,-1.0f,0.5f},
 	{1.0f,1.0f,0.5f}, {-1.0f,1.0f,0.5f},
 	{-0.75f,-0.75f,1.0f}, {0.75f,-0.75f,1.0f},
 	{0.75f,0.75f,1.0f}, {-0.75f,0.75f,1.0f}
 });
-const Resource<GLfloat> rockVerticesS({ 
+const Resource2D<GLfloat> rockVerticesS({ 
 	{-0.5f,-0.5f,0.5f}, {0.5f,-0.5f,0.5f},
 	{0.5f,0.5f,0.5f}, {-0.5f,0.5f,0.5f},
 	{-0.25f,-0.25f,1.0f}, {0.25f,-0.25f,1.0f},
 	{0.25f,0.25f,1.0f}, {-0.25f,0.25f,1.0f}
 });
-Resource<GLubyte> rockIndices({ { 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 } });
+Resource<GLubyte> rockIndices({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
 } // end namespace
 
 std::string Rock::RockPrefix()
@@ -96,14 +98,14 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) :
 
     rockIndices_ = rockIndices;
 
-    GetFrame() = Resource<GLfloat>({ 
+    GetFrame() = Resource2D<GLfloat>({ 
 		{_x,   0.0f,0.0f,0.0f},
         {_y,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {1.0f,   0.0f,0.0f,0.0f}
 	});
 
-    GetUnitVelocity() = Resource<GLfloat>({
+    GetUnitVelocity() = Resource2D<GLfloat>({
 		{1.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
@@ -125,8 +127,8 @@ void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, co
 	SetSpeed(GetSpeed() + _speed);
 	SetVelocityAngle(_velocityAngle);
 	/*==================== COMPUTE ROCK VELOCITY =========================*/
-	GetUnitVelocity().Data(0,0) = cos(_velocityAngle);
-	GetUnitVelocity().Data(1,0) = sin(_velocityAngle);
+	GetUnitVelocity().GetData(0,0) = cos(_velocityAngle);
+	GetUnitVelocity().GetData(1,0) = sin(_velocityAngle);
 
 	spinEpsilon_ += _spin;
 	spinEpsilon_ *= spinDirection_;
@@ -145,17 +147,17 @@ void Rock::UpdateSpin()
 
 void Rock::MoveRock()
 {
-	S_ = Resource<GLfloat>({ 
+	S_ = Resource2D<GLfloat>({ 
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	T_ = Resource<GLfloat>({ 
-		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+	T_ = Resource2D<GLfloat>({ 
+		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
@@ -185,21 +187,21 @@ void Rock::WrapAroundMoveRock()
 	top = (1 / fabs(projectionMatrix[5]));
 	bottom = -1 * top;
 
-	if (GetFrame().Data(0,0) <= left - epsilon) {
+	if (GetFrame().GetData(0,0) <= left - epsilon) {
 		SetFrame(0,0,right + epsilon);
-		SetFrame(1,0, GetFrame().Data(1,0) * -1);
+		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().Data(0,0) >= right + epsilon) {
+	else if (GetFrame().GetData(0,0) >= right + epsilon) {
 		SetFrame(0,0,left - epsilon);
-		SetFrame(1,0, GetFrame().Data(1,0) * -1);
+		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().Data(1,0) >= top + epsilon) {
+	else if (GetFrame().GetData(1,0) >= top + epsilon) {
 		SetFrame(1,0,bottom - epsilon);
-		SetFrame(0,0, GetFrame().Data(0,0) * -1);
+		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
-	else if (GetFrame().Data(1,0) <= bottom - epsilon) {
+	else if (GetFrame().GetData(1,0) <= bottom - epsilon) {
 		SetFrame(1,0,top + epsilon);
-		SetFrame(0,0, GetFrame().Data(0,0) * -1);
+		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
 }
 
@@ -208,7 +210,7 @@ void Rock::DrawRock()
 	glVertexPointer(3, GL_FLOAT, 0, rockVertices_.Data());
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
+	glTranslatef(GetFrame().GetData(0,0), GetFrame().GetData(1,0), GetFrame().GetData(2,0));
 	glRotatef(spin_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data());
 }
@@ -294,7 +296,7 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
-	rockVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.get());
+	rockVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
-	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
+	rockIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
 }

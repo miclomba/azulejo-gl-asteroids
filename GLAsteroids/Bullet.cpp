@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
 #include "Resources/ResourceSerializer.h"
 
@@ -18,6 +19,7 @@ using asteroids::Bullet;
 using asteroids::GLEntity;
 using resource::IResource;
 using resource::Resource;
+using resource::Resource2D;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
 
@@ -42,10 +44,10 @@ std::string Bullet::BulletPrefix()
 Bullet::Bullet() :
 	GLEntity()
 {
-	bulletIndices_ = Resource<GLubyte>({{0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4}});
-	projectionMatrix_ = Resource<GLfloat>({std::vector<GLfloat>(16)}); 
+	bulletIndices_ = Resource<GLubyte>({0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4});
+	projectionMatrix_ = Resource<GLfloat>(std::vector<GLfloat>(16)); 
 
-	bulletVertices_ = Resource<GLfloat>({
+	bulletVertices_ = Resource2D<GLfloat>({
 		{-0.2f,-0.1f,0.5f}, {0.2f,-0.0f,0.5f},
 		{0.2f,0.0f,0.5f}, {-0.2f,0.1f,0.5f},
 		{-0.2f,-0.1f,1.0f}, {0.2f,-0.0f,1.0f},
@@ -66,14 +68,14 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
 {
     SetMass(0.5f);
 
-    SetFrame(Resource<GLfloat>({
+    SetFrame(Resource2D<GLfloat>({
 		{_x,   0.0f,0.0f,0.0f},
 		{_y,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f}
 	}));
 
-    SetUnitVelocity(Resource<GLfloat>({
+    SetUnitVelocity(Resource2D<GLfloat>({
 		{1.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
@@ -97,7 +99,7 @@ void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed
 
 void Bullet::SetSMatrix()
 {
-	S_ = Resource<GLfloat>({
+	S_ = Resource2D<GLfloat>({
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
@@ -107,10 +109,10 @@ void Bullet::SetSMatrix()
 
 void Bullet::SetTMatrix()
 {
-	T_ = Resource<GLfloat>({
-		{1.0f,0.0f,0.0f,GetFrame().Data(0,0)},
-		{0.0f,1.0f,0.0f,GetFrame().Data(1,0)},
-		{0.0f,0.0f,1.0f,GetFrame().Data(2,0)},
+	T_ = Resource2D<GLfloat>({
+		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
 		{0.0f,0.0f,0.0f,1.0f}
 	});
 }
@@ -119,13 +121,13 @@ void Bullet::SetBulletOutOfBounds()
 {
 	GLfloat epsilon = 3.0f;
 
-	GLfloat right = (1 / fabs(projectionMatrix_.Data(0,0)));
+	GLfloat right = (1 / fabs(projectionMatrix_.Data()[0]));
 	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(projectionMatrix_.Data(0,5)));
+	GLfloat top = (1 / fabs(projectionMatrix_.Data()[5]));
 	GLfloat bottom = -1 * top;
 
-	if ((GetFrame().Data(0,0) <= left - epsilon) || (GetFrame().Data(0,0) >= right + epsilon) ||
-		(GetFrame().Data(1,0) >= top + epsilon) || (GetFrame().Data(1,0) <= bottom - epsilon))
+	if ((GetFrame().GetData(0,0) <= left - epsilon) || (GetFrame().GetData(0,0) >= right + epsilon) ||
+		(GetFrame().GetData(1,0) >= top + epsilon) || (GetFrame().GetData(1,0) <= bottom - epsilon))
 	{
 		outOfBounds_ = true;
 	}
@@ -155,14 +157,14 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		glVertexPointer(3, GL_FLOAT, 0, bulletVertices_.Data());
 		glColor3f(0.0f, 1.0f, 1.0f);
 		glLoadIdentity();
-		glTranslatef(GetFrame().Data(0,0), GetFrame().Data(1,0), GetFrame().Data(2,0));
+		glTranslatef(GetFrame().GetData(0,0), GetFrame().GetData(1,0), GetFrame().GetData(2,0));
 		glRotatef(GetVelocityAngle()*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data());
 	};
 
 	std::vector<std::vector<GLfloat>> buffer({ std::vector<GLfloat>(16) });
 	glGetFloatv(GL_PROJECTION_MATRIX, buffer[0].data());
-	projectionMatrix_ = Resource<GLfloat>(buffer);
+	projectionMatrix_ = Resource2D<GLfloat>(buffer);
 
     glPushMatrix();
 	{
@@ -207,9 +209,9 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
-	bulletVertices_ = *static_cast<Resource<GLfloat>*>(deserializedVertices.release());
+	bulletVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.release());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
-	bulletIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.release());
+	bulletIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.release());
 	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
-	projectionMatrix_ = *static_cast<Resource<GLfloat>*>(deserializedProjection.release());
+	projectionMatrix_ = *static_cast<Resource2D<GLfloat>*>(deserializedProjection.release());
 }

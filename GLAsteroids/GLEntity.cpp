@@ -6,14 +6,14 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "GLEntity.h"
-#include "Resources/Resource.h"
+#include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
 #include "Resources/ResourceSerializer.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
 using resource::IResource;
-using resource::Resource;
+using resource::Resource2D;
 using resource::ResourceDeserializer;
 using resource::ResourceSerializer;
 
@@ -31,14 +31,14 @@ const std::string MASS_KEY = "mass";
 
 GLEntity::GLEntity() 
 {
-	frame_ = Resource<GLfloat>({
+	frame_ = Resource2D<GLfloat>({
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0}
 	});
 
-	unitVelocity_ = Resource<GLfloat>({
+	unitVelocity_ = Resource2D<GLfloat>({
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
@@ -65,12 +65,12 @@ GLEntity::GLEntity(GLEntity&&) = default;
 GLEntity& GLEntity::operator=(const GLEntity&) = default;
 GLEntity& GLEntity::operator=(GLEntity&&) = default;
 
-Resource<GLfloat>& GLEntity::GetFrame()
+Resource2D<GLfloat>& GLEntity::GetFrame()
 {
 	return frame_;
 }
 
-Resource<GLfloat>& GLEntity::GetUnitVelocity()
+Resource2D<GLfloat>& GLEntity::GetUnitVelocity()
 {
 	return unitVelocity_;
 }
@@ -92,20 +92,20 @@ GLfloat GLEntity::GetVelocityAngle() const
 
 void GLEntity::SetFrame(const int i, const int j, const GLfloat val)
 {
-	frame_.Data(i,j) = val;
+	frame_.GetData(i,j) = val;
 }
 
-void GLEntity::SetFrame(const Resource<GLfloat>& frame)
+void GLEntity::SetFrame(const Resource2D<GLfloat>& frame)
 {
 	frame_ = frame;
 }
 
 void GLEntity::SetUnitVelocity(const int i, const int j, const GLfloat val)
 {
-	unitVelocity_.Data(i,j) = val;
+	unitVelocity_.GetData(i,j) = val;
 }
 
-void GLEntity::SetUnitVelocity(const Resource<GLfloat>& unitVelocity)
+void GLEntity::SetUnitVelocity(const Resource2D<GLfloat>& unitVelocity)
 {
 	unitVelocity_ = unitVelocity;
 }
@@ -151,13 +151,13 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedUnitVelocity = deserializer->Deserialize(UNIT_VELOCITY_KEY);
-	unitVelocity_ = *static_cast<Resource<GLfloat>*>(deserializedUnitVelocity.get());
+	unitVelocity_ = *static_cast<Resource2D<GLfloat>*>(deserializedUnitVelocity.get());
 	std::unique_ptr<IResource> deserializedFrame = deserializer->Deserialize(FRAME_KEY);
-	frame_ = *static_cast<Resource<GLfloat>*>(deserializedFrame.get());
+	frame_ = *static_cast<Resource2D<GLfloat>*>(deserializedFrame.get());
 	std::unique_ptr<IResource> deserializedS = deserializer->Deserialize(S_KEY);
-	S_ = *static_cast<Resource<GLfloat>*>(deserializedS.get());
+	S_ = *static_cast<Resource2D<GLfloat>*>(deserializedS.get());
 	std::unique_ptr<IResource> deserializedR = deserializer->Deserialize(R_KEY);
-	R_ = *static_cast<Resource<GLfloat>*>(deserializedR.get());
+	R_ = *static_cast<Resource2D<GLfloat>*>(deserializedR.get());
 	std::unique_ptr<IResource> deserializedT = deserializer->Deserialize(T_KEY);
-	T_ = *static_cast<Resource<GLfloat>*>(deserializedT.get());
+	T_ = *static_cast<Resource2D<GLfloat>*>(deserializedT.get());
 }
