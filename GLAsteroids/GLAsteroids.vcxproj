@@ -134,7 +134,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\freeglut\lib\x64;C:\Program Files\boost\boost_1_69_0\stage\lib;..\..\Backend\X\x64\Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;Entities.lib;Resources.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;Entities.lib;Resources.lib;Events.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

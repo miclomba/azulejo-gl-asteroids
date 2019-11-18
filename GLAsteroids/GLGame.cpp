@@ -8,6 +8,8 @@
 
 #include "Entities/EntityAggregationDeserializer.h"
 #include "Entities/EntityAggregationSerializer.h"
+#include "Events/EventEmitter.h"
+
 #include "Asteroids.h"
 #include "Bullet.h"
 #include "Rock.h"
@@ -16,6 +18,7 @@
 using boost::property_tree::ptree;
 using entity::EntityAggregationDeserializer;
 using entity::EntityAggregationSerializer;
+using events::EventEmitter;
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
@@ -89,18 +92,24 @@ GLGame::GLGame(int _argc, char* _argv[])
 	InitServer();
 	InitClient();
 
-	game.SetKey(Asteroids::AsteroidsKey());
+	game_.SetKey(Asteroids::AsteroidsKey());
 	Deserializer->RegisterEntity<Asteroids>(Asteroids::AsteroidsKey());
 	if (fs::exists(SERIALIZATION_PATH))
 	{
-		game.ClearGame();
+		game_.ClearGame();
 		
 		Deserializer->UnregisterAll();
 		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
 		RegisterEntities(Deserializer->GetSerializationStructure());
 
-		Deserializer->Deserialize(game);
+		Deserializer->Deserialize(game_);
 	}
+
+	leftArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	rightArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	thrustEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 }
 
 void GLGame::Run() const
@@ -169,7 +178,7 @@ void GLGame::Display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	game.Draw();
+	game_.Draw();
 
 	// RENDER
 	glFlush();
@@ -215,30 +224,60 @@ void GLGame::KeyboardUpdateState()
 			switch (i)
 			{
 			case 's':
-				game.RotateLeft(); break;
+				leftArrowEmitter_->Signal()(); break;
 			case 'f':
-				game.RotateRight(); break;
+				rightArrowEmitter_->Signal()(); break;
 			case 'e':
-				game.Thrust(); break;
+				thrustEmitter_->Signal()(); break;
 			case 'j':
-				game.Fire(); break;
+				fireEmitter_->Signal()(); break;
 			case 'x':
-				game.ResetGame(); break;
+				resetEmitter_->Signal()(); break;
 			case 'u':
 				Serializer->SetSerializationPath(SERIALIZATION_PATH.string());
-				Serializer->Serialize(game);
+				Serializer->Serialize(game_);
 				break;
 			case 'i':
 				Deserializer->UnregisterAll();
 				Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
 				RegisterEntities(Deserializer->GetSerializationStructure());
 
-				game.ClearGame();
-				Deserializer->Deserialize(game);
+				game_.ClearGame();
+				Deserializer->Deserialize(game_);
 				break;
 			default:
 				break;
 			}
 		}
 	}
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetLeftArrowEmitter()
+{
+	return leftArrowEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetRightArrowEmitter()
+{
+	return rightArrowEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetThrustEmitter()
+{
+	return thrustEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetFireEmitter()
+{
+	return fireEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetResetEmitter()
+{
+	return resetEmitter_;
+}
+
+Asteroids& GLGame::GetAsteroids()
+{
+	return game_;
 }

@@ -7,6 +7,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Events/EventConsumer.h"
+
 #include "config.h"
 #include "Rock.h"
 #include "Ship.h"
@@ -39,6 +41,12 @@ public:
 
 	static std::string AsteroidsKey();
 
+	std::shared_ptr<events::EventConsumer<void(void)>> GetLeftArrowConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetRightArrowConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetThrustConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetFireConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetResetConsumer();
+
 private:
 	std::string GenerateUUID() const;
 
@@ -69,6 +77,12 @@ private:
 	GLint rockCount_{0};
 	GLfloat orientationAngle_{0.0f};
 	GLfloat thrust_{0.0f};
+
+	std::shared_ptr<events::EventConsumer<void(void)>> leftArrowConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> rightArrowConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> thrustConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> fireConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> resetConsumer_;
 };
 
 } // end asteroids

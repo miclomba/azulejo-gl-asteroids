@@ -16,6 +16,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
+#include "Events/EventConsumer.h"
 #include "Bullet.h"
 #include "Rock.h"
 #include "Ship.h"
@@ -26,6 +27,7 @@ using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
 using entity::EntityAggregationDeserializer;
+using events::EventConsumer;
 
 namespace fs = std::filesystem;
 namespace pt = boost::property_tree;
@@ -49,6 +51,12 @@ Asteroids::Asteroids()
 {
 	AggregateMember(Ship::ShipKey());
 	Deserializer->RegisterEntity<Ship>(Ship::ShipKey());
+
+	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateLeft(); });
+	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateRight(); });
+	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Thrust(); });
+	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Fire(); });
+	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ResetGame(); });
 
 	ResetGame();
 }
@@ -457,4 +465,29 @@ void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
 	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetLeftArrowConsumer()
+{
+	return leftArrowConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetRightArrowConsumer()
+{
+	return rightArrowConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetThrustConsumer()
+{
+	return thrustConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetFireConsumer()
+{
+	return fireConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetResetConsumer()
+{
+	return resetConsumer_;
 }

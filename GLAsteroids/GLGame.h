@@ -2,6 +2,9 @@
 #define asteroids_glgame_h
 
 #include <array>
+#include <memory>
+
+#include "Events/EventEmitter.h"
 
 #include "config.h"
 #include "Asteroids.h"
@@ -20,6 +23,14 @@ public:
 
 	void Run() const;
 	static void TimerCallback(int _idx);
+
+	std::shared_ptr<events::EventEmitter<void(void)>> GetLeftArrowEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetRightArrowEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetThrustEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetFireEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetResetEmitter();
+
+	Asteroids& GetAsteroids();
 
 	static GLGame* callbackInstance_;
 
@@ -44,7 +55,13 @@ private:
 	void KeyboardUpdateState();
 
 	std::array<bool, 256> keysPressed_;
-	Asteroids game;
+	Asteroids game_;
+
+	std::shared_ptr<events::EventEmitter<void(void)>> leftArrowEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> rightArrowEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> thrustEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> fireEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> resetEmitter_;
 };
 
 } // end asteroids
