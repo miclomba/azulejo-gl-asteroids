@@ -26,20 +26,6 @@ public:
 	Asteroids& operator=(const Asteroids&);
 	Asteroids& operator=(Asteroids&&);
 
-	void Draw();
-
-	// commands
-	void Fire();
-	void RotateLeft();
-	void RotateRight();
-	void Thrust();
-	void ResetGame();
-
-	void Run();
-
-	void Serialize();
-	void Deserialize();
-
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
@@ -54,6 +40,17 @@ public:
 	std::shared_ptr<events::EventConsumer<void(void)>> GetDeserializeConsumer();
 
 private:
+	// commands
+	void Draw();
+	void Fire();
+	void RotateLeft();
+	void RotateRight();
+	void Thrust();
+	void ResetGame();
+	void Run();
+	void Serialize();
+	void Deserialize();
+
 	void ClearGame();
 
 	std::string GenerateUUID() const;
