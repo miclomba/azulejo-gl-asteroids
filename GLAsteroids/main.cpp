@@ -26,8 +26,12 @@ const std::string RESET_EVENT = "reset_event";
 const std::string RESET_ACTION = "reset_action";
 const std::string DRAW_EVENT = "draw_event";
 const std::string DRAW_ACTION = "draw_action";
-const std::string CLEAR_EVENT = "clear_event";
-const std::string CLEAR_ACTION = "clear_action";
+const std::string RUN_EVENT = "run_event";
+const std::string RUN_ACTION = "run_action";
+const std::string SERIALIZE_EVENT = "serialize_event";
+const std::string SERIALIZE_ACTION = "serialize_action";
+const std::string DESERIALIZE_EVENT = "deserialize_event";
+const std::string DESERIALIZE_ACTION = "deserialize_action";
 }
 
 void RegisterEvents(Asteroids& asteroids, GLGame& game, EventChannel& channel)
@@ -44,8 +48,12 @@ void RegisterEvents(Asteroids& asteroids, GLGame& game, EventChannel& channel)
 	channel.RegisterConsumer(RESET_ACTION, RESET_EVENT, asteroids.GetResetConsumer());
 	channel.RegisterEmitter(DRAW_EVENT, game.GetDrawEmitter());
 	channel.RegisterConsumer(DRAW_ACTION, DRAW_EVENT, asteroids.GetDrawConsumer());
-	channel.RegisterEmitter(CLEAR_EVENT, game.GetClearEmitter());
-	channel.RegisterConsumer(CLEAR_ACTION, CLEAR_EVENT, asteroids.GetClearConsumer());
+	channel.RegisterEmitter(RUN_EVENT, game.GetRunEmitter());
+	channel.RegisterConsumer(RUN_ACTION, RUN_EVENT, asteroids.GetRunConsumer());
+	channel.RegisterEmitter(SERIALIZE_EVENT, game.GetSerializeEmitter());
+	channel.RegisterConsumer(SERIALIZE_ACTION, SERIALIZE_EVENT, asteroids.GetSerializeConsumer());
+	channel.RegisterEmitter(DESERIALIZE_EVENT, game.GetDeserializeEmitter());
+	channel.RegisterConsumer(DESERIALIZE_ACTION, DESERIALIZE_EVENT, asteroids.GetDeserializeConsumer());
 }
 
 int main(int _argc, char* _argv[]) 
@@ -53,8 +61,7 @@ int main(int _argc, char* _argv[])
 	GLGame game(_argc,_argv);
     glutTimerFunc(TIME,game.TimerCallback,VAL);
 
-	Asteroids& asteroids = game.GetAsteroids();
-
+	Asteroids asteroids;
 	EventChannel channel;
 
 	RegisterEvents(asteroids, game, channel);

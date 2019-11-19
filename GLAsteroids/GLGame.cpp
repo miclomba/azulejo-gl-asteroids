@@ -1,32 +1,14 @@
 #include "GLGame.h"
 
-#include <filesystem>
+#include <memory>
 #include <string>
 #include <utility>
 
-#include <boost/property_tree/ptree.hpp>
-
-#include "Entities/EntityAggregationDeserializer.h"
-#include "Entities/EntityAggregationSerializer.h"
 #include "Events/EventEmitter.h"
 
-#include "Asteroids.h"
-#include "Bullet.h"
-#include "Rock.h"
-#include "Ship.h"
-
-using boost::property_tree::ptree;
-using entity::EntityAggregationDeserializer;
-using entity::EntityAggregationSerializer;
 using events::EventEmitter;
 
-using asteroids::Asteroids;
-using asteroids::Bullet;
 using asteroids::GLGame;
-using asteroids::Rock;
-using asteroids::Ship;
-
-namespace fs = std::filesystem;
 
 namespace
 {
@@ -35,30 +17,7 @@ const int WIN_HEIGHT = 480;
 const int NUMBER_KEYS = 256;
 const int INIT_WIN_X = 100;
 const int INIT_WIN_Y = 100;
-
-const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
-
-EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
-EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
-
-void RegisterEntities(const ptree& tree)
-{
-	for (const std::pair<std::string, ptree>& keyValue : tree)
-	{
-		std::string nodeKey = keyValue.first;
-		ptree node = keyValue.second;
-
-		if (nodeKey.substr(0,Rock::RockPrefix().length()) == Rock::RockPrefix())
-			Deserializer->RegisterEntity<Rock>(nodeKey);
-		else if (nodeKey.substr(0,Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
-			Deserializer->RegisterEntity<Bullet>(nodeKey);
-		else if (nodeKey == Ship::ShipKey())
-			Deserializer->RegisterEntity<Ship>(nodeKey);
-		else if (nodeKey == Asteroids::AsteroidsKey())
-			Deserializer->RegisterEntity<Asteroids>(nodeKey);
-		RegisterEntities(node);
-	}
-}
+const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
 /*======================== CALLBACK POINTER ==================================*/
@@ -98,23 +57,14 @@ GLGame::GLGame(int _argc, char* _argv[])
 	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	drawEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	clearEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	runEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	serializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	deserializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 }
 
 void GLGame::Run()
 {
-	game_.SetKey(Asteroids::AsteroidsKey());
-	Deserializer->RegisterEntity<Asteroids>(Asteroids::AsteroidsKey());
-	if (fs::exists(SERIALIZATION_PATH))
-	{
-		clearEmitter_->Signal()();
-
-		Deserializer->UnregisterAll();
-		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
-		RegisterEntities(Deserializer->GetSerializationStructure());
-
-		Deserializer->Deserialize(game_);
-	}
+	runEmitter_->Signal()();
 
 	glutMainLoop();
 };
@@ -133,7 +83,7 @@ void GLGame::InitGlut(int _argc, char* _argv[]) const
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowPosition(INIT_WIN_X, INIT_WIN_Y);
 	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	glutCreateWindow(Asteroids::AsteroidsKey().c_str());
+	glutCreateWindow(ASTEROIDS_TITLE.c_str());
 }
 
 void GLGame::InitServer() const
@@ -218,7 +168,6 @@ void GLGame::KeyboardUp(const unsigned char _chr, const int _x, const int _y)
 
 void GLGame::KeyboardUpdateState()
 {
-	ptree tree;
 	for (int i = 0; i < NUMBER_KEYS; i++)
 	{
 		if (keysPressed_[i]) 
@@ -236,17 +185,9 @@ void GLGame::KeyboardUpdateState()
 			case 'x':
 				resetEmitter_->Signal()(); break;
 			case 'u':
-				Serializer->SetSerializationPath(SERIALIZATION_PATH.string());
-				Serializer->Serialize(game_);
-				break;
+				serializeEmitter_->Signal()(); break;
 			case 'i':
-				Deserializer->UnregisterAll();
-				Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
-				RegisterEntities(Deserializer->GetSerializationStructure());
-
-				clearEmitter_->Signal()();
-				Deserializer->Deserialize(game_);
-				break;
+				deserializeEmitter_->Signal()(); break;
 			default:
 				break;
 			}
@@ -284,12 +225,17 @@ std::shared_ptr<EventEmitter<void(void)>> GLGame::GetDrawEmitter()
 	return drawEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetClearEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetRunEmitter()
 {
-	return clearEmitter_;
+	return runEmitter_;
 }
 
-Asteroids& GLGame::GetAsteroids()
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetSerializeEmitter()
 {
-	return game_;
+	return serializeEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetDeserializeEmitter()
+{
+	return deserializeEmitter_;
 }

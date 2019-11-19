@@ -7,7 +7,6 @@
 #include "Events/EventEmitter.h"
 
 #include "config.h"
-#include "Asteroids.h"
 
 namespace asteroids {
 
@@ -30,9 +29,9 @@ public:
 	std::shared_ptr<events::EventEmitter<void(void)>> GetFireEmitter();
 	std::shared_ptr<events::EventEmitter<void(void)>> GetResetEmitter();
 	std::shared_ptr<events::EventEmitter<void(void)>> GetDrawEmitter();
-	std::shared_ptr<events::EventEmitter<void(void)>> GetClearEmitter();
-
-	Asteroids& GetAsteroids();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetRunEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetSerializeEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetDeserializeEmitter();
 
 	static GLGame* callbackInstance_;
 
@@ -57,7 +56,6 @@ private:
 	void KeyboardUpdateState();
 
 	std::array<bool, 256> keysPressed_;
-	Asteroids game_;
 
 	std::shared_ptr<events::EventEmitter<void(void)>> leftArrowEmitter_;
 	std::shared_ptr<events::EventEmitter<void(void)>> rightArrowEmitter_;
@@ -65,7 +63,9 @@ private:
 	std::shared_ptr<events::EventEmitter<void(void)>> fireEmitter_;
 	std::shared_ptr<events::EventEmitter<void(void)>> resetEmitter_;
 	std::shared_ptr<events::EventEmitter<void(void)>> drawEmitter_;
-	std::shared_ptr<events::EventEmitter<void(void)>> clearEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> runEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> serializeEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> deserializeEmitter_;
 };
 
 } // end asteroids

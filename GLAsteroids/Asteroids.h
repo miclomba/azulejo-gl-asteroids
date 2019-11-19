@@ -34,12 +34,14 @@ public:
 	void RotateRight();
 	void Thrust();
 	void ResetGame();
-	void ClearGame();
+
+	void Run();
+
+	void Serialize();
+	void Deserialize();
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
-
-	static std::string AsteroidsKey();
 
 	std::shared_ptr<events::EventConsumer<void(void)>> GetLeftArrowConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetRightArrowConsumer();
@@ -47,9 +49,13 @@ public:
 	std::shared_ptr<events::EventConsumer<void(void)>> GetFireConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetResetConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetDrawConsumer();
-	std::shared_ptr<events::EventConsumer<void(void)>> GetClearConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetRunConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetSerializeConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetDeserializeConsumer();
 
 private:
+	void ClearGame();
+
 	std::string GenerateUUID() const;
 
 	SharedEntity& GetShip();
@@ -86,7 +92,9 @@ private:
 	std::shared_ptr<events::EventConsumer<void(void)>> fireConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> resetConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> drawConsumer_;
-	std::shared_ptr<events::EventConsumer<void(void)>> clearConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> runConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> serializeConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> deserializeConsumer_;
 };
 
 } // end asteroids

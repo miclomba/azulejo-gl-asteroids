@@ -16,10 +16,13 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "Entities/EntityAggregationDeserializer.h"
+#include "Entities/EntityAggregationSerializer.h"
 #include "Events/EventConsumer.h"
 #include "Bullet.h"
 #include "Rock.h"
 #include "Ship.h"
+
+using boost::property_tree::ptree;
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
@@ -27,6 +30,7 @@ using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
 using entity::EntityAggregationDeserializer;
+using entity::EntityAggregationSerializer;
 using events::EventConsumer;
 
 namespace fs = std::filesystem;
@@ -35,17 +39,35 @@ namespace pt = boost::property_tree;
 namespace
 {
 const int ROCK_NUMBER = 6;
+const std::string ASTEROIDS_KEY = "Asteroids";
 const std::string SCORE_KEY = "score";
 const std::string ROCK_COUNT_KEY = "rock_count";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string THRUST_KEY = "thrust";
-EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
-} // end namespace
+const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
 
-std::string Asteroids::AsteroidsKey()
+EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
+EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
+
+void RegisterEntities(const ptree& tree)
 {
-	return "Asteroids";
+	for (const std::pair<std::string, ptree>& keyValue : tree)
+	{
+		std::string nodeKey = keyValue.first;
+		ptree node = keyValue.second;
+
+		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+			Deserializer->RegisterEntity<Rock>(nodeKey);
+		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			Deserializer->RegisterEntity<Bullet>(nodeKey);
+		else if (nodeKey == Ship::ShipKey())
+			Deserializer->RegisterEntity<Ship>(nodeKey);
+		else if (nodeKey == ASTEROIDS_KEY)
+			Deserializer->RegisterEntity<Asteroids>(nodeKey);
+		RegisterEntities(node);
+	}
 }
+} // end namespace
 
 Asteroids::Asteroids()
 {
@@ -58,7 +80,9 @@ Asteroids::Asteroids()
 	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Fire(); });
 	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ResetGame(); });
 	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Draw(); });
-	clearConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ClearGame(); });
+	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Run(); });
+	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Serialize(); });
+	deserializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Deserialize(); });
 
 	ResetGame();
 }
@@ -68,6 +92,22 @@ Asteroids::Asteroids(const Asteroids&) = default;
 Asteroids::Asteroids(Asteroids&&) = default;
 Asteroids& Asteroids::operator=(const Asteroids&) = default;
 Asteroids& Asteroids::operator=(Asteroids&&) = default;
+
+void Asteroids::Run()
+{
+	SetKey(ASTEROIDS_KEY);
+	Deserializer->RegisterEntity<Asteroids>(ASTEROIDS_KEY);
+	if (fs::exists(SERIALIZATION_PATH))
+	{
+		ClearGame();
+
+		Deserializer->UnregisterAll();
+		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+		RegisterEntities(Deserializer->GetSerializationStructure());
+
+		Deserializer->Deserialize(*this);
+	}
+}
 
 Asteroids::SharedEntity& Asteroids::GetRock(const std::string& key)
 {
@@ -469,6 +509,22 @@ void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
+void Asteroids::Serialize()
+{
+	Serializer->SetSerializationPath(SERIALIZATION_PATH.string());
+	Serializer->Serialize(*this);
+}
+
+void Asteroids::Deserialize()
+{
+	Deserializer->UnregisterAll();
+	Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
+	RegisterEntities(Deserializer->GetSerializationStructure());
+
+	ClearGame();
+	Deserializer->Deserialize(*this);
+}
+
 std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetLeftArrowConsumer()
 {
 	return leftArrowConsumer_;
@@ -499,7 +555,17 @@ std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetDrawConsumer()
 	return drawConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetClearConsumer()
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetRunConsumer()
 {
-	return clearConsumer_;
+	return runConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetSerializeConsumer()
+{
+	return serializeConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetDeserializeConsumer()
+{
+	return deserializeConsumer_;
 }
