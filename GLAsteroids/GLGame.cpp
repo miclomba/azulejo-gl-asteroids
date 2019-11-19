@@ -92,12 +92,23 @@ GLGame::GLGame(int _argc, char* _argv[])
 	InitServer();
 	InitClient();
 
+	leftArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	rightArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	thrustEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	drawEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+	clearEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+}
+
+void GLGame::Run()
+{
 	game_.SetKey(Asteroids::AsteroidsKey());
 	Deserializer->RegisterEntity<Asteroids>(Asteroids::AsteroidsKey());
 	if (fs::exists(SERIALIZATION_PATH))
 	{
-		game_.ClearGame();
-		
+		clearEmitter_->Signal()();
+
 		Deserializer->UnregisterAll();
 		Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
 		RegisterEntities(Deserializer->GetSerializationStructure());
@@ -105,15 +116,6 @@ GLGame::GLGame(int _argc, char* _argv[])
 		Deserializer->Deserialize(game_);
 	}
 
-	leftArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	rightArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	thrustEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-}
-
-void GLGame::Run() const
-{
 	glutMainLoop();
 };
 
@@ -178,7 +180,7 @@ void GLGame::Display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	game_.Draw();
+	drawEmitter_->Signal()();
 
 	// RENDER
 	glFlush();
@@ -242,7 +244,7 @@ void GLGame::KeyboardUpdateState()
 				Deserializer->LoadSerializationStructure(SERIALIZATION_PATH.string());
 				RegisterEntities(Deserializer->GetSerializationStructure());
 
-				game_.ClearGame();
+				clearEmitter_->Signal()();
 				Deserializer->Deserialize(game_);
 				break;
 			default:
@@ -275,6 +277,16 @@ std::shared_ptr<EventEmitter<void(void)>> GLGame::GetFireEmitter()
 std::shared_ptr<EventEmitter<void(void)>> GLGame::GetResetEmitter()
 {
 	return resetEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetDrawEmitter()
+{
+	return drawEmitter_;
+}
+
+std::shared_ptr<EventEmitter<void(void)>> GLGame::GetClearEmitter()
+{
+	return clearEmitter_;
 }
 
 Asteroids& GLGame::GetAsteroids()

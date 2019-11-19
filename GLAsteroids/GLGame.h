@@ -21,7 +21,7 @@ public:
 	GLGame& operator=(const GLGame&) = delete;
 	GLGame& operator=(GLGame&&) = delete;
 
-	void Run() const;
+	void Run();
 	static void TimerCallback(int _idx);
 
 	std::shared_ptr<events::EventEmitter<void(void)>> GetLeftArrowEmitter();
@@ -29,6 +29,8 @@ public:
 	std::shared_ptr<events::EventEmitter<void(void)>> GetThrustEmitter();
 	std::shared_ptr<events::EventEmitter<void(void)>> GetFireEmitter();
 	std::shared_ptr<events::EventEmitter<void(void)>> GetResetEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetDrawEmitter();
+	std::shared_ptr<events::EventEmitter<void(void)>> GetClearEmitter();
 
 	Asteroids& GetAsteroids();
 
@@ -62,6 +64,8 @@ private:
 	std::shared_ptr<events::EventEmitter<void(void)>> thrustEmitter_;
 	std::shared_ptr<events::EventEmitter<void(void)>> fireEmitter_;
 	std::shared_ptr<events::EventEmitter<void(void)>> resetEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> drawEmitter_;
+	std::shared_ptr<events::EventEmitter<void(void)>> clearEmitter_;
 };
 
 } // end asteroids

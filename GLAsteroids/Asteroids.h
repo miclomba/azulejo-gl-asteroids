@@ -46,6 +46,8 @@ public:
 	std::shared_ptr<events::EventConsumer<void(void)>> GetThrustConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetFireConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetResetConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetDrawConsumer();
+	std::shared_ptr<events::EventConsumer<void(void)>> GetClearConsumer();
 
 private:
 	std::string GenerateUUID() const;
@@ -83,6 +85,8 @@ private:
 	std::shared_ptr<events::EventConsumer<void(void)>> thrustConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> fireConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> resetConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> drawConsumer_;
+	std::shared_ptr<events::EventConsumer<void(void)>> clearConsumer_;
 };
 
 } // end asteroids

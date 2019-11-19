@@ -57,6 +57,8 @@ Asteroids::Asteroids()
 	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Thrust(); });
 	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Fire(); });
 	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ResetGame(); });
+	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Draw(); });
+	clearConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ClearGame(); });
 
 	ResetGame();
 }
@@ -490,4 +492,14 @@ std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetFireConsumer()
 std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetResetConsumer()
 {
 	return resetConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetDrawConsumer()
+{
+	return drawConsumer_;
+}
+
+std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetClearConsumer()
+{
+	return clearConsumer_;
 }
