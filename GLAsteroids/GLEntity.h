@@ -8,12 +8,12 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
-#include "Entities/ISerializableEntity.h"
+#include "FilesystemAdapters/ISerializableEntity.h"
 #include "Resources/Resource2D.h"
 
 namespace asteroids {
 
-class ASTEROIDS_DLL_EXPORT GLEntity : public entity::ISerializableEntity
+class ASTEROIDS_DLL_EXPORT GLEntity : public filesystem_adapters::ISerializableEntity
 {
 public:
     GLEntity();

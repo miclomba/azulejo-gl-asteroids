@@ -12,7 +12,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "Entities/EntityAggregationDeserializer.h"
+#include "FilesystemAdapters/EntityAggregationDeserializer.h"
 #include "Resources/Resource.h"
 #include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
@@ -25,7 +25,7 @@ using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
 using asteroids::Ship;
-using entity::EntityAggregationDeserializer;
+using filesystem_adapters::EntityAggregationDeserializer;
 using resource::IResource;
 using resource::Resource;
 using resource::Resource2D;
@@ -283,7 +283,7 @@ void Ship::RemoveBullet(const Ship::Key& key)
 void Ship::AddBullet(const SharedEntity& bullet)
 {
 	AggregateMember(bullet);
-	Deserializer->RegisterEntity<Bullet>(bullet->GetKey());
+	Deserializer->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
 }
 
 GLint Ship::BulletNumber()
