@@ -8,12 +8,16 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "config.h"
+#include "DatabaseAdapters/ITabularizableEntity.h"
+#include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ISerializableEntity.h"
 #include "Resources/Resource2D.h"
 
 namespace asteroids {
 
-class ASTEROIDS_DLL_EXPORT GLEntity : public filesystem_adapters::ISerializableEntity
+class ASTEROIDS_DLL_EXPORT GLEntity : 
+	public filesystem_adapters::ISerializableEntity, 
+	public database_adapters::ITabularizableEntity
 {
 public:
     GLEntity();
@@ -45,7 +49,14 @@ protected:
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+	void Save(database_adapters::Sqlite& database) const override;
+	void Load(database_adapters::Sqlite& database) override;
+
+	// both ISerializableEntity and ITabularizableEntity override this function so 
+	// we must override it to remove the ambiguity
+	SharedEntity& GetAggregatedMember(const Key& key) const override;
 private:
+
 	resource::Resource2D<GLfloat> frame_;
 	resource::Resource2D<GLfloat> unitVelocity_;
 

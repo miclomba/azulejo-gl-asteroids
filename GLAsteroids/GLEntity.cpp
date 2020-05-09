@@ -12,6 +12,7 @@
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
+using entity::Entity;
 using resource::IResource;
 using resource::Resource2D;
 using resource::ResourceDeserializer;
@@ -125,6 +126,11 @@ void GLEntity::SetVelocityAngle(const GLfloat velocityAngle)
 	velocityAngle_ = velocityAngle;
 }
 
+Entity::SharedEntity& GLEntity::GetAggregatedMember(const Entity::Key& key) const
+{
+	return Entity::GetAggregatedMember(key);
+};
+
 void GLEntity::Save(ptree& tree, const std::string& path) const 
 {
 	tree.put(VELOCITY_ANGLE_KEY, velocityAngle_);
@@ -161,3 +167,14 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	std::unique_ptr<IResource> deserializedT = deserializer->Deserialize(T_KEY);
 	T_ = *static_cast<Resource2D<GLfloat>*>(deserializedT.get());
 }
+
+void GLEntity::Save(database_adapters::Sqlite& database) const
+{
+
+}
+
+void GLEntity::Load(database_adapters::Sqlite& database)
+{
+
+}
+

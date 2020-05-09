@@ -108,7 +108,7 @@ std::string Ship::GenerateUUID() const
 
 Ship::SharedEntity& Ship::GetBullet(const std::string& key) const
 {
-	return GetAggregatedMember(key);
+	return ISerializableEntity::GetAggregatedMember(key);
 }
 
 std::vector<Ship::Key> Ship::GetBulletKeys() const
@@ -236,7 +236,7 @@ void Ship::DrawBullets()
 	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
 	{
 		SharedEntity& sharedEntity = iter->second;
-		Bullet* bullet = static_cast<Bullet*>(sharedEntity.get());
+		Bullet* bullet = dynamic_cast<Bullet*>(sharedEntity.get());
 		if (bullet && bullet->IsOutOfBounds())
 		{
 			bulletsToRemove.push_back(bullet->GetKey());

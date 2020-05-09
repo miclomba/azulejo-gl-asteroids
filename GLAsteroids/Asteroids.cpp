@@ -185,7 +185,7 @@ void Asteroids::DrawRockAndShip()
 		if (!sharedRock)
 			continue;
 
-		Rock* rock = static_cast<Rock*>(sharedRock.get());
+		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
 		randy = rand();
 		randy = (randy % 9) + 1;
 		rock->Draw((GLfloat)(M_PI*randy / 5),
@@ -196,7 +196,7 @@ void Asteroids::DrawRockAndShip()
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = static_cast<Ship*>(sharedShip.get());
+		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 		ship->Draw(orientationAngle_, thrust_);
 	}
 }
@@ -236,7 +236,7 @@ void Asteroids::ClearRocks()
 	for (Key& key : rockKeys)
 	{
 		SharedEntity& sharedRock = GetRock(key);
-		Rock* rock = static_cast<Rock*>(sharedRock.get());
+		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
 		RemoveMember(sharedRock);
 	}
 }
@@ -265,14 +265,14 @@ void Asteroids::DetermineCollisions()
 	if (!sharedShip)
 		return;
 
-	Ship* ship = static_cast<Ship*>(sharedShip.get());
+	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 	std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys();
 
 	std::vector<std::pair<Bullet*, Key>> collisionPairs;
 	for (Ship::Key& bulletKey : bulletKeys)
 	{
 		Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
-		Bullet* bullet = static_cast<Bullet*>(sharedBullet.get());
+		Bullet* bullet = dynamic_cast<Bullet*>(sharedBullet.get());
 		Rock* rock = Collision(bullet);
 
 		if (rock)
@@ -284,7 +284,7 @@ void Asteroids::DetermineCollisions()
 		if (HasRock(collisions.second))
 		{
 			SharedEntity& rock = GetRock(collisions.second);
-			ProcessCollision(collisions.first, static_cast<Rock*>(rock.get()));
+			ProcessCollision(collisions.first, dynamic_cast<Rock*>(rock.get()));
 			if (!HasRocks())
 			{
 				ResetGame();
@@ -321,7 +321,7 @@ Rock* Asteroids::Collision(Bullet* _bullet)
 		if (!sharedRock)
 			continue;
 
-		Rock* rock = static_cast<Rock*>(sharedRock.get());
+		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
         ray= sqrt(pow(fabs(_bullet->GetFrame().GetData(0,0) - rock->GetFrame().GetData(0,0)),2) +
                 pow(fabs(_bullet->GetFrame().GetData(1,0) - rock->GetFrame().GetData(1,0)),2));
         
@@ -345,7 +345,7 @@ Rock* Asteroids::ShipCollision() {
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = static_cast<Ship*>(sharedShip.get());
+		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 		std::vector<Key> rockKeys = GetRockKeys();
 		for (Key& key : rockKeys)
 		{
@@ -353,7 +353,7 @@ Rock* Asteroids::ShipCollision() {
 			if (!sharedRock)
 				continue;
 
-			Rock* rock = static_cast<Rock*>(sharedRock.get());
+			Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
 			ray = sqrt(pow(fabs(ship->GetFrame().GetData(0,0) - rock->GetFrame().GetData(0,0)), 2) +
 				pow(fabs(ship->GetFrame().GetData(1,0) - rock->GetFrame().GetData(1,0)), 2));
 
@@ -445,7 +445,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 	if (!sharedShip)
 		return;
 
-	Ship* ship = static_cast<Ship*>(sharedShip.get());
+	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 
 	std::string bulletKey = bullet->GetKey();
 
@@ -472,7 +472,7 @@ void Asteroids::Fire()
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = static_cast<Ship*>(sharedShip.get());
+		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 		ship->Fire();
 	}
 }
