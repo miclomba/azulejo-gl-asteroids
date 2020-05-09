@@ -15,6 +15,10 @@
 #include "Bullet.h"
 #include "GLEntity.h"
 
+namespace database_adapters {
+class Sqlite;
+} // end database_adapters
+
 namespace asteroids {
 
 class ASTEROIDS_DLL_EXPORT Ship : public GLEntity
@@ -40,6 +44,9 @@ public:
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
+
+	void Save(database_adapters::Sqlite& database) const override;
+	void Load(database_adapters::Sqlite& database) override;
 
 	static std::string ShipKey();
 

@@ -7,6 +7,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "DatabaseAdapters/Sqlite.h"
 #include "Resources/Resource.h"
 #include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
@@ -17,6 +18,7 @@
 using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
+using database_adapters::Sqlite;
 using resource::IResource;
 using resource::Resource;
 using resource::Resource2D;
@@ -214,4 +216,14 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	bulletIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.release());
 	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
 	projectionMatrix_ = *static_cast<Resource2D<GLfloat>*>(deserializedProjection.release());
+}
+
+void Bullet::Save(Sqlite& database) const
+{
+
+}
+
+void Bullet::Load(Sqlite& database)
+{
+
 }

@@ -8,6 +8,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "DatabaseAdapters/Sqlite.h"
 #include "Resources/Resource.h"
 #include "Resources/Resource2D.h"
 #include "Resources/ResourceDeserializer.h"
@@ -20,6 +21,7 @@ using boost::property_tree::ptree;
 using asteroids::GLEntity;
 using asteroids::Rock;
 using asteroids::State;
+using database_adapters::Sqlite;
 using resource::IResource;
 using resource::Resource;
 using resource::Resource2D;
@@ -299,4 +301,14 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	rockVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
 	rockIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
+}
+
+void Rock::Save(Sqlite& database) const
+{
+
+}
+
+void Rock::Load(Sqlite& database)
+{
+
 }

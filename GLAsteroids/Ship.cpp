@@ -12,6 +12,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityAggregationDeserializer.h"
 #include "Resources/Resource.h"
 #include "Resources/Resource2D.h"
@@ -25,6 +26,7 @@ using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
 using asteroids::Ship;
+using database_adapters::Sqlite;
 using filesystem_adapters::EntityAggregationDeserializer;
 using resource::IResource;
 using resource::Resource;
@@ -340,5 +342,15 @@ void Ship::Load(ptree& tree, const std::string& path)
 	shipIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
 	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2D<GLfloat>*>(deserializedOrientation.get());
+}
+
+void Ship::Save(Sqlite& database) const
+{
+
+}
+
+void Ship::Load(Sqlite& database)
+{
+
 }
 

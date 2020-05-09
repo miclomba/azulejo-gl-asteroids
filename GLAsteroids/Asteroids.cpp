@@ -15,6 +15,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityAggregationDeserializer.h"
 #include "FilesystemAdapters/EntityAggregationSerializer.h"
 #include "Events/EventConsumer.h"
@@ -29,6 +30,7 @@ using asteroids::Bullet;
 using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
+using database_adapters::Sqlite;
 using events::EventConsumer;
 using filesystem_adapters::EntityAggregationDeserializer;
 using filesystem_adapters::EntityAggregationSerializer;
@@ -507,6 +509,16 @@ void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
 	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
+}
+
+void Asteroids::Save(Sqlite& database) const
+{
+
+}
+
+void Asteroids::Load(Sqlite& database)
+{
+
 }
 
 void Asteroids::Serialize()

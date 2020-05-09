@@ -14,6 +14,10 @@
 #include "Ship.h"
 #include "GLEntity.h"
 
+namespace database_adapters {
+class Sqlite;
+} // end database_adapters
+
 namespace asteroids {
 
 class ASTEROIDS_DLL_EXPORT Asteroids : public GLEntity
@@ -28,6 +32,9 @@ public:
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
+
+	void Save(database_adapters::Sqlite& database) const override;
+	void Load(database_adapters::Sqlite& database) override;
 
 	std::shared_ptr<events::EventConsumer<void(void)>> GetLeftArrowConsumer();
 	std::shared_ptr<events::EventConsumer<void(void)>> GetRightArrowConsumer();
