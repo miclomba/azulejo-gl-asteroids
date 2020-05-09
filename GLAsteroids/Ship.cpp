@@ -14,10 +14,10 @@
 
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityAggregationDeserializer.h"
+#include "FilesystemAdapters/ResourceDeserializer.h"
+#include "FilesystemAdapters/ResourceSerializer.h"
 #include "Resources/Resource.h"
 #include "Resources/Resource2D.h"
-#include "Resources/ResourceDeserializer.h"
-#include "Resources/ResourceSerializer.h"
 
 #include "Bullet.h"
 #include "Ship.h"
@@ -28,11 +28,11 @@ using asteroids::GLEntity;
 using asteroids::Ship;
 using database_adapters::Sqlite;
 using filesystem_adapters::EntityAggregationDeserializer;
+using filesystem_adapters::ResourceDeserializer;
+using filesystem_adapters::ResourceSerializer;
 using resource::IResource;
 using resource::Resource;
 using resource::Resource2D;
-using resource::ResourceDeserializer;
-using resource::ResourceSerializer;
 
 namespace fs = std::filesystem;
 
