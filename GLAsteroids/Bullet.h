@@ -6,8 +6,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "Resources/Resource.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "config.h"
 #include "GLEntity.h"
@@ -17,6 +17,10 @@ class Sqlite;
 } // end database_adapters
 
 namespace asteroids {
+
+using ResourceGLubyte = ContainerResource<GLubyte>;
+using ResourceGLfloat = ContainerResource<GLfloat>;
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 class ASTEROIDS_DLL_EXPORT Bullet : public GLEntity
 {
@@ -50,9 +54,9 @@ private:
     bool bulletInitialized_ = false;
     bool outOfBounds_ = false;
 
-	resource::Resource2D<GLfloat> bulletVertices_;
-	resource::Resource<GLubyte> bulletIndices_;
-	resource::Resource2D<GLfloat> projectionMatrix_;
+	Resource2DGLfloat bulletVertices_;
+	ResourceGLubyte bulletIndices_;
+	Resource2DGLfloat projectionMatrix_;
 };
 
 } // end asteroids

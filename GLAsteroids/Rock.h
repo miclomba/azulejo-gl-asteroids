@@ -7,8 +7,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "Resources/Resource.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "config.h"
 #include "GLEntity.h"
@@ -18,6 +18,9 @@ class Sqlite;
 } // end database_adapters
 
 namespace asteroids {
+
+using ResourceGLubyte = ContainerResource<GLubyte>;
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 enum class State {LARGE,MEDIUM,SMALL};
 
@@ -67,8 +70,8 @@ private:
     State state_;
 	bool rockInitialized_{false};
     /*=============================== Geometry ===============================*/
-    resource::Resource2D<GLfloat> rockVertices_;
-	resource::Resource<GLubyte> rockIndices_;
+    Resource2DGLfloat rockVertices_;
+	ResourceGLubyte rockIndices_;
 };
 
 } // end asteroids

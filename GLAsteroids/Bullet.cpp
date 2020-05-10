@@ -10,8 +10,8 @@
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
-#include "Resources/Resource.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
 
@@ -22,8 +22,9 @@ using database_adapters::Sqlite;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 using resource::IResource;
-using resource::Resource;
-using resource::Resource2D;
+
+using ResourceGLubyte = ContainerResource<GLubyte>;
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace fs = std::filesystem;
 
@@ -36,6 +37,9 @@ const std::string BULLET_VERTICES_KEY = "bullet_vertices";
 const std::string BULLET_INDICES_KEY = "bullet_indices";
 const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
 const std::string TRUE_VAL = "true";
+
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Bullet::BulletPrefix()
@@ -46,12 +50,12 @@ std::string Bullet::BulletPrefix()
 Bullet::Bullet() :
 	GLEntity()
 {
-	bulletIndices_ = Resource<GLubyte>({0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4});
-	projectionMatrix_ = Resource2D<GLfloat>(
+	bulletIndices_ = ResourceGLubyte({0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4});
+	projectionMatrix_ = Resource2DGLfloat(
 		std::vector<std::vector<GLfloat>>(4, std::vector<GLfloat>(4))
 	); 
 
-	bulletVertices_ = Resource2D<GLfloat>({
+	bulletVertices_ = Resource2DGLfloat({
 		{-0.2f,-0.1f,0.5f}, {0.2f,-0.0f,0.5f},
 		{0.2f,0.0f,0.5f}, {-0.2f,0.1f,0.5f},
 		{-0.2f,-0.1f,1.0f}, {0.2f,-0.0f,1.0f},
@@ -60,11 +64,11 @@ Bullet::Bullet() :
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(BULLET_VERTICES_KEY))
-		deserializer->RegisterResource<GLfloat>(BULLET_VERTICES_KEY);
+		deserializer->RegisterResource<GLfloat>(BULLET_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(BULLET_INDICES_KEY))
-		deserializer->RegisterResource<GLubyte>(BULLET_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(BULLET_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(PROJECTION_MATRIX_KEY))
-		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY);
+		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 }
 
 Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
@@ -72,14 +76,14 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y) :
 {
     SetMass(0.5f);
 
-    SetFrame(Resource2D<GLfloat>({
+    SetFrame(Resource2DGLfloat({
 		{_x,   0.0f,0.0f,0.0f},
 		{_y,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f}
 	}));
 
-    SetUnitVelocity(Resource2D<GLfloat>({
+    SetUnitVelocity(Resource2DGLfloat({
 		{1.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
@@ -103,7 +107,7 @@ void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed
 
 void Bullet::SetSMatrix()
 {
-	S_ = Resource2D<GLfloat>({
+	S_ = Resource2DGLfloat({
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
@@ -113,7 +117,7 @@ void Bullet::SetSMatrix()
 
 void Bullet::SetTMatrix()
 {
-	T_ = Resource2D<GLfloat>({
+	T_ = Resource2DGLfloat({
 		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
 		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
 		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
@@ -168,7 +172,7 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 
 	std::vector<std::vector<GLfloat>> buffer({ std::vector<GLfloat>(16) });
 	glGetFloatv(GL_PROJECTION_MATRIX, buffer[0].data());
-	projectionMatrix_ = Resource2D<GLfloat>(buffer);
+	projectionMatrix_ = Resource2DGLfloat(buffer);
 
     glPushMatrix();
 	{
@@ -213,11 +217,11 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
-	bulletVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.release());
+	bulletVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.release());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
-	bulletIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.release());
+	bulletIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.release());
 	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
-	projectionMatrix_ = *static_cast<Resource2D<GLfloat>*>(deserializedProjection.release());
+	projectionMatrix_ = *static_cast<Resource2DGLfloat*>(deserializedProjection.release());
 }
 
 void Bullet::Save(Sqlite& database) const

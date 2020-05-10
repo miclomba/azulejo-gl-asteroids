@@ -11,9 +11,11 @@
 #include "DatabaseAdapters/ITabularizableEntity.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ISerializableEntity.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 namespace asteroids {
+
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 class ASTEROIDS_DLL_EXPORT GLEntity : 
 	public filesystem_adapters::ISerializableEntity, 
@@ -27,24 +29,24 @@ public:
 	GLEntity& operator=(const GLEntity&);
 	GLEntity& operator=(GLEntity&&);
 
-	resource::Resource2D<GLfloat>& GetFrame();
-	resource::Resource2D<GLfloat>& GetUnitVelocity();
+	Resource2DGLfloat& GetFrame();
+	Resource2DGLfloat& GetUnitVelocity();
 	GLfloat GetSpeed() const;
 	GLfloat GetMass() const;
 	GLfloat GetVelocityAngle() const;
 
 	void SetFrame(int i, int j, GLfloat val);
-	void SetFrame(const resource::Resource2D<GLfloat>& frame);
+	void SetFrame(const Resource2DGLfloat& frame);
 	void SetUnitVelocity(int i, int j, GLfloat val);
-	void SetUnitVelocity(const resource::Resource2D<GLfloat>& unitVelocity);
+	void SetUnitVelocity(const Resource2DGLfloat& unitVelocity);
 	void SetSpeed(const GLfloat);
 	void SetMass(const GLfloat);
 	void SetVelocityAngle(const GLfloat);
 
 protected:
-	resource::Resource2D<GLfloat> S_;
-	resource::Resource2D<GLfloat> T_;
-	resource::Resource2D<GLfloat> R_;
+	Resource2DGLfloat S_;
+	Resource2DGLfloat T_;
+	Resource2DGLfloat R_;
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
@@ -57,8 +59,8 @@ protected:
 	SharedEntity& GetAggregatedMember(const Key& key) const override;
 private:
 
-	resource::Resource2D<GLfloat> frame_;
-	resource::Resource2D<GLfloat> unitVelocity_;
+	Resource2DGLfloat frame_;
+	Resource2DGLfloat unitVelocity_;
 
     GLfloat velocityAngle_ = 0.0;
     GLfloat speed_ = 0.0;

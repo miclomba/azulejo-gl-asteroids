@@ -9,7 +9,7 @@
 #include "FilesystemAdapters/ResourceSerializer.h"
 
 #include "GLEntity.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
@@ -17,7 +17,8 @@ using entity::Entity;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 using resource::IResource;
-using resource::Resource2D;
+
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
 {
@@ -29,18 +30,20 @@ const std::string R_KEY = "R";
 const std::string VELOCITY_ANGLE_KEY = "velocity_angle";
 const std::string SPEED_KEY = "speed";
 const std::string MASS_KEY = "mass";
+
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 GLEntity::GLEntity() 
 {
-	frame_ = Resource2D<GLfloat>({
+	frame_ = Resource2DGLfloat({
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0}
 	});
 
-	unitVelocity_ = Resource2D<GLfloat>({
+	unitVelocity_ = Resource2DGLfloat({
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
@@ -50,15 +53,15 @@ GLEntity::GLEntity()
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 
 	if (!deserializer->HasSerializationKey(UNIT_VELOCITY_KEY))
-		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY);
+		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(FRAME_KEY))
-		deserializer->RegisterResource<GLfloat>(FRAME_KEY);
+		deserializer->RegisterResource<GLfloat>(FRAME_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(S_KEY))
-		deserializer->RegisterResource<GLfloat>(S_KEY);
+		deserializer->RegisterResource<GLfloat>(S_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(R_KEY))
-		deserializer->RegisterResource<GLfloat>(R_KEY);
+		deserializer->RegisterResource<GLfloat>(R_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(T_KEY))
-		deserializer->RegisterResource<GLfloat>(T_KEY);
+		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 }
 
 GLEntity::~GLEntity() = default;
@@ -67,12 +70,12 @@ GLEntity::GLEntity(GLEntity&&) = default;
 GLEntity& GLEntity::operator=(const GLEntity&) = default;
 GLEntity& GLEntity::operator=(GLEntity&&) = default;
 
-Resource2D<GLfloat>& GLEntity::GetFrame()
+Resource2DGLfloat& GLEntity::GetFrame()
 {
 	return frame_;
 }
 
-Resource2D<GLfloat>& GLEntity::GetUnitVelocity()
+Resource2DGLfloat& GLEntity::GetUnitVelocity()
 {
 	return unitVelocity_;
 }
@@ -97,7 +100,7 @@ void GLEntity::SetFrame(const int i, const int j, const GLfloat val)
 	frame_.GetData(i,j) = val;
 }
 
-void GLEntity::SetFrame(const Resource2D<GLfloat>& frame)
+void GLEntity::SetFrame(const Resource2DGLfloat& frame)
 {
 	frame_ = frame;
 }
@@ -107,7 +110,7 @@ void GLEntity::SetUnitVelocity(const int i, const int j, const GLfloat val)
 	unitVelocity_.GetData(i,j) = val;
 }
 
-void GLEntity::SetUnitVelocity(const Resource2D<GLfloat>& unitVelocity)
+void GLEntity::SetUnitVelocity(const Resource2DGLfloat& unitVelocity)
 {
 	unitVelocity_ = unitVelocity;
 }
@@ -158,15 +161,15 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedUnitVelocity = deserializer->Deserialize(UNIT_VELOCITY_KEY);
-	unitVelocity_ = *static_cast<Resource2D<GLfloat>*>(deserializedUnitVelocity.get());
+	unitVelocity_ = *static_cast<Resource2DGLfloat*>(deserializedUnitVelocity.get());
 	std::unique_ptr<IResource> deserializedFrame = deserializer->Deserialize(FRAME_KEY);
-	frame_ = *static_cast<Resource2D<GLfloat>*>(deserializedFrame.get());
+	frame_ = *static_cast<Resource2DGLfloat*>(deserializedFrame.get());
 	std::unique_ptr<IResource> deserializedS = deserializer->Deserialize(S_KEY);
-	S_ = *static_cast<Resource2D<GLfloat>*>(deserializedS.get());
+	S_ = *static_cast<Resource2DGLfloat*>(deserializedS.get());
 	std::unique_ptr<IResource> deserializedR = deserializer->Deserialize(R_KEY);
-	R_ = *static_cast<Resource2D<GLfloat>*>(deserializedR.get());
+	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
 	std::unique_ptr<IResource> deserializedT = deserializer->Deserialize(T_KEY);
-	T_ = *static_cast<Resource2D<GLfloat>*>(deserializedT.get());
+	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
 }
 
 void GLEntity::Save(database_adapters::Sqlite& database) const

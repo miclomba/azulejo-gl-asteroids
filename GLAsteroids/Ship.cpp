@@ -16,8 +16,8 @@
 #include "FilesystemAdapters/EntityAggregationDeserializer.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
-#include "Resources/Resource.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
 #include "Ship.h"
@@ -31,8 +31,9 @@ using filesystem_adapters::EntityAggregationDeserializer;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 using resource::IResource;
-using resource::Resource;
-using resource::Resource2D;
+
+using ResourceGLubyte = ContainerResource<GLubyte>;
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace fs = std::filesystem;
 
@@ -44,7 +45,12 @@ const std::string UNIT_ORIENTATION_KEY = "unit_orientation";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string BULLET_FIRED_KEY = "bullet_fired";
 const std::string TRUE_VAL = "true";
+
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
+
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
+
 } // end namespace
 
 std::string Ship::ShipKey()
@@ -57,23 +63,23 @@ Ship::Ship() :
 {
 	SetVelocityAngle(M_PI / 2);
 
-	shipVertices_ = Resource2D<GLfloat>({
+	shipVertices_ = Resource2DGLfloat({
 		{-0.5f,-0.5f,0.5f}, {0.5f,-0.0f,0.5f},
 		{0.5f,0.0f,0.5f}, {-0.5f,0.5f,0.5f},
 		{-0.5f,-0.5f,1.0f}, {0.1f,-0.0f,1.0f},
 		{0.1f,0.0f,1.0f}, {-0.5f,0.5f,1.0f}
 	});
 
-	shipIndices_ = Resource<GLubyte>({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
+	shipIndices_ = ResourceGLubyte({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
 
-	unitOrientation_ = Resource2D<GLfloat>({
+	unitOrientation_ = Resource2DGLfloat({
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f}
 	});
 
-	GetUnitVelocity() = Resource2D<GLfloat>({
+	GetUnitVelocity() = Resource2DGLfloat({
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f},
 		{0.0f,   0.0f,0.0f,0.0f},
@@ -82,11 +88,11 @@ Ship::Ship() :
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
-		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY);
+		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
-		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(UNIT_ORIENTATION_KEY))
-		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY);
+		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 }
 
 Ship::Ship(const Ship::Key& key) :
@@ -153,7 +159,7 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 	if (fabs(_orientationAngle - 0.0f) <= 0.00001f)
 		return;
 
-	R_ = Resource2D<GLfloat>({ 
+	R_ = Resource2DGLfloat({ 
 		{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
 		{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
 		{0.0f,0.0f,1.0f,0.0f},
@@ -174,14 +180,14 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 
 void Ship::MoveShip()
 {
-	S_ = Resource2D<GLfloat>({ 
+	S_ = Resource2DGLfloat({ 
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	T_ = Resource2D<GLfloat>({ 
+	T_ = Resource2DGLfloat({ 
 		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
 		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
 		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
@@ -337,11 +343,11 @@ void Ship::Load(ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
-	shipVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
+	shipVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
-	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
+	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
-	unitOrientation_ = *static_cast<Resource2D<GLfloat>*>(deserializedOrientation.get());
+	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
 }
 
 void Ship::Save(Sqlite& database) const

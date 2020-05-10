@@ -11,8 +11,8 @@
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
-#include "Resources/Resource.h"
-#include "Resources/Resource2D.h"
+#include "test_filesystem_adapters/ContainerResource.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "GLEntity.h"
 #include "Rock.h"
@@ -25,8 +25,9 @@ using database_adapters::Sqlite;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 using resource::IResource;
-using resource::Resource;
-using resource::Resource2D;
+
+using ResourceGLubyte = ContainerResource<GLubyte>;
+using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace fs = std::filesystem;
 
@@ -42,25 +43,28 @@ const std::string& ROCK_VERTICES_KEY = "rock_vertices";
 const std::string& ROCK_INDICES_KEY = "rock_indices";
 const std::string TRUE_VAL = "true";
 
-const Resource2D<GLfloat> rockVerticesL({ 
+const Resource2DGLfloat rockVerticesL({ 
 	{-1.5f,-1.5f,0.5f}, {1.5f,-1.5f,0.5f},
 	{1.5f,1.5f,0.5f}, {-1.5f,1.5f,0.5f},
 	{-1.0f,-1.0f,1.0f}, {1.0f,-1.0f,1.0f},
 	{1.0f,1.0f,1.0f}, {-1.0f,1.0f,1.0f} 
 });
-const Resource2D<GLfloat> rockVerticesM({ 
+const Resource2DGLfloat rockVerticesM({ 
 	{-1.0f,-1.0f,0.5f},	{1.0f,-1.0f,0.5f},
 	{1.0f,1.0f,0.5f}, {-1.0f,1.0f,0.5f},
 	{-0.75f,-0.75f,1.0f}, {0.75f,-0.75f,1.0f},
 	{0.75f,0.75f,1.0f}, {-0.75f,0.75f,1.0f}
 });
-const Resource2D<GLfloat> rockVerticesS({ 
+const Resource2DGLfloat rockVerticesS({ 
 	{-0.5f,-0.5f,0.5f}, {0.5f,-0.5f,0.5f},
 	{0.5f,0.5f,0.5f}, {-0.5f,0.5f,0.5f},
 	{-0.25f,-0.25f,1.0f}, {0.25f,-0.25f,1.0f},
 	{0.25f,0.25f,1.0f}, {-0.25f,0.25f,1.0f}
 });
-Resource<GLubyte> rockIndices({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
+ResourceGLubyte rockIndices({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
+
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Rock::RockPrefix()
@@ -73,9 +77,9 @@ Rock::Rock() :
 {
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
-		deserializer->RegisterResource<GLfloat>(ROCK_VERTICES_KEY);
+		deserializer->RegisterResource<GLfloat>(ROCK_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
 	if (!deserializer->HasSerializationKey(ROCK_INDICES_KEY))
-		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY);
+		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR);
 }
 
 Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : 
@@ -100,14 +104,14 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) :
 
     rockIndices_ = rockIndices;
 
-    GetFrame() = Resource2D<GLfloat>({ 
+    GetFrame() = Resource2DGLfloat({ 
 		{_x,   0.0f,0.0f,0.0f},
         {_y,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {1.0f,   0.0f,0.0f,0.0f}
 	});
 
-    GetUnitVelocity() = Resource2D<GLfloat>({
+    GetUnitVelocity() = Resource2DGLfloat({
 		{1.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
         {0.0f,   0.0f,0.0f,0.0f},
@@ -149,14 +153,14 @@ void Rock::UpdateSpin()
 
 void Rock::MoveRock()
 {
-	S_ = Resource2D<GLfloat>({ 
+	S_ = Resource2DGLfloat({ 
 		{GetSpeed(),0.0f,0.0f,0.0f},
 		{0.0f,GetSpeed(),0.0f,0.0f},
 		{0.0f,0.0f,GetSpeed(),0.0f},
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	T_ = Resource2D<GLfloat>({ 
+	T_ = Resource2DGLfloat({ 
 		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
 		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
 		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
@@ -298,9 +302,9 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	deserializer->SetSerializationPath(path);
 
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
-	rockVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
+	rockVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
-	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
+	rockIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 }
 
 void Rock::Save(Sqlite& database) const
