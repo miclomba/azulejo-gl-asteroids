@@ -52,7 +52,7 @@ private:
 
 	resource::Resource2D<GLfloat> bulletVertices_;
 	resource::Resource<GLubyte> bulletIndices_;
-	resource::Resource<GLfloat> projectionMatrix_;
+	resource::Resource2D<GLfloat> projectionMatrix_;
 };
 
 } // end asteroids

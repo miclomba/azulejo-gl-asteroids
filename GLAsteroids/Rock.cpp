@@ -164,10 +164,10 @@ void Rock::MoveRock()
 	});
 
 	/*======================= p = av + frame =============================*/
-	glLoadMatrixf(GetUnitVelocity().Data());
-	glMultMatrixf(S_.Data());
-	glMultMatrixf(T_.Data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().Data());
+	glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
+	glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
+	glMultMatrixf(static_cast<GLfloat*>(T_.Data()));
+	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(GetFrame().Data()));
 }
 
 void Rock::WrapAroundMoveRock()
@@ -300,7 +300,7 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
 	rockVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
-	rockIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
+	rockIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
 }
 
 void Rock::Save(Sqlite& database) const

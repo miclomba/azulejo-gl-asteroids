@@ -47,7 +47,9 @@ Bullet::Bullet() :
 	GLEntity()
 {
 	bulletIndices_ = Resource<GLubyte>({0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4});
-	projectionMatrix_ = Resource<GLfloat>(std::vector<GLfloat>(16)); 
+	projectionMatrix_ = Resource2D<GLfloat>(
+		std::vector<std::vector<GLfloat>>(4, std::vector<GLfloat>(4))
+	); 
 
 	bulletVertices_ = Resource2D<GLfloat>({
 		{-0.2f,-0.1f,0.5f}, {0.2f,-0.0f,0.5f},
@@ -123,9 +125,9 @@ void Bullet::SetBulletOutOfBounds()
 {
 	GLfloat epsilon = 3.0f;
 
-	GLfloat right = (1 / fabs(projectionMatrix_.Data()[0]));
+	GLfloat right = (1 / fabs(static_cast<GLfloat*>(projectionMatrix_.Data())[0]));
 	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(projectionMatrix_.Data()[5]));
+	GLfloat top = (1 / fabs(static_cast<GLfloat*>(projectionMatrix_.Data())[5]));
 	GLfloat bottom = -1 * top;
 
 	if ((GetFrame().GetData(0,0) <= left - epsilon) || (GetFrame().GetData(0,0) >= right + epsilon) ||
@@ -147,11 +149,11 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 		SetSMatrix();
 		SetTMatrix();
 
-		glLoadMatrixf(GetUnitVelocity().Data());
-		glMultMatrixf(S_.Data());
-		glMultMatrixf(T_.Data());
+		glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
+		glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
+		glMultMatrixf(static_cast<GLfloat*>(T_.Data()));
 
-		glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().Data());
+		glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(GetFrame().Data()));
 	};
 
 	auto DrawBullet = [this]()
@@ -213,7 +215,7 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
 	bulletVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.release());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
-	bulletIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.release());
+	bulletIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.release());
 	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
 	projectionMatrix_ = *static_cast<Resource2D<GLfloat>*>(deserializedProjection.release());
 }

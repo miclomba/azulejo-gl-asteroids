@@ -160,9 +160,9 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 		{0.0f,0.0f,0.0f,1.0f} 
 	});
 
-	glLoadMatrixf(unitOrientation_.Data());
-	glMultMatrixf(R_.Data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, unitOrientation_.Data());
+	glLoadMatrixf(static_cast<GLfloat*>(unitOrientation_.Data()));
+	glMultMatrixf(static_cast<GLfloat*>(R_.Data()));
+	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(unitOrientation_.Data()));
 
 	orientationAngle_ = (GLfloat)(atan(unitOrientation_.GetData(1,0) /
 		unitOrientation_.GetData(0,0)));
@@ -189,10 +189,10 @@ void Ship::MoveShip()
 	});
 
 	/*======================= p = av + frame =============================*/
-	glLoadMatrixf(GetUnitVelocity().Data());
-	glMultMatrixf(S_.Data());
-	glMultMatrixf(T_.Data());
-	glGetFloatv(GL_MODELVIEW_MATRIX, GetFrame().Data());
+	glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
+	glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
+	glMultMatrixf(static_cast<GLfloat*>(T_.Data()));
+	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(GetFrame().Data()));
 }
 
 void Ship::WrapAroundMoveShip()
@@ -339,7 +339,7 @@ void Ship::Load(ptree& tree, const std::string& path)
 	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
 	shipVertices_ = *static_cast<Resource2D<GLfloat>*>(deserializedVertices.get());
 	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
-	shipIndices_ = *static_cast<Resource2D<GLubyte>*>(deserializedIndices.get());
+	shipIndices_ = *static_cast<Resource<GLubyte>*>(deserializedIndices.get());
 	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2D<GLfloat>*>(deserializedOrientation.get());
 }
