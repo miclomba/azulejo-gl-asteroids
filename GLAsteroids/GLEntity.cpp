@@ -5,6 +5,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
 
@@ -14,9 +15,9 @@
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
 using entity::Entity;
+using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
-using resource::IResource;
 
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
@@ -31,7 +32,7 @@ const std::string VELOCITY_ANGLE_KEY = "velocity_angle";
 const std::string SPEED_KEY = "speed";
 const std::string MASS_KEY = "mass";
 
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 GLEntity::GLEntity() 
@@ -160,15 +161,15 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<IResource> deserializedUnitVelocity = deserializer->Deserialize(UNIT_VELOCITY_KEY);
+	std::unique_ptr<ISerializableResource> deserializedUnitVelocity = deserializer->Deserialize(UNIT_VELOCITY_KEY);
 	unitVelocity_ = *static_cast<Resource2DGLfloat*>(deserializedUnitVelocity.get());
-	std::unique_ptr<IResource> deserializedFrame = deserializer->Deserialize(FRAME_KEY);
+	std::unique_ptr<ISerializableResource> deserializedFrame = deserializer->Deserialize(FRAME_KEY);
 	frame_ = *static_cast<Resource2DGLfloat*>(deserializedFrame.get());
-	std::unique_ptr<IResource> deserializedS = deserializer->Deserialize(S_KEY);
+	std::unique_ptr<ISerializableResource> deserializedS = deserializer->Deserialize(S_KEY);
 	S_ = *static_cast<Resource2DGLfloat*>(deserializedS.get());
-	std::unique_ptr<IResource> deserializedR = deserializer->Deserialize(R_KEY);
+	std::unique_ptr<ISerializableResource> deserializedR = deserializer->Deserialize(R_KEY);
 	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
-	std::unique_ptr<IResource> deserializedT = deserializer->Deserialize(T_KEY);
+	std::unique_ptr<ISerializableResource> deserializedT = deserializer->Deserialize(T_KEY);
 	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
 }
 

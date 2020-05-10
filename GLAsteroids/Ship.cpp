@@ -14,6 +14,7 @@
 
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityAggregationDeserializer.h"
+#include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
 #include "test_filesystem_adapters/ContainerResource.h"
@@ -28,9 +29,9 @@ using asteroids::GLEntity;
 using asteroids::Ship;
 using database_adapters::Sqlite;
 using filesystem_adapters::EntityAggregationDeserializer;
+using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
-using resource::IResource;
 
 using ResourceGLubyte = ContainerResource<GLubyte>;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
@@ -48,8 +49,8 @@ const std::string TRUE_VAL = "true";
 
 EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
 
-auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
 
 } // end namespace
 
@@ -342,11 +343,11 @@ void Ship::Load(ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
 	shipVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
-	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
 	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
-	std::unique_ptr<IResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
+	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
 }
 

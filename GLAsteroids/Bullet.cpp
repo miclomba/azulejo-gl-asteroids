@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "DatabaseAdapters/Sqlite.h"
+#include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
 #include "test_filesystem_adapters/ContainerResource.h"
@@ -19,9 +20,9 @@ using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
 using database_adapters::Sqlite;
+using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
-using resource::IResource;
 
 using ResourceGLubyte = ContainerResource<GLubyte>;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
@@ -38,8 +39,8 @@ const std::string BULLET_INDICES_KEY = "bullet_indices";
 const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
 const std::string TRUE_VAL = "true";
 
-auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Bullet::BulletPrefix()
@@ -216,11 +217,11 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
 	bulletVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.release());
-	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
 	bulletIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.release());
-	std::unique_ptr<IResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
+	std::unique_ptr<ISerializableResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
 	projectionMatrix_ = *static_cast<Resource2DGLfloat*>(deserializedProjection.release());
 }
 

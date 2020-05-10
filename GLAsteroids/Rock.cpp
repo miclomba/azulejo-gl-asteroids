@@ -9,6 +9,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "DatabaseAdapters/Sqlite.h"
+#include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
 #include "test_filesystem_adapters/ContainerResource.h"
@@ -22,9 +23,9 @@ using asteroids::GLEntity;
 using asteroids::Rock;
 using asteroids::State;
 using database_adapters::Sqlite;
+using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
-using resource::IResource;
 
 using ResourceGLubyte = ContainerResource<GLubyte>;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
@@ -63,8 +64,8 @@ const Resource2DGLfloat rockVerticesS({
 });
 ResourceGLubyte rockIndices({ 0,3,2,1,2,3,7,6,0,4,7,3,1,2,6,5,4,5,6,7,0,1,5,4 });
 
-auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<ResourceGLubyte>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<resource::IResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Rock::RockPrefix()
@@ -301,9 +302,9 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<IResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
 	rockVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
-	std::unique_ptr<IResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
 	rockIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 }
 
