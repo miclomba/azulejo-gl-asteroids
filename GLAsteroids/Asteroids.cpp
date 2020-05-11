@@ -16,8 +16,8 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "DatabaseAdapters/Sqlite.h"
-#include "FilesystemAdapters/EntityAggregationDeserializer.h"
-#include "FilesystemAdapters/EntityAggregationSerializer.h"
+#include "FilesystemAdapters/EntityDeserializer.h"
+#include "FilesystemAdapters/EntitySerializer.h"
 #include "Events/EventConsumer.h"
 #include "Bullet.h"
 #include "Rock.h"
@@ -32,8 +32,8 @@ using asteroids::Ship;
 using asteroids::State;
 using database_adapters::Sqlite;
 using events::EventConsumer;
-using filesystem_adapters::EntityAggregationDeserializer;
-using filesystem_adapters::EntityAggregationSerializer;
+using filesystem_adapters::EntityDeserializer;
+using filesystem_adapters::EntitySerializer;
 
 namespace fs = std::filesystem;
 namespace pt = boost::property_tree;
@@ -48,8 +48,8 @@ const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string THRUST_KEY = "thrust";
 const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
 
-EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
-EntityAggregationSerializer* const Serializer = EntityAggregationSerializer::GetInstance();
+EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
+EntitySerializer* const Serializer = EntitySerializer::GetInstance();
 
 void RegisterEntities(const ptree& tree)
 {

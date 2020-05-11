@@ -13,7 +13,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "DatabaseAdapters/Sqlite.h"
-#include "FilesystemAdapters/EntityAggregationDeserializer.h"
+#include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
@@ -28,7 +28,7 @@ using asteroids::Bullet;
 using asteroids::GLEntity;
 using asteroids::Ship;
 using database_adapters::Sqlite;
-using filesystem_adapters::EntityAggregationDeserializer;
+using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
@@ -47,7 +47,7 @@ const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string BULLET_FIRED_KEY = "bullet_fired";
 const std::string TRUE_VAL = "true";
 
-EntityAggregationDeserializer* const Deserializer = EntityAggregationDeserializer::GetInstance();
+EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
 
 auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
 auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
