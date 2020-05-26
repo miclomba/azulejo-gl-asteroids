@@ -15,11 +15,16 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "DatabaseAdapters/EntityDetabularizer.h"
+#include "DatabaseAdapters/EntityTabularizer.h"
+#include "FilesystemAdapters/EntitySerializer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/EntitySerializer.h"
 #include "Events/EventConsumer.h"
+
 #include "Bullet.h"
+#include "Common.h"
 #include "Rock.h"
 #include "Ship.h"
 
@@ -30,6 +35,8 @@ using asteroids::Bullet;
 using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
+using database_adapters::EntityDetabularizer;
+using database_adapters::EntityTabularizer;
 using database_adapters::Sqlite;
 using events::EventConsumer;
 using filesystem_adapters::EntityDeserializer;
@@ -46,10 +53,11 @@ const std::string SCORE_KEY = "score";
 const std::string ROCK_COUNT_KEY = "rock_count";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string THRUST_KEY = "thrust";
-const fs::path SERIALIZATION_PATH = fs::path(USERS_PATH) / "miclomba" / "desktop" / "asteroids.json";
 
 EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
 EntitySerializer* const Serializer = EntitySerializer::GetInstance();
+EntityDetabularizer* const Detabularizer = EntityDetabularizer::GetInstance();
+EntityTabularizer* const Tabularizer = EntityTabularizer::GetInstance();
 
 void RegisterEntities(const ptree& tree)
 {
@@ -59,13 +67,29 @@ void RegisterEntities(const ptree& tree)
 		ptree node = keyValue.second;
 
 		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+		{
 			Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+			Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+			Rock::RegisterResources(nodeKey);
+		}
 		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+		{
 			Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+			Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+			Bullet::RegisterResources(nodeKey);
+		}
 		else if (nodeKey == Ship::ShipKey())
+		{
 			Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+			Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+			Ship::RegisterResources(nodeKey);
+		}
 		else if (nodeKey == ASTEROIDS_KEY)
+		{
 			Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+			Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+			Asteroids::RegisterResources(nodeKey);
+		}
 		RegisterEntities(node);
 	}
 }
@@ -73,8 +97,12 @@ void RegisterEntities(const ptree& tree)
 
 Asteroids::Asteroids()
 {
+	SetKey(ASTEROIDS_KEY);
+	Asteroids::RegisterResources(GetKey());
+
 	AggregateMember(Ship::ShipKey());
 	Deserializer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
+	Detabularizer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 
 	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateLeft(); });
 	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateRight(); });
@@ -97,14 +125,18 @@ Asteroids& Asteroids::operator=(Asteroids&&) = default;
 
 void Asteroids::Run()
 {
-	SetKey(ASTEROIDS_KEY);
 	Deserializer->GetRegistry().RegisterEntity<Asteroids>(ASTEROIDS_KEY);
+	Detabularizer->GetRegistry().RegisterEntity<Asteroids>(ASTEROIDS_KEY);
+
 	if (fs::exists(SERIALIZATION_PATH))
 	{
 		ClearGame();
 
 		Deserializer->GetRegistry().UnregisterAll();
 		Deserializer->GetHierarchy().LoadSerializationStructure(SERIALIZATION_PATH.string());
+		Detabularizer->GetRegistry().UnregisterAll();
+		Detabularizer->GetHierarchy().LoadSerializationStructure(SERIALIZATION_PATH.string());
+
 		RegisterEntities(Deserializer->GetHierarchy().GetSerializationStructure());
 
 		Deserializer->LoadEntity(*this);
@@ -147,13 +179,17 @@ void Asteroids::ResetGame()
 	{
         SharedEntity rock = std::make_shared<Rock>(State::LARGE,randy1,randy2);
 		rock->SetKey(Rock::RockPrefix() + uuidStr);
+		Rock::RegisterResources(rock->GetKey());
+
 		AggregateMember(rock);
 		Deserializer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
+		Detabularizer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
 	};
 	auto CreateShip = [this]()
 	{
 		SharedEntity& sharedShip = GetShip();
 		sharedShip = std::make_shared<Ship>(Ship::ShipKey());
+		Ship::RegisterResources(sharedShip->GetKey());
 	};
 
 	ClearRocks();
@@ -408,6 +444,7 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().GetData(0,0), rock->GetFrame().GetData(1,0));
 
 	rock1->SetKey(Rock::RockPrefix() + GenerateUUID()); 
+	Rock::RegisterResources(rock1->GetKey());
 
 	rock1->SetMass(rock->GetMass() / massDenominator);
 	rock1->SetSpeed(rock->GetSpeed());
@@ -439,6 +476,8 @@ void Asteroids::BreakRock(Rock* rock)
 	AggregateMember(rock2);
 	Deserializer->GetRegistry().RegisterEntity<Rock>(rock1->GetKey());
 	Deserializer->GetRegistry().RegisterEntity<Rock>(rock2->GetKey());
+	Detabularizer->GetRegistry().RegisterEntity<Rock>(rock1->GetKey());
+	Detabularizer->GetRegistry().RegisterEntity<Rock>(rock2->GetKey());
 }
 
 void Asteroids::DestroyBullet(Bullet* bullet)
@@ -452,6 +491,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 	std::string bulletKey = bullet->GetKey();
 
 	Deserializer->GetRegistry().UnregisterEntity(bulletKey);
+	Detabularizer->GetRegistry().UnregisterEntity(bulletKey);
 	ship->RemoveBullet(bulletKey);
 }
 
@@ -460,6 +500,7 @@ void Asteroids::DestroyRock(Rock* rock)
 	std::string rockKey = rock->GetKey();
 
 	Deserializer->GetRegistry().UnregisterEntity(rockKey);
+	Detabularizer->GetRegistry().UnregisterEntity(rockKey);
 	RemoveMember(rockKey);
 }
 
@@ -496,8 +537,10 @@ void Asteroids::Thrust()
 
 void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
+#ifndef SAVE_TO_DB
 	if (!fs::exists(path))
 		fs::create_directories(path);
+#endif
 
 	tree.put(SCORE_KEY, score_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
@@ -531,6 +574,9 @@ void Asteroids::Deserialize()
 {
 	Deserializer->GetRegistry().UnregisterAll();
 	Deserializer->GetHierarchy().LoadSerializationStructure(SERIALIZATION_PATH.string());
+	Detabularizer->GetRegistry().UnregisterAll();
+	Detabularizer->GetHierarchy().LoadSerializationStructure(SERIALIZATION_PATH.string());
+
 	RegisterEntities(Deserializer->GetHierarchy().GetSerializationStructure());
 
 	ClearGame();

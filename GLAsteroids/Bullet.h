@@ -33,6 +33,8 @@ public:
 	Bullet& operator=(const Bullet&);
 	Bullet& operator=(Bullet&&);
 
+	static void RegisterResources(const std::string& key);
+
     void Draw(const GLfloat _velocityAngle, const GLfloat _speed);
 
 	bool IsOutOfBounds() const;

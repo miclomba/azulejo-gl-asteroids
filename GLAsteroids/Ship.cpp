@@ -12,6 +12,10 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "DatabaseAdapters/EntityDetabularizer.h"
+#include "DatabaseAdapters/ITabularizableResource.h"
+#include "DatabaseAdapters/ResourceDetabularizer.h"
+#include "DatabaseAdapters/ResourceTabularizer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
@@ -20,6 +24,7 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
+#include "Common.h"
 #include "Bullet.h"
 #include "Ship.h"
 
@@ -27,6 +32,10 @@ using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
 using asteroids::Ship;
+using database_adapters::EntityDetabularizer;
+using database_adapters::ITabularizableResource;
+using database_adapters::ResourceDetabularizer;
+using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
@@ -48,10 +57,12 @@ const std::string BULLET_FIRED_KEY = "bullet_fired";
 const std::string TRUE_VAL = "true";
 
 EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
+EntityDetabularizer* const Detabularizer = EntityDetabularizer::GetInstance();
 
-auto RES_GLUBYTE_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
-
+auto RES_GLUBYTE_CONSTRUCTOR_S = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_T = []()->std::unique_ptr<ITabularizableResource> { return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []()->std::unique_ptr<ITabularizableResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Ship::ShipKey()
@@ -86,20 +97,34 @@ Ship::Ship() :
 		{0.0f,   0.0f,0.0f,0.0f},
 		{1.0f,   0.0f,0.0f,0.0f}
 	});
+}
+
+void Ship::RegisterResources(const std::string& key)
+{
+	GLEntity::RegisterResources(key);
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
-		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
-		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR);
+		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(UNIT_ORIENTATION_KEY))
-		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
+
+	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_VERTICES_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + SHIP_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_INDICES_KEY)))
+		detabularizer->RegisterResource<GLubyte>(FormatKey(key + SHIP_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_ORIENTATION_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_ORIENTATION_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
 Ship::Ship(const Ship::Key& key) :
 	Ship()
 {
 	SetKey(key);
+	Ship::RegisterResources(GetKey());
 }
 
 Ship::~Ship() = default;
@@ -293,6 +318,7 @@ void Ship::AddBullet(const SharedEntity& bullet)
 {
 	AggregateMember(bullet);
 	Deserializer->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
+	Detabularizer->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
 }
 
 GLint Ship::BulletNumber()
@@ -310,6 +336,8 @@ void Ship::Fire()
 
 	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().GetData(0,0), GetFrame().GetData(1,0));
 	bullet->SetKey(key);
+	Bullet::RegisterResources(bullet->GetKey());
+
 	bulletFired_ = true;
 
 	AddBullet(bullet);
@@ -317,13 +345,12 @@ void Ship::Fire()
 
 void Ship::Save(ptree& tree, const std::string& path) const
 {
-	if (!fs::exists(path))
-		fs::create_directories(path);
-
-	GLEntity::Save(tree, path);
-
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
+
+#ifndef SAVE_TO_DB
+	if (!fs::exists(path))
+		fs::create_directories(path);
 
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
 	serializer->SetSerializationPath(path);
@@ -331,6 +358,19 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(shipVertices_, SHIP_VERTICES_KEY);
 	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
 	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
+#else
+	size_t len = path.find("Asteroids", 0);
+	fs::path DB_PATH = path.substr(0, len);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	tabularizer->Tabularize(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
+	tabularizer->Tabularize(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
+	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
+	tabularizer->CloseDatabase();
+#endif
+
+	GLEntity::Save(tree, path);
 }
 
 void Ship::Load(ptree& tree, const std::string& path)
@@ -340,6 +380,7 @@ void Ship::Load(ptree& tree, const std::string& path)
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
+#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -349,6 +390,22 @@ void Ship::Load(ptree& tree, const std::string& path)
 	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
+#else
+	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
+	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
+
+	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
+	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+
+	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_VERTICES_KEY));
+	shipVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
+	std::unique_ptr<ITabularizableResource> deserializedIndices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_INDICES_KEY));
+	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
+	std::unique_ptr<ITabularizableResource> deserializedOrientation = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
+	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
+
+	detabularizer->CloseDatabase();
+#endif
 }
 
 void Ship::Save(Sqlite& database) const

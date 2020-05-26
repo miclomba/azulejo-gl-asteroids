@@ -36,6 +36,8 @@ public:
 	Ship& operator=(const Ship&);
 	Ship& operator=(Ship&&);
 
+	static void RegisterResources(const std::string& key);
+
 	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust);
 	void Fire();
 

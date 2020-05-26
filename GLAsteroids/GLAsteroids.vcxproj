@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Asteroids.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="GLEntity.h" />
     <ClInclude Include="GLGame.h" />

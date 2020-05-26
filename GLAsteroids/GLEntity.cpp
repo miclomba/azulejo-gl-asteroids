@@ -1,24 +1,35 @@
 #include <algorithm>
 #include <array>
+#include <filesystem>
 #include <numeric>
 #include <string>
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "DatabaseAdapters/ITabularizableResource.h"
+#include "DatabaseAdapters/ResourceDetabularizer.h"
+#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
-
-#include "GLEntity.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
+
+#include "Common.h"
+#include "GLEntity.h"
 
 using boost::property_tree::ptree;
 using asteroids::GLEntity;
+using database_adapters::ITabularizableResource;
+using database_adapters::ResourceDetabularizer;
+using database_adapters::ResourceTabularizer;
 using entity::Entity;
+using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 
+namespace fs = std::filesystem;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
@@ -32,37 +43,52 @@ const std::string VELOCITY_ANGLE_KEY = "velocity_angle";
 const std::string SPEED_KEY = "speed";
 const std::string MASS_KEY = "mass";
 
-auto RES2D_GLFLOAT_CONSTRUCTOR = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []()->std::unique_ptr<ISerializableResource> { return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []()->std::unique_ptr<ITabularizableResource> { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
-GLEntity::GLEntity() 
+GLEntity::GLEntity()
 {
 	frame_ = Resource2DGLfloat({
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0},
 		{0.0,0.0,0.0,0.0}
-	});
+		});
 
-	unitVelocity_ = Resource2DGLfloat({
-		{0.0,0.0,0.0,0.0},
-		{0.0,0.0,0.0,0.0},
-		{0.0,0.0,0.0,0.0},
-		{0.0,0.0,0.0,0.0}
-	});
+	unitVelocity_ = frame_;
+	S_ = frame_;
+	R_ = frame_;
+	T_ = frame_;
+}
 
+void GLEntity::RegisterResources(const std::string& key)
+{
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 
 	if (!deserializer->HasSerializationKey(UNIT_VELOCITY_KEY))
-		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(UNIT_VELOCITY_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(FRAME_KEY))
-		deserializer->RegisterResource<GLfloat>(FRAME_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(FRAME_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(S_KEY))
-		deserializer->RegisterResource<GLfloat>(S_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(S_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(R_KEY))
-		deserializer->RegisterResource<GLfloat>(R_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(R_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(T_KEY))
-		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR);
+		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
+
+	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
+
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_VELOCITY_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_VELOCITY_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + FRAME_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + FRAME_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + S_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + S_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + R_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + R_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!detabularizer->HasTabularizationKey(FormatKey(key + T_KEY)))
+		detabularizer->RegisterResource<GLfloat>(FormatKey(key + T_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
 GLEntity::~GLEntity() = default;
@@ -142,6 +168,7 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 	tree.put(SPEED_KEY, speed_);
 	tree.put(MASS_KEY, mass_);
 
+#ifndef SAVE_TO_DB
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
 	serializer->SetSerializationPath(path);
 
@@ -150,6 +177,21 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(S_, S_KEY);
 	serializer->Serialize(R_, R_KEY);
 	serializer->Serialize(T_, T_KEY);
+#else
+	size_t len = path.find("Asteroids", 0);
+	fs::path DB_PATH = path.substr(0, len);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+
+	tabularizer->Tabularize(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
+	tabularizer->Tabularize(frame_, FormatKey(GetKey() + FRAME_KEY));
+	tabularizer->Tabularize(S_, FormatKey(GetKey() + S_KEY));
+	tabularizer->Tabularize(R_, FormatKey(GetKey() + R_KEY));
+	tabularizer->Tabularize(T_, FormatKey(GetKey() + T_KEY));
+
+	tabularizer->CloseDatabase();
+#endif
 }
 
 void GLEntity::Load(ptree& tree, const std::string& path) 
@@ -158,6 +200,7 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
 	mass_ = std::stof(tree.get_child(MASS_KEY).data());
 
+#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -171,6 +214,26 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
 	std::unique_ptr<ISerializableResource> deserializedT = deserializer->Deserialize(T_KEY);
 	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
+#else
+	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
+	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
+
+	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
+	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+
+	std::unique_ptr<ITabularizableResource> deserializedUnitVelocity = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_VELOCITY_KEY));
+	unitVelocity_ = *static_cast<Resource2DGLfloat*>(deserializedUnitVelocity.get());
+	std::unique_ptr<ITabularizableResource> deserializedFrame = detabularizer->Detabularize(FormatKey(GetKey() + FRAME_KEY));
+	frame_ = *static_cast<Resource2DGLfloat*>(deserializedFrame.get());
+	std::unique_ptr<ITabularizableResource> deserializedS = detabularizer->Detabularize(FormatKey(GetKey() + S_KEY));
+	S_ = *static_cast<Resource2DGLfloat*>(deserializedS.get());
+	std::unique_ptr<ITabularizableResource> deserializedR = detabularizer->Detabularize(FormatKey(GetKey() + R_KEY));
+	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
+	std::unique_ptr<ITabularizableResource> deserializedT = detabularizer->Detabularize(FormatKey(GetKey() + T_KEY));
+	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
+
+	detabularizer->CloseDatabase();
+#endif
 }
 
 void GLEntity::Save(database_adapters::Sqlite& database) const

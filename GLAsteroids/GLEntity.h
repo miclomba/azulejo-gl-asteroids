@@ -43,6 +43,8 @@ public:
 	void SetMass(const GLfloat);
 	void SetVelocityAngle(const GLfloat);
 
+	static void RegisterResources(const std::string& key);
+
 protected:
 	Resource2DGLfloat S_;
 	Resource2DGLfloat T_;
