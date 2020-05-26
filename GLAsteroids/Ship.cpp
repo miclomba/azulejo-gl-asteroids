@@ -359,11 +359,8 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
 	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
 #else
-	size_t len = path.find("Asteroids", 0);
-	fs::path DB_PATH = path.substr(0, len);
-
 	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 	tabularizer->Tabularize(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
 	tabularizer->Tabularize(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
 	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
@@ -391,11 +388,8 @@ void Ship::Load(ptree& tree, const std::string& path)
 	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
 #else
-	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
-	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
-
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_VERTICES_KEY));
 	shipVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());

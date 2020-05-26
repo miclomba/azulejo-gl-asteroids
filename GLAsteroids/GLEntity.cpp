@@ -178,11 +178,8 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(R_, R_KEY);
 	serializer->Serialize(T_, T_KEY);
 #else
-	size_t len = path.find("Asteroids", 0);
-	fs::path DB_PATH = path.substr(0, len);
-
 	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	tabularizer->Tabularize(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
 	tabularizer->Tabularize(frame_, FormatKey(GetKey() + FRAME_KEY));
@@ -215,11 +212,8 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	std::unique_ptr<ISerializableResource> deserializedT = deserializer->Deserialize(T_KEY);
 	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
 #else
-	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
-	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
-
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedUnitVelocity = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_VELOCITY_KEY));
 	unitVelocity_ = *static_cast<Resource2DGLfloat*>(deserializedUnitVelocity.get());

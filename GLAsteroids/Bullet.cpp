@@ -229,11 +229,8 @@ void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) co
 	serializer->Serialize(bulletIndices_, BULLET_INDICES_KEY);
 	serializer->Serialize(projectionMatrix_, PROJECTION_MATRIX_KEY);
 #else
-	size_t len = path.find("Asteroids", 0);
-	fs::path DB_PATH = path.substr(0, len);
-
 	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	tabularizer->Tabularize(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	tabularizer->Tabularize(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
@@ -263,11 +260,8 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	std::unique_ptr<ISerializableResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
 	projectionMatrix_ = *static_cast<Resource2DGLfloat*>(deserializedProjection.release());
 #else
-	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
-	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
-
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	bulletVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.release());

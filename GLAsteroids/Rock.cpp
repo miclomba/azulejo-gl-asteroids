@@ -12,7 +12,6 @@
 #include "DatabaseAdapters/ResourceDetabularizer.h"
 #include "DatabaseAdapters/ResourceTabularizer.h"
 #include "DatabaseAdapters/Sqlite.h"
-#include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
@@ -31,7 +30,6 @@ using database_adapters::ITabularizableResource;
 using database_adapters::ResourceDetabularizer;
 using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
-using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
@@ -307,11 +305,8 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 	serializer->Serialize(rockVertices_, ROCK_VERTICES_KEY);
 	serializer->Serialize(rockIndices_, ROCK_INDICES_KEY);
 #else
-	size_t len = path.find("Asteroids", 0);
-	fs::path DB_PATH = path.substr(0, len);
-
 	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	tabularizer->Tabularize(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
 	tabularizer->Tabularize(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
@@ -341,11 +336,8 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
 	rockIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 #else
-	EntityDeserializer* deserializer = EntityDeserializer::GetInstance();
-	fs::path DB_PATH = deserializer->GetHierarchy().GetSerializationPath().parent_path();
-
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(DB_PATH / DB_NAME);
+	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> detabularizedVertices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_VERTICES_KEY));
 	rockVertices_ = *static_cast<Resource2DGLfloat*>(detabularizedVertices.get());
