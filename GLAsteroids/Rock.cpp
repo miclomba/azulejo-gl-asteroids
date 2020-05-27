@@ -295,7 +295,6 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 	tree.put(STATE_KEY, static_cast<int>(state_));
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
-#ifndef SAVE_TO_DB
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
@@ -304,15 +303,6 @@ void Rock::Save(boost::property_tree::ptree& tree, const std::string& path) cons
 
 	serializer->Serialize(rockVertices_, ROCK_VERTICES_KEY);
 	serializer->Serialize(rockIndices_, ROCK_INDICES_KEY);
-#else
-	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-
-	tabularizer->Tabularize(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
-	tabularizer->Tabularize(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
-
-	tabularizer->CloseDatabase();
-#endif
 
 	GLEntity::Save(tree, path);
 }
@@ -327,7 +317,6 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
-#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -335,25 +324,38 @@ void Rock::Load(boost::property_tree::ptree& tree, const std::string& path)
 	rockVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
 	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
 	rockIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
-#else
+}
+
+void Rock::Save(boost::property_tree::ptree& tree, Sqlite& database) const
+{
+	tree.put(SPIN_KEY, spin_);
+	tree.put(SPIN_EPSILON_KEY, spinEpsilon_);
+	tree.put(SPIN_DIRECTION_KEY, spinDirection_);
+	tree.put(STATE_KEY, static_cast<int>(state_));
+	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+
+	tabularizer->Tabularize(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
+	tabularizer->Tabularize(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
+
+	GLEntity::Save(tree, database);
+}
+
+void Rock::Load(boost::property_tree::ptree& tree, Sqlite& database)
+{
+	GLEntity::Load(tree, database);
+
+	spin_ = std::stof(tree.get_child(SPIN_KEY).data());
+	spinEpsilon_ = std::stof(tree.get_child(SPIN_EPSILON_KEY).data());
+	spinDirection_ = std::stoi(tree.get_child(SPIN_DIRECTION_KEY).data());
+	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
+	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
+
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> detabularizedVertices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_VERTICES_KEY));
 	rockVertices_ = *static_cast<Resource2DGLfloat*>(detabularizedVertices.get());
 	std::unique_ptr<ITabularizableResource> detabularizedIndices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_INDICES_KEY));
 	rockIndices_ = *static_cast<ResourceGLubyte*>(detabularizedIndices.get());
-
-	detabularizer->CloseDatabase();
-#endif
-}
-
-void Rock::Save(Sqlite& database) const
-{
-
-}
-
-void Rock::Load(Sqlite& database)
-{
-
 }

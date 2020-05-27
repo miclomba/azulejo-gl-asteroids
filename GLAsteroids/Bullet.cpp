@@ -218,7 +218,6 @@ void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) co
 	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
 
-#ifndef SAVE_TO_DB
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
@@ -228,16 +227,6 @@ void Bullet::Save(boost::property_tree::ptree& tree, const std::string& path) co
 	serializer->Serialize(bulletVertices_, BULLET_VERTICES_KEY);
 	serializer->Serialize(bulletIndices_, BULLET_INDICES_KEY);
 	serializer->Serialize(projectionMatrix_, PROJECTION_MATRIX_KEY);
-#else
-	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-
-	tabularizer->Tabularize(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
-	tabularizer->Tabularize(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
-	tabularizer->Tabularize(projectionMatrix_, FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
-
-	tabularizer->CloseDatabase();
-#endif
 
 	GLEntity::Save(tree, path);
 }
@@ -249,7 +238,6 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
-#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -259,9 +247,30 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	bulletIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.release());
 	std::unique_ptr<ISerializableResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
 	projectionMatrix_ = *static_cast<Resource2DGLfloat*>(deserializedProjection.release());
-#else
+}
+
+void Bullet::Save(boost::property_tree::ptree& tree, Sqlite& database) const
+{
+	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
+	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+
+	tabularizer->Tabularize(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
+	tabularizer->Tabularize(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
+	tabularizer->Tabularize(projectionMatrix_, FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
+
+	GLEntity::Save(tree, database);
+}
+
+void Bullet::Load(boost::property_tree::ptree& tree, Sqlite& database)
+{
+	GLEntity::Load(tree, database);
+
+	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
+	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
+
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	bulletVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.release());
@@ -269,17 +278,4 @@ void Bullet::Load(boost::property_tree::ptree& tree, const std::string& path)
 	bulletIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.release());
 	std::unique_ptr<ITabularizableResource> deserializedProjection = detabularizer->Detabularize(FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
 	projectionMatrix_ = *static_cast<Resource2DGLfloat*>(deserializedProjection.release());
-
-	detabularizer->CloseDatabase();
-#endif
-}
-
-void Bullet::Save(Sqlite& database) const
-{
-
-}
-
-void Bullet::Load(Sqlite& database)
-{
-
 }

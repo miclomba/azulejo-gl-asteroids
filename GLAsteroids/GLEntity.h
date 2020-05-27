@@ -53,8 +53,8 @@ protected:
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
-	void Save(database_adapters::Sqlite& database) const override;
-	void Load(database_adapters::Sqlite& database) override;
+	void Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const override;
+	void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
 	// both ISerializableEntity and ITabularizableEntity override this function so 
 	// we must override it to remove the ambiguity

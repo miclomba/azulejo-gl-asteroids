@@ -17,10 +17,14 @@
 
 #include "DatabaseAdapters/EntityDetabularizer.h"
 #include "DatabaseAdapters/EntityTabularizer.h"
+#include "DatabaseAdapters/ResourceDetabularizer.h"
+#include "DatabaseAdapters/ResourceTabularizer.h"
 #include "FilesystemAdapters/EntitySerializer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/EntitySerializer.h"
+#include "FilesystemAdapters/ResourceDeserializer.h"
+#include "FilesystemAdapters/ResourceSerializer.h"
 #include "Events/EventConsumer.h"
 
 #include "Bullet.h"
@@ -37,10 +41,14 @@ using asteroids::Ship;
 using asteroids::State;
 using database_adapters::EntityDetabularizer;
 using database_adapters::EntityTabularizer;
+using database_adapters::ResourceDetabularizer;
+using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
 using events::EventConsumer;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::EntitySerializer;
+using filesystem_adapters::ResourceDeserializer;
+using filesystem_adapters::ResourceSerializer;
 
 namespace fs = std::filesystem;
 namespace pt = boost::property_tree;
@@ -58,6 +66,10 @@ EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
 EntitySerializer* const Serializer = EntitySerializer::GetInstance();
 EntityDetabularizer* const Detabularizer = EntityDetabularizer::GetInstance();
 EntityTabularizer* const Tabularizer = EntityTabularizer::GetInstance();
+ResourceDeserializer* const RDeserializer = ResourceDeserializer::GetInstance();
+ResourceSerializer* const RSerializer = ResourceSerializer::GetInstance();
+ResourceDetabularizer* const RDetabularizer = ResourceDetabularizer::GetInstance();
+ResourceTabularizer* const RTabularizer = ResourceTabularizer::GetInstance();
 
 void RegisterEntities(const ptree& tree)
 {
@@ -139,7 +151,15 @@ void Asteroids::Run()
 
 		RegisterEntities(Deserializer->GetHierarchy().GetSerializationStructure());
 
+#ifndef SAVE_TO_DB
 		Deserializer->LoadEntity(*this);
+#else
+		Detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+		RDetabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+		Detabularizer->LoadEntity(*this);
+		Detabularizer->CloseDatabase();
+		RDetabularizer->CloseDatabase();
+#endif
 	}
 }
 
@@ -537,10 +557,8 @@ void Asteroids::Thrust()
 
 void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
 {
-#ifndef SAVE_TO_DB
 	if (!fs::exists(path))
 		fs::create_directories(path);
-#endif
 
 	tree.put(SCORE_KEY, score_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
@@ -554,20 +572,33 @@ void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
-void Asteroids::Save(Sqlite& database) const
+void Asteroids::Save(boost::property_tree::ptree& tree, Sqlite& database) const
 {
-
+	tree.put(SCORE_KEY, score_);
+	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
+	tree.put(THRUST_KEY, thrust_);
 }
 
-void Asteroids::Load(Sqlite& database)
+void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
 {
-
+	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
+	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
+	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
 void Asteroids::Serialize()
 {
 	Serializer->GetHierarchy().SetSerializationPath(SERIALIZATION_PATH.string());
+	Tabularizer->GetHierarchy().SetSerializationPath(SERIALIZATION_PATH.string());
+#ifndef SAVE_TO_DB
 	Serializer->Serialize(*this);
+#else
+	Tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+	RTabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+	Tabularizer->Tabularize(*this);
+	Tabularizer->CloseDatabase();
+	RTabularizer->CloseDatabase();
+#endif
 }
 
 void Asteroids::Deserialize()
@@ -580,7 +611,16 @@ void Asteroids::Deserialize()
 	RegisterEntities(Deserializer->GetHierarchy().GetSerializationStructure());
 
 	ClearGame();
+
+#ifndef SAVE_TO_DB
 	Deserializer->LoadEntity(*this);
+#else
+	Detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+	RDetabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+	Detabularizer->LoadEntity(*this);
+	Detabularizer->CloseDatabase();
+	RDetabularizer->CloseDatabase();
+#endif
 }
 
 std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetLeftArrowConsumer()

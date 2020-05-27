@@ -168,7 +168,6 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 	tree.put(SPEED_KEY, speed_);
 	tree.put(MASS_KEY, mass_);
 
-#ifndef SAVE_TO_DB
 	ResourceSerializer* serializer = ResourceSerializer::GetInstance();
 	serializer->SetSerializationPath(path);
 
@@ -177,18 +176,6 @@ void GLEntity::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(S_, S_KEY);
 	serializer->Serialize(R_, R_KEY);
 	serializer->Serialize(T_, T_KEY);
-#else
-	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-
-	tabularizer->Tabularize(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
-	tabularizer->Tabularize(frame_, FormatKey(GetKey() + FRAME_KEY));
-	tabularizer->Tabularize(S_, FormatKey(GetKey() + S_KEY));
-	tabularizer->Tabularize(R_, FormatKey(GetKey() + R_KEY));
-	tabularizer->Tabularize(T_, FormatKey(GetKey() + T_KEY));
-
-	tabularizer->CloseDatabase();
-#endif
 }
 
 void GLEntity::Load(ptree& tree, const std::string& path) 
@@ -197,7 +184,6 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
 	mass_ = std::stof(tree.get_child(MASS_KEY).data());
 
-#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -211,9 +197,30 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
 	std::unique_ptr<ISerializableResource> deserializedT = deserializer->Deserialize(T_KEY);
 	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
-#else
+}
+
+void GLEntity::Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const
+{
+	tree.put(VELOCITY_ANGLE_KEY, velocityAngle_);
+	tree.put(SPEED_KEY, speed_);
+	tree.put(MASS_KEY, mass_);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+
+	tabularizer->Tabularize(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
+	tabularizer->Tabularize(frame_, FormatKey(GetKey() + FRAME_KEY));
+	tabularizer->Tabularize(S_, FormatKey(GetKey() + S_KEY));
+	tabularizer->Tabularize(R_, FormatKey(GetKey() + R_KEY));
+	tabularizer->Tabularize(T_, FormatKey(GetKey() + T_KEY));
+}
+
+void GLEntity::Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database)
+{
+	velocityAngle_ = std::stof(tree.get_child(VELOCITY_ANGLE_KEY).data());
+	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
+	mass_ = std::stof(tree.get_child(MASS_KEY).data());
+
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedUnitVelocity = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_VELOCITY_KEY));
 	unitVelocity_ = *static_cast<Resource2DGLfloat*>(deserializedUnitVelocity.get());
@@ -225,18 +232,5 @@ void GLEntity::Load(ptree& tree, const std::string& path)
 	R_ = *static_cast<Resource2DGLfloat*>(deserializedR.get());
 	std::unique_ptr<ITabularizableResource> deserializedT = detabularizer->Detabularize(FormatKey(GetKey() + T_KEY));
 	T_ = *static_cast<Resource2DGLfloat*>(deserializedT.get());
-
-	detabularizer->CloseDatabase();
-#endif
-}
-
-void GLEntity::Save(database_adapters::Sqlite& database) const
-{
-
-}
-
-void GLEntity::Load(database_adapters::Sqlite& database)
-{
-
 }
 

@@ -348,7 +348,6 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
 
-#ifndef SAVE_TO_DB
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
@@ -358,14 +357,6 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(shipVertices_, SHIP_VERTICES_KEY);
 	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
 	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
-#else
-	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
-	tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	tabularizer->Tabularize(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
-	tabularizer->Tabularize(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
-	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
-	tabularizer->CloseDatabase();
-#endif
 
 	GLEntity::Save(tree, path);
 }
@@ -377,7 +368,6 @@ void Ship::Load(ptree& tree, const std::string& path)
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
-#ifndef SAVE_TO_DB
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	deserializer->SetSerializationPath(path);
 
@@ -387,9 +377,30 @@ void Ship::Load(ptree& tree, const std::string& path)
 	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
 	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
-#else
+}
+
+void Ship::Save(boost::property_tree::ptree& tree, Sqlite& database) const
+{
+	tree.put(BULLET_FIRED_KEY, bulletFired_);
+	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
+
+	ResourceTabularizer* tabularizer = ResourceTabularizer::GetInstance();
+
+	tabularizer->Tabularize(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
+	tabularizer->Tabularize(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
+	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
+
+	GLEntity::Save(tree, database);
+}
+
+void Ship::Load(boost::property_tree::ptree& tree, Sqlite& database)
+{
+	GLEntity::Load(tree, database);
+
+	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
+	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
+
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
-	detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_VERTICES_KEY));
 	shipVertices_ = *static_cast<Resource2DGLfloat*>(deserializedVertices.get());
@@ -397,18 +408,5 @@ void Ship::Load(ptree& tree, const std::string& path)
 	shipIndices_ = *static_cast<ResourceGLubyte*>(deserializedIndices.get());
 	std::unique_ptr<ITabularizableResource> deserializedOrientation = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
 	unitOrientation_ = *static_cast<Resource2DGLfloat*>(deserializedOrientation.get());
-
-	detabularizer->CloseDatabase();
-#endif
-}
-
-void Ship::Save(Sqlite& database) const
-{
-
-}
-
-void Ship::Load(Sqlite& database)
-{
-
 }
 
