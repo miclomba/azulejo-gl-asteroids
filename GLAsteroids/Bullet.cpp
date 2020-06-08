@@ -75,9 +75,9 @@ Bullet::Bullet() :
 	});
 }
 
-void Bullet::RegisterResources(const std::string& key)
+void Bullet::RegisterSerializationResources(const std::string& key)
 {
-	GLEntity::RegisterResources(key);
+	GLEntity::RegisterSerializationResources(key);
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(BULLET_VERTICES_KEY))
@@ -86,6 +86,11 @@ void Bullet::RegisterResources(const std::string& key)
 		deserializer->RegisterResource<GLubyte>(BULLET_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(PROJECTION_MATRIX_KEY))
 		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
+}
+
+void Bullet::RegisterTabularizationResources(const std::string& key)
+{
+	GLEntity::RegisterTabularizationResources(key);
 
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_VERTICES_KEY)))

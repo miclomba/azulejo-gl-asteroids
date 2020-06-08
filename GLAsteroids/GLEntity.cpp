@@ -62,7 +62,7 @@ GLEntity::GLEntity()
 	T_ = frame_;
 }
 
-void GLEntity::RegisterResources(const std::string& key)
+void GLEntity::RegisterSerializationResources(const std::string& key)
 {
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 
@@ -76,7 +76,10 @@ void GLEntity::RegisterResources(const std::string& key)
 		deserializer->RegisterResource<GLfloat>(R_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(T_KEY))
 		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
+}
 
+void GLEntity::RegisterTabularizationResources(const std::string& key)
+{
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
 
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_VELOCITY_KEY)))
@@ -120,6 +123,21 @@ GLfloat GLEntity::GetMass() const
 GLfloat GLEntity::GetVelocityAngle() const
 {
 	return velocityAngle_;
+}
+
+const Resource2DGLfloat& GLEntity::SMatrix() const
+{
+	return S_;
+}
+
+const Resource2DGLfloat& GLEntity::TMatrix() const
+{
+	return T_;
+}
+
+const Resource2DGLfloat& GLEntity::RMatrix() const
+{
+	return R_;
 }
 
 void GLEntity::SetFrame(const int i, const int j, const GLfloat val)

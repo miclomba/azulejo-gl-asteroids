@@ -36,7 +36,8 @@ public:
 	Rock& operator=(const Rock&);
 	Rock& operator=(Rock&&);
 
-	static void RegisterResources(const std::string& key);
+	static void RegisterSerializationResources(const std::string& key);
+	static void RegisterTabularizationResources(const std::string& key);
 
 	void Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
 

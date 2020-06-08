@@ -2,6 +2,7 @@
 #define	asteroids_asteroids_h
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -58,23 +59,27 @@ private:
 	void Serialize();
 	void Deserialize();
 
-	void ClearGame();
-
 	std::string GenerateUUID() const;
 
 	SharedEntity& GetShip();
 	SharedEntity& GetRock(const std::string& key);
 	std::vector<Key> GetRockKeys() const;
 
+	void ClearUnusedSerializationKeys();
+	void ClearUnusedTabularizationKeys();
+	void ClearGame();
 	void ClearRocks();
+	void DestroyRock(Rock* rock);
+	void DestroyBullet(Bullet* bullet);
+	std::set<std::string> keysToRemove_;
+
+	void BreakRock(Rock* rock);
+
 	bool HasRocks();
 	bool HasRock(const std::string& key) const;
-	void BreakRock(Rock* rock);
-	void DestroyRock(Rock* rock);
 	std::shared_ptr<Rock> MakeRock(const State rockSize, Rock* rock, const bool halfMass, const bool clockwise);
 
 	void CalculateConservationOfMomentum(Bullet* _ithBullet, Rock* rock);
-	void DestroyBullet(Bullet* bullet);
 
 	void DetermineCollisions();
     Rock* ShipCollision();

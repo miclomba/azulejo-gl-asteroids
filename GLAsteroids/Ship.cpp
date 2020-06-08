@@ -99,9 +99,9 @@ Ship::Ship() :
 	});
 }
 
-void Ship::RegisterResources(const std::string& key)
+void Ship::RegisterSerializationResources(const std::string& key)
 {
-	GLEntity::RegisterResources(key);
+	GLEntity::RegisterSerializationResources(key);
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
@@ -110,6 +110,11 @@ void Ship::RegisterResources(const std::string& key)
 		deserializer->RegisterResource<GLubyte>(SHIP_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(UNIT_ORIENTATION_KEY))
 		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
+}
+
+void Ship::RegisterTabularizationResources(const std::string& key)
+{
+	GLEntity::RegisterTabularizationResources(key);
 
 	ResourceDetabularizer* detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_VERTICES_KEY)))
@@ -124,7 +129,11 @@ Ship::Ship(const Ship::Key& key) :
 	Ship()
 {
 	SetKey(key);
-	Ship::RegisterResources(GetKey());
+#ifndef SAVE_TO_DB
+	Ship::RegisterSerializationResources(GetKey());
+#else
+	Ship::RegisterTabularizationResources(GetKey());
+#endif
 }
 
 Ship::~Ship() = default;
@@ -336,11 +345,30 @@ void Ship::Fire()
 
 	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().GetData(0,0), GetFrame().GetData(1,0));
 	bullet->SetKey(key);
-	Bullet::RegisterResources(bullet->GetKey());
+#ifndef SAVE_TO_DB
+	Bullet::RegisterSerializationResources(bullet->GetKey());
+#else
+	Bullet::RegisterTabularizationResources(bullet->GetKey());
+#endif
 
 	bulletFired_ = true;
 
 	AddBullet(bullet);
+}
+
+const Resource2DGLfloat& Ship::GetUnitOrientation() const
+{
+	return unitOrientation_;
+}
+
+const Resource2DGLfloat& Ship::GetShipVertices() const
+{
+	return shipVertices_;
+}
+
+const ResourceGLubyte& Ship::GetShipIndices() const
+{
+	return shipIndices_;
 }
 
 void Ship::Save(ptree& tree, const std::string& path) const

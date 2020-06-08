@@ -84,15 +84,20 @@ std::string Rock::RockPrefix()
 
 Rock::Rock() = default;
 
-void Rock::RegisterResources(const std::string& key)
+void Rock::RegisterSerializationResources(const std::string& key)
 {
-	GLEntity::RegisterResources(key);
+	GLEntity::RegisterSerializationResources(key);
 
 	ResourceDeserializer* deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
 		deserializer->RegisterResource<GLfloat>(ROCK_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(ROCK_INDICES_KEY))
 		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
+}
+
+void Rock::RegisterTabularizationResources(const std::string& key)
+{
+	GLEntity::RegisterTabularizationResources(key);
 
 	ResourceDetabularizer* tabularizer = ResourceDetabularizer::GetInstance();
 	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_VERTICES_KEY)))

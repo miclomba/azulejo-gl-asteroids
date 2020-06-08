@@ -26,6 +26,7 @@
 #include "FilesystemAdapters/ResourceDeserializer.h"
 #include "FilesystemAdapters/ResourceSerializer.h"
 #include "Events/EventConsumer.h"
+#include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
 #include "Common.h"
@@ -61,6 +62,11 @@ const std::string SCORE_KEY = "score";
 const std::string ROCK_COUNT_KEY = "rock_count";
 const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
 const std::string THRUST_KEY = "thrust";
+const std::string ROCK_PREFIX = "Rock";
+const std::string BULLET_PREFIX = "Bullet";
+const std::vector<std::string> ROCK_RESOURCES = { "rock_vertices", "rock_indices", "frame", "unit_velocity", "S", "T", "R" };
+const std::vector<std::string> BULLET_RESOURCES = { "bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R" };
+const std::vector<std::string> SHIP_RESOURCES = { "frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation" };
 
 EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
 EntitySerializer* const Serializer = EntitySerializer::GetInstance();
@@ -81,22 +87,22 @@ void RegisterEntitiesForSerialization(const ptree& tree)
 		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
 		{
 			Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-			Rock::RegisterResources(nodeKey);
+			Rock::RegisterSerializationResources(nodeKey);
 		}
 		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
 		{
 			Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-			Bullet::RegisterResources(nodeKey);
+			Bullet::RegisterSerializationResources(nodeKey);
 		}
 		else if (nodeKey == Ship::ShipKey())
 		{
 			Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-			Ship::RegisterResources(nodeKey);
+			Ship::RegisterSerializationResources(nodeKey);
 		}
 		else if (nodeKey == ASTEROIDS_KEY)
 		{
 			Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-			Asteroids::RegisterResources(nodeKey);
+			Asteroids::RegisterSerializationResources(nodeKey);
 		}
 		RegisterEntitiesForSerialization(node);
 	}
@@ -112,37 +118,74 @@ void RegisterEntitiesForTabularization(const ptree& tree)
 		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
 		{
 			Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-			Rock::RegisterResources(nodeKey);
+			Rock::RegisterTabularizationResources(nodeKey);
 		}
 		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
 		{
 			Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-			Bullet::RegisterResources(nodeKey);
+			Bullet::RegisterTabularizationResources(nodeKey);
 		}
 		else if (nodeKey == Ship::ShipKey())
 		{
 			Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-			Ship::RegisterResources(nodeKey);
+			Ship::RegisterTabularizationResources(nodeKey);
 		}
 		else if (nodeKey == ASTEROIDS_KEY)
 		{
 			Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-			Asteroids::RegisterResources(nodeKey);
+			Asteroids::RegisterTabularizationResources(nodeKey);
 		}
 		RegisterEntitiesForTabularization(node);
 	}
+}
+
+std::vector<std::string> RockResourceKeys(const std::string& key)
+{
+	std::vector<std::string> keys;
+	for (const std::string& suffix : ROCK_RESOURCES)
+		keys.push_back(FormatKey(key + suffix));
+	return keys;
+}
+
+std::vector<std::string> BulletResourceKeys(const std::string& key)
+{
+	std::vector<std::string> keys;
+	for (const std::string& suffix : BULLET_RESOURCES)
+		keys.push_back(FormatKey(key + suffix));
+	return keys;
+}
+
+void UntabularizeShipResources(Ship* ship)
+{
+	if (ship->GetFrame().GetDirty())
+		RTabularizer->Untabularize("Shipframe");
+	if (ship->GetUnitVelocity().GetDirty())
+		RTabularizer->Untabularize("Shipunitvelocity");
+	if (ship->SMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipS");
+	if (ship->TMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipT");
+	if (ship->RMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipR");
+	if (ship->GetShipVertices().GetDirty())
+		RTabularizer->Untabularize("Shipshipvertices");
+	if (ship->GetShipIndices().GetDirty())
+		RTabularizer->Untabularize("Shipshipindices");
+	if (ship->GetUnitOrientation().GetDirty())
+		RTabularizer->Untabularize("Shipunitorientation");
 }
 } // end namespace
 
 Asteroids::Asteroids()
 {
 	SetKey(ASTEROIDS_KEY);
-	Asteroids::RegisterResources(GetKey());
 
 	AggregateMember(Ship::ShipKey());
 #ifndef SAVE_TO_DB
+	Asteroids::RegisterSerializationResources(GetKey());
 	Deserializer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #else
+	Asteroids::RegisterTabularizationResources(GetKey());
 	Detabularizer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #endif
 
@@ -218,7 +261,11 @@ void Asteroids::ClearGame()
 {
 	std::vector<Key> rockKeys = GetRockKeys();
 	for (Key& key : rockKeys)
+	{
+		keysToRemove_.insert(key);
 		RemoveMember(key);
+	}
+	keysToRemove_.insert(GetShip()->GetKey());
 	RemoveMember(GetShip()->GetKey());
 }
 
@@ -235,12 +282,13 @@ void Asteroids::ResetGame()
 	{
         SharedEntity rock = std::make_shared<Rock>(State::LARGE,randy1,randy2);
 		rock->SetKey(Rock::RockPrefix() + uuidStr);
-		Rock::RegisterResources(rock->GetKey());
 
 		AggregateMember(rock);
 #ifndef SAVE_TO_DB
+		Rock::RegisterSerializationResources(rock->GetKey());
 		Deserializer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
 #else
+		Rock::RegisterTabularizationResources(rock->GetKey());
 		Detabularizer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
 #endif
 	};
@@ -249,7 +297,11 @@ void Asteroids::ResetGame()
 	{
 		SharedEntity& sharedShip = GetShip();
 		sharedShip = std::make_shared<Ship>(Ship::ShipKey());
-		Ship::RegisterResources(sharedShip->GetKey());
+#ifndef SAVE_TO_DB
+		Ship::RegisterSerializationResources(sharedShip->GetKey());
+#else
+		Ship::RegisterTabularizationResources(sharedShip->GetKey());
+#endif
 	};
 
 	ClearRocks();
@@ -333,8 +385,8 @@ void Asteroids::ClearRocks()
 	std::vector<Key> rockKeys = GetRockKeys();
 	for (Key& key : rockKeys)
 	{
+		keysToRemove_.insert(key);
 		SharedEntity& sharedRock = GetRock(key);
-		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
 		RemoveMember(sharedRock);
 	}
 }
@@ -504,7 +556,11 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().GetData(0,0), rock->GetFrame().GetData(1,0));
 
 	rock1->SetKey(Rock::RockPrefix() + GenerateUUID()); 
-	Rock::RegisterResources(rock1->GetKey());
+#ifndef SAVE_TO_DB
+	Rock::RegisterSerializationResources(rock1->GetKey());
+#else
+	Rock::RegisterTabularizationResources(rock1->GetKey());
+#endif
 
 	rock1->SetMass(rock->GetMass() / massDenominator);
 	rock1->SetSpeed(rock->GetSpeed());
@@ -558,6 +614,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 #else
 	Detabularizer->GetRegistry().UnregisterEntity(bulletKey);
 #endif
+	keysToRemove_.insert(bulletKey);
 	ship->RemoveBullet(bulletKey);
 }
 
@@ -570,6 +627,7 @@ void Asteroids::DestroyRock(Rock* rock)
 #else
 	Detabularizer->GetRegistry().UnregisterEntity(rockKey);
 #endif
+	keysToRemove_.insert(rockKey);
 	RemoveMember(rockKey);
 }
 
@@ -635,15 +693,74 @@ void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
+void Asteroids::ClearUnusedSerializationKeys()
+{
+	for (const std::string& key : keysToRemove_)
+	{
+		if (key.find(ROCK_PREFIX) != std::string::npos)
+		{
+			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
+			RSerializer->SetSerializationPath((resourceFolder).string());
+			for (const std::string& resourceKey : ROCK_RESOURCES)
+				RSerializer->Unserialize(resourceKey);
+			fs::remove(resourceFolder);
+		}
+		else if (key.find(BULLET_PREFIX) != std::string::npos)
+		{
+			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / Ship::ShipKey() / key;
+			RSerializer->SetSerializationPath((resourceFolder).string());
+			for (const std::string& resourceKey : BULLET_RESOURCES)
+				RSerializer->Unserialize(resourceKey);
+			fs::remove(resourceFolder);
+		}
+		else
+		{
+			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
+			RSerializer->SetSerializationPath((resourceFolder).string());
+			for (const std::string& resourceKey : SHIP_RESOURCES)
+				RSerializer->Unserialize(resourceKey);
+		}
+	}
+	keysToRemove_.clear();
+}
+
+void Asteroids::ClearUnusedTabularizationKeys()
+{
+	for (const std::string& key : keysToRemove_)
+	{
+		if (key.find(ROCK_PREFIX) != std::string::npos)
+		{
+			for (const std::string& resourceKey : RockResourceKeys(key))
+				RTabularizer->Untabularize(resourceKey);
+		}
+		else if (key.find(BULLET_PREFIX) != std::string::npos)
+		{
+			for (const std::string& resourceKey : BulletResourceKeys(key))
+				RTabularizer->Untabularize(resourceKey);
+		}
+		else
+		{
+			Ship* ship = dynamic_cast<Ship*>(GetShip().get());
+			UntabularizeShipResources(ship);
+		}
+	}
+	keysToRemove_.clear();
+}
+
 void Asteroids::Serialize()
 {
 #ifndef SAVE_TO_DB
 	Serializer->GetHierarchy().SetSerializationPath(SERIALIZATION_PATH.string());
+	ClearUnusedSerializationKeys();
 	Serializer->Serialize(*this);
 #else
 	Tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
 	RTabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+
+	ClearUnusedTabularizationKeys();
+
 	Tabularizer->Tabularize(*this);
+	
 	Tabularizer->CloseDatabase();
 	RTabularizer->CloseDatabase();
 #endif

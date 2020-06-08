@@ -34,6 +34,9 @@ public:
 	GLfloat GetSpeed() const;
 	GLfloat GetMass() const;
 	GLfloat GetVelocityAngle() const;
+	const Resource2DGLfloat& SMatrix() const;
+	const Resource2DGLfloat& TMatrix() const;
+	const Resource2DGLfloat& RMatrix() const;
 
 	void SetFrame(int i, int j, GLfloat val);
 	void SetFrame(const Resource2DGLfloat& frame);
@@ -43,7 +46,8 @@ public:
 	void SetMass(const GLfloat);
 	void SetVelocityAngle(const GLfloat);
 
-	static void RegisterResources(const std::string& key);
+	static void RegisterSerializationResources(const std::string& key);
+	static void RegisterTabularizationResources(const std::string& key);
 
 protected:
 	Resource2DGLfloat S_;

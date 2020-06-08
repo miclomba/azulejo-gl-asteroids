@@ -36,7 +36,8 @@ public:
 	Ship& operator=(const Ship&);
 	Ship& operator=(Ship&&);
 
-	static void RegisterResources(const std::string& key);
+	static void RegisterSerializationResources(const std::string& key);
+	static void RegisterTabularizationResources(const std::string& key);
 
 	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust);
 	void Fire();
@@ -55,6 +56,10 @@ public:
 	void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
 	static std::string ShipKey();
+
+	const Resource2DGLfloat& GetUnitOrientation() const;
+	const Resource2DGLfloat& GetShipVertices() const;
+	const ResourceGLubyte& GetShipIndices() const;
 
 private:
 	std::string GenerateUUID() const;
