@@ -349,7 +349,7 @@ void Asteroids::DrawRockAndShip()
 	if (sharedShip)
 	{
 		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
-		ship->Draw(orientationAngle_, thrust_);
+		ship->Draw(orientationAngle_, thrust_, keysSerialized_);
 	}
 }
 
@@ -404,7 +404,7 @@ void Asteroids::ClearBullets()
 	{
 		AddToRemoveKeys(key);
 		SharedEntity& sharedBullet = ship->GetBullet(key);
-		ship->RemoveBullet(sharedBullet->GetKey());
+		ship->RemoveBullet(sharedBullet->GetKey(), keysSerialized_);
 	}
 
 	AddOutOfScopeBulletsToRemovalKeys();
@@ -645,7 +645,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 #else
 	Detabularizer->GetRegistry().UnregisterEntity(bulletKey);
 #endif
-	ship->RemoveBullet(bulletKey);
+	ship->RemoveBullet(bulletKey, keysSerialized_);
 }
 
 void Asteroids::DestroyRock(Rock* rock)

@@ -276,7 +276,7 @@ void Ship::WrapAroundMoveShip()
 	}
 }
 
-void Ship::DrawBullets()
+void Ship::DrawBullets(const std::set<std::string>& serializedKeys)
 {
 	if (bulletFired_ == false)
 		return;
@@ -302,7 +302,7 @@ void Ship::DrawBullets()
 	}
 
 	for (std::string& bulletKey : bulletsToRemove)
-		RemoveBullet(bulletKey);
+		RemoveBullet(bulletKey, serializedKeys);
 }
 
 void Ship::DrawShip()
@@ -315,7 +315,7 @@ void Ship::DrawShip()
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
 }
 
-void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust) 
+void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys) 
 {
 	RecomputeShipVelocity(_thrust);
 
@@ -323,14 +323,15 @@ void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust)
 		ChangeShipOrientation(_orientationAngle);
 		MoveShip();
 		WrapAroundMoveShip();
-		DrawBullets();
+		DrawBullets(serializedKeys);
 		DrawShip();
     glPopMatrix();
 }
 
-void Ship::RemoveBullet(const Ship::Key& key)
+void Ship::RemoveBullet(const Ship::Key& key, const std::set<std::string>& serializedKeys)
 {
-	outOfScopeBulletKeys_.insert(key);
+	if (serializedKeys.find(key) != serializedKeys.cend())
+		outOfScopeBulletKeys_.insert(key);
 	RemoveMember(key);
 }
 

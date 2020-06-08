@@ -40,7 +40,7 @@ public:
 	static void RegisterSerializationResources(const std::string& key);
 	static void RegisterTabularizationResources(const std::string& key);
 
-	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust);
+	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys);
 	void Fire();
 
 	static GLint BulletNumber();
@@ -49,7 +49,7 @@ public:
 	std::vector<Key> GetBulletKeys() const;
 	const std::set<Key>& GetOutOfScopeBulletKeys() const;
 	void ClearOutOfScopeBulletKeys();
-	void RemoveBullet(const Key& key);
+	void RemoveBullet(const Key& key, const std::set<std::string>& serializedKeys);
 	void AddBullet(const SharedEntity& bullet);
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
@@ -71,7 +71,7 @@ private:
 	void ChangeShipOrientation(const GLfloat _orientationAngle);
 	void MoveShip();
 	void WrapAroundMoveShip();
-	void DrawBullets();
+	void DrawBullets(const std::set<std::string>& serializedKeys);
 	void DrawShip();
 
 	mutable std::set<std::string> outOfScopeBulletKeys_;
