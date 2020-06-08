@@ -47,7 +47,8 @@ public:
 
 	SharedEntity& GetBullet(const std::string& key) const;
 	std::vector<Key> GetBulletKeys() const;
-	const std::set<Key>& GetBulletKeysForRemoval() const;
+	const std::set<Key>& GetOutOfScopeBulletKeys() const;
+	void ClearOutOfScopeBulletKeys();
 	void RemoveBullet(const Key& key);
 	void AddBullet(const SharedEntity& bullet);
 
@@ -73,7 +74,7 @@ private:
 	void DrawBullets();
 	void DrawShip();
 
-	mutable std::set<std::string> keysToRemove_;
+	mutable std::set<std::string> outOfScopeBulletKeys_;
 
 	bool bulletFired_{false};
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };

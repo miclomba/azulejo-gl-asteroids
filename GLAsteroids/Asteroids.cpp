@@ -726,9 +726,10 @@ void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
 void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
 {
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
-	const std::set<std::string>& outOfScopeBullets = ship->GetBulletKeysForRemoval();
+	const std::set<std::string>& outOfScopeBullets = ship->GetOutOfScopeBulletKeys();
 	for (const Key& key : outOfScopeBullets)
 		keysToRemove_.insert(key);
+	ship->ClearOutOfScopeBulletKeys();
 }
 
 void Asteroids::ClearUnusedSerializationKeys()
