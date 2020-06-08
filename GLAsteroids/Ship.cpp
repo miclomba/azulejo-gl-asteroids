@@ -159,6 +159,11 @@ std::vector<Ship::Key> Ship::GetBulletKeys() const
 	return GetAggregatedMemberKeys();
 }
 
+const std::set<Ship::Key>& Ship::GetBulletKeysForRemoval() const
+{
+	return keysToRemove_;
+}
+
 void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 {
 	/*====================== RECOMPUTE SHIP VELOCITY =========================*/
@@ -320,6 +325,7 @@ void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust)
 
 void Ship::RemoveBullet(const Ship::Key& key)
 {
+	keysToRemove_.insert(key);
 	RemoveMember(key);
 }
 
@@ -387,6 +393,8 @@ void Ship::Save(ptree& tree, const std::string& path) const
 	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
 
 	GLEntity::Save(tree, path);
+
+	keysToRemove_.clear();
 }
 
 void Ship::Load(ptree& tree, const std::string& path)
@@ -419,6 +427,8 @@ void Ship::Save(boost::property_tree::ptree& tree, Sqlite& database) const
 	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
 
 	GLEntity::Save(tree, database);
+
+	keysToRemove_.clear();
 }
 
 void Ship::Load(boost::property_tree::ptree& tree, Sqlite& database)

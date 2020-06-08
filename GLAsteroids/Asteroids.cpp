@@ -305,6 +305,8 @@ void Asteroids::ResetGame()
 	};
 
 	ClearRocks();
+	ClearBullets();
+	ClearShip();
 
     GLint randy1, randy2;
     for (GLint nextRock = 0; nextRock < 10; ++nextRock) {
@@ -389,6 +391,34 @@ void Asteroids::ClearRocks()
 		SharedEntity& sharedRock = GetRock(key);
 		RemoveMember(sharedRock);
 	}
+}
+
+void Asteroids::ClearBullets()
+{
+	Ship* ship = dynamic_cast<Ship*>(GetShip().get());
+	if (!ship)
+		return;
+
+	std::vector<Key> bulletKeys = ship->GetBulletKeys();
+	for (Key& key : bulletKeys)
+	{
+		keysToRemove_.insert(key);
+		SharedEntity& sharedBullet = ship->GetBullet(key);
+		ship->RemoveBullet(sharedBullet->GetKey());
+	}
+
+	AddOutOfScopeBulletsToRemovalKeys();
+}
+
+void Asteroids::ClearShip()
+{
+	SharedEntity& sharedShip = GetShip();
+	if (!sharedShip)
+		return;
+
+	keysToRemove_.insert(Ship::ShipKey());
+
+	sharedShip.reset();
 }
 
 bool Asteroids::HasRocks()
@@ -601,33 +631,33 @@ void Asteroids::BreakRock(Rock* rock)
 
 void Asteroids::DestroyBullet(Bullet* bullet)
 {
+	std::string bulletKey = bullet->GetKey();
+	keysToRemove_.insert(bulletKey);
+
 	SharedEntity& sharedShip = GetShip();
 	if (!sharedShip)
 		return;
 
 	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 
-	std::string bulletKey = bullet->GetKey();
-
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(bulletKey);
 #else
 	Detabularizer->GetRegistry().UnregisterEntity(bulletKey);
 #endif
-	keysToRemove_.insert(bulletKey);
 	ship->RemoveBullet(bulletKey);
 }
 
 void Asteroids::DestroyRock(Rock* rock)
 {
 	std::string rockKey = rock->GetKey();
+	keysToRemove_.insert(rockKey);
 
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(rockKey);
 #else
 	Detabularizer->GetRegistry().UnregisterEntity(rockKey);
 #endif
-	keysToRemove_.insert(rockKey);
 	RemoveMember(rockKey);
 }
 
@@ -693,8 +723,18 @@ void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
+void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
+{
+	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
+	const std::set<std::string>& outOfScopeBullets = ship->GetBulletKeysForRemoval();
+	for (const Key& key : outOfScopeBullets)
+		keysToRemove_.insert(key);
+}
+
 void Asteroids::ClearUnusedSerializationKeys()
 {
+	AddOutOfScopeBulletsToRemovalKeys();
+
 	for (const std::string& key : keysToRemove_)
 	{
 		if (key.find(ROCK_PREFIX) != std::string::npos)
@@ -726,6 +766,8 @@ void Asteroids::ClearUnusedSerializationKeys()
 
 void Asteroids::ClearUnusedTabularizationKeys()
 {
+	AddOutOfScopeBulletsToRemovalKeys();
+
 	for (const std::string& key : keysToRemove_)
 	{
 		if (key.find(ROCK_PREFIX) != std::string::npos)

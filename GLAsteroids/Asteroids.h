@@ -65,10 +65,13 @@ private:
 	SharedEntity& GetRock(const std::string& key);
 	std::vector<Key> GetRockKeys() const;
 
+	void AddOutOfScopeBulletsToRemovalKeys();
 	void ClearUnusedSerializationKeys();
 	void ClearUnusedTabularizationKeys();
 	void ClearGame();
 	void ClearRocks();
+	void ClearBullets();
+	void ClearShip();
 	void DestroyRock(Rock* rock);
 	void DestroyBullet(Bullet* bullet);
 	std::set<std::string> keysToRemove_;
