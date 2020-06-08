@@ -75,6 +75,9 @@ private:
 	void DestroyRock(Rock* rock);
 	void DestroyBullet(Bullet* bullet);
 	std::set<std::string> keysToRemove_;
+	std::set<std::string> keysSerialized_;
+	std::set<std::string> GetKeysToSerialize();
+	void AddToRemoveKeys(const std::string& key);
 
 	void BreakRock(Rock* rock);
 

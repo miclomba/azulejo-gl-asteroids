@@ -20,6 +20,6 @@
 #define USERS_PATH "/users"
 #endif
 
-#define SAVE_TO_DB
+//#define SAVE_TO_DB
 
 #endif // end config_h

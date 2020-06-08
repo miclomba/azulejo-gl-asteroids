@@ -262,10 +262,10 @@ void Asteroids::ClearGame()
 	std::vector<Key> rockKeys = GetRockKeys();
 	for (Key& key : rockKeys)
 	{
-		keysToRemove_.insert(key);
+		AddToRemoveKeys(key);
 		RemoveMember(key);
 	}
-	keysToRemove_.insert(GetShip()->GetKey());
+	AddToRemoveKeys(GetShip()->GetKey());
 	RemoveMember(GetShip()->GetKey());
 }
 
@@ -387,7 +387,7 @@ void Asteroids::ClearRocks()
 	std::vector<Key> rockKeys = GetRockKeys();
 	for (Key& key : rockKeys)
 	{
-		keysToRemove_.insert(key);
+		AddToRemoveKeys(key);
 		SharedEntity& sharedRock = GetRock(key);
 		RemoveMember(sharedRock);
 	}
@@ -402,7 +402,7 @@ void Asteroids::ClearBullets()
 	std::vector<Key> bulletKeys = ship->GetBulletKeys();
 	for (Key& key : bulletKeys)
 	{
-		keysToRemove_.insert(key);
+		AddToRemoveKeys(key);
 		SharedEntity& sharedBullet = ship->GetBullet(key);
 		ship->RemoveBullet(sharedBullet->GetKey());
 	}
@@ -416,7 +416,7 @@ void Asteroids::ClearShip()
 	if (!sharedShip)
 		return;
 
-	keysToRemove_.insert(Ship::ShipKey());
+	AddToRemoveKeys(Ship::ShipKey());
 
 	sharedShip.reset();
 }
@@ -632,7 +632,7 @@ void Asteroids::BreakRock(Rock* rock)
 void Asteroids::DestroyBullet(Bullet* bullet)
 {
 	std::string bulletKey = bullet->GetKey();
-	keysToRemove_.insert(bulletKey);
+	AddToRemoveKeys(bulletKey);
 
 	SharedEntity& sharedShip = GetShip();
 	if (!sharedShip)
@@ -651,7 +651,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 void Asteroids::DestroyRock(Rock* rock)
 {
 	std::string rockKey = rock->GetKey();
-	keysToRemove_.insert(rockKey);
+	AddToRemoveKeys(rockKey);
 
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(rockKey);
@@ -723,12 +723,18 @@ void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
+void Asteroids::AddToRemoveKeys(const std::string& key)
+{
+	if (keysSerialized_.find(key) != keysSerialized_.end())
+		keysToRemove_.insert(key);
+}
+
 void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
 {
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
 	const std::set<std::string>& outOfScopeBullets = ship->GetOutOfScopeBulletKeys();
 	for (const Key& key : outOfScopeBullets)
-		keysToRemove_.insert(key);
+		AddToRemoveKeys(key);
 	ship->ClearOutOfScopeBulletKeys();
 }
 
@@ -790,6 +796,18 @@ void Asteroids::ClearUnusedTabularizationKeys()
 	keysToRemove_.clear();
 }
 
+std::set<std::string> Asteroids::GetKeysToSerialize()
+{
+	std::vector<std::string> keysSerialized = GetAggregatedMemberKeys();
+	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
+	std::vector<std::string> bulletsSerialized = ship->GetBulletKeys();
+	keysSerialized.insert(keysSerialized.end(), bulletsSerialized.begin(), bulletsSerialized.end());
+
+	std::set<std::string> keys;
+	keys.insert(keysSerialized.begin(), keysSerialized.end());
+	return keys;
+}
+
 void Asteroids::Serialize()
 {
 #ifndef SAVE_TO_DB
@@ -807,6 +825,8 @@ void Asteroids::Serialize()
 	Tabularizer->CloseDatabase();
 	RTabularizer->CloseDatabase();
 #endif
+
+	keysSerialized_ = GetKeysToSerialize();
 }
 
 void Asteroids::Deserialize()
@@ -827,6 +847,8 @@ void Asteroids::Deserialize()
 	Detabularizer->CloseDatabase();
 	RDetabularizer->CloseDatabase();
 #endif
+
+	keysSerialized_ = GetKeysToSerialize();
 }
 
 std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetLeftArrowConsumer()
