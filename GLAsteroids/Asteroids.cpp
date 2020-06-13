@@ -3,11 +3,15 @@
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
+#include <future>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <boost/asio/packaged_task.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -56,6 +60,8 @@ namespace pt = boost::property_tree;
 
 namespace
 {
+boost::asio::thread_pool POOL(3);
+
 const int ROCK_NUMBER = 6;
 const std::string ASTEROIDS_KEY = "Asteroids";
 const std::string SCORE_KEY = "score";
@@ -174,6 +180,27 @@ void UntabularizeShipResources(Ship* ship)
 	if (ship->GetUnitOrientation().GetDirty())
 		RTabularizer->Untabularize("Shipunitorientation");
 }
+
+struct Task
+{
+	Task(std::function<bool()> lambda)
+	{
+		task_ = std::make_shared<std::packaged_task<bool()>>(lambda);
+	}
+
+	void operator()()
+	{
+		return (*task_)();
+	}
+
+	std::future<bool> GetFuture()
+	{
+		return task_->get_future();
+	}
+
+private:
+	std::shared_ptr<std::packaged_task<bool()>> task_;
+};
 } // end namespace
 
 Asteroids::Asteroids()
@@ -328,7 +355,25 @@ void Asteroids::ResetGame()
 
 void Asteroids::DrawRockAndShip()
 {
-    GLint randy;
+	auto DrawRock = [](Entity* sharedRock) 
+	{
+		Rock* rock = dynamic_cast<Rock*>(sharedRock);
+		GLint randy = rand();
+		randy = (randy % 9) + 1;
+		rock->Draw((GLfloat)(M_PI*randy / 5),
+			(GLfloat)(randy % 3) / 100,
+			(GLfloat)(randy % 6) / 100);
+	};
+
+	auto DrawShip = [this](Entity* sharedShip)
+	{
+		Ship* ship = dynamic_cast<Ship*>(sharedShip);
+		ship->Draw(orientationAngle_, thrust_, keysSerialized_);
+	};
+
+	std::vector<std::future<bool>> futures;
+
+	GLint randy;
 	std::vector<Key> rockKeys = GetRockKeys();
 
 	for (Key& key : rockKeys)
@@ -337,20 +382,27 @@ void Asteroids::DrawRockAndShip()
 		if (!sharedRock)
 			continue;
 
-		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
-		randy = rand();
-		randy = (randy % 9) + 1;
-		rock->Draw((GLfloat)(M_PI*randy / 5),
-			(GLfloat)(randy % 3) / 100,
-			(GLfloat)(randy % 6) / 100);
+		Entity* rock = sharedRock.get();
+		Task task([rock, &DrawRock]() { DrawRock(rock); return true; });
+		futures.push_back(task.GetFuture());
+
+		//boost::asio::post(POOL, task);
+		task();
 	}
 
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
-		ship->Draw(orientationAngle_, thrust_, keysSerialized_);
+		Entity* ship = sharedShip.get();
+		Task task([ship, &DrawShip]() { DrawShip(ship); return true; });
+		futures.push_back(task.GetFuture());
+
+		//boost::asio::post(POOL, task);
+		task();
 	}
+
+	for (std::future<bool>& future : futures)
+		future.get();
 }
 
 void Asteroids::DrawGameInfo()
