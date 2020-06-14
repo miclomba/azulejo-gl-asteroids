@@ -23,6 +23,7 @@
 #include "DatabaseAdapters/EntityTabularizer.h"
 #include "DatabaseAdapters/ResourceDetabularizer.h"
 #include "DatabaseAdapters/ResourceTabularizer.h"
+#include "Entities/Entity.h"
 #include "FilesystemAdapters/EntitySerializer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
@@ -34,6 +35,7 @@
 
 #include "Bullet.h"
 #include "Common.h"
+#include "GLEntityTask.h"
 #include "Rock.h"
 #include "Ship.h"
 
@@ -41,6 +43,7 @@ using boost::property_tree::ptree;
 
 using asteroids::Asteroids;
 using asteroids::Bullet;
+using asteroids::GLEntityTask;
 using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
@@ -49,6 +52,7 @@ using database_adapters::EntityTabularizer;
 using database_adapters::ResourceDetabularizer;
 using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
+using entity::Entity;
 using events::EventConsumer;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::EntitySerializer;
@@ -60,8 +64,6 @@ namespace pt = boost::property_tree;
 
 namespace
 {
-boost::asio::thread_pool POOL(3);
-
 const int ROCK_NUMBER = 6;
 const std::string ASTEROIDS_KEY = "Asteroids";
 const std::string SCORE_KEY = "score";
@@ -180,30 +182,10 @@ void UntabularizeShipResources(Ship* ship)
 	if (ship->GetUnitOrientation().GetDirty())
 		RTabularizer->Untabularize("Shipunitorientation");
 }
-
-struct Task
-{
-	Task(std::function<entity::Entity*()> lambda)
-	{
-		task_ = std::make_shared<std::packaged_task<entity::Entity*()>>(lambda);
-	}
-
-	void operator()()
-	{
-		return (*task_)();
-	}
-
-	std::future<entity::Entity*> GetFuture()
-	{
-		return task_->get_future();
-	}
-
-private:
-	std::shared_ptr<std::packaged_task<entity::Entity*()>> task_;
-};
 } // end namespace
 
-Asteroids::Asteroids()
+Asteroids::Asteroids() :
+	threadPool_(3)
 {
 	SetKey(ASTEROIDS_KEY);
 
@@ -230,10 +212,6 @@ Asteroids::Asteroids()
 }
 
 Asteroids::~Asteroids() = default;
-Asteroids::Asteroids(const Asteroids&) = default;
-Asteroids::Asteroids(Asteroids&&) = default;
-Asteroids& Asteroids::operator=(const Asteroids&) = default;
-Asteroids& Asteroids::operator=(Asteroids&&) = default;
 
 void Asteroids::Run()
 {
@@ -353,61 +331,63 @@ void Asteroids::ResetGame()
 	score_ = 0;
 }
 
-void Asteroids::DrawRockAndShip()
+void Asteroids::UpdateRockTask(Entity* sharedRock)
 {
-	auto DrawRock = [](Entity* sharedRock) 
-	{
-		Rock* rock = dynamic_cast<Rock*>(sharedRock);
-		GLint randy = rand();
-		randy = (randy % 9) + 1;
-		rock->Update((GLfloat)(M_PI*randy / 5),
-			(GLfloat)(randy % 3) / 100,
-			(GLfloat)(randy % 6) / 100);
-	};
+	Rock* rock = dynamic_cast<Rock*>(sharedRock);
+	GLint randy = rand();
+	randy = (randy % 9) + 1;
+	rock->Update((GLfloat)(M_PI*randy / 5), (GLfloat)(randy % 3) / 100, (GLfloat)(randy % 6) / 100);
+};
 
-	auto DrawShip = [this](Entity* sharedShip)
-	{
-		Ship* ship = dynamic_cast<Ship*>(sharedShip);
-		ship->Update(orientationAngle_, thrust_, keysSerialized_);
-	};
+void Asteroids::UpdateShipTask(Entity* sharedShip, std::vector<std::future<Entity*>>& futures)
+{
+	Ship* ship = dynamic_cast<Ship*>(sharedShip);
+	ship->Update(orientationAngle_, thrust_, keysSerialized_, threadPool_, futures);
+};
 
-	std::vector<std::future<entity::Entity*>> futures;
+void Asteroids::DrawGLEntities()
+{
+	std::vector<std::future<Entity*>> futures;
+	std::vector<std::future<Entity*>> bulletFutures;
 
-	GLint randy;
-	std::vector<Key> rockKeys = GetRockKeys();
-
-	for (Key& key : rockKeys)
+	for (Key& key : GetRockKeys())
 	{
 		SharedEntity& sharedRock = GetRock(key);
 		if (!sharedRock)
 			continue;
 
 		Entity* rock = sharedRock.get();
-		Task task([rock, &DrawRock]() { DrawRock(rock); return rock; });
+		GLEntityTask task([rock, this]() { UpdateRockTask(rock); return rock; });
 		futures.push_back(task.GetFuture());
 
-		boost::asio::post(POOL, task);
+		boost::asio::post(threadPool_, task);
 	}
 
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
 		Entity* ship = sharedShip.get();
-		Task task([ship, &DrawShip]() { DrawShip(ship); return ship; });
+		GLEntityTask task([ship, &bulletFutures, this]() { UpdateShipTask(ship, bulletFutures); return ship; });
 		futures.push_back(task.GetFuture());
 
-		boost::asio::post(POOL, task);
+		boost::asio::post(threadPool_, task);
 	}
 
-	for (std::future<entity::Entity*>& future : futures)
+	for (std::future<Entity*>& future : futures)
 	{
-		entity::Entity* obj = future.get();
+		Entity* obj = future.get();
 
 		Rock* rock = dynamic_cast<Rock*>(obj);
-		if (rock)
+		if (rock) 
 			rock->Draw();
-		else
-			dynamic_cast<Ship*>(obj)->Draw(orientationAngle_, keysSerialized_);
+		else 
+			dynamic_cast<Ship*>(obj)->Draw(orientationAngle_);
+	}
+
+	for (std::future<Entity*>& future : bulletFutures)
+	{
+		Entity* obj = future.get();
+		dynamic_cast<Bullet*>(obj)->Draw();
 	}
 }
 
@@ -434,7 +414,7 @@ void Asteroids::DrawGameInfo()
 
 void Asteroids::Draw()
 {
-	DrawRockAndShip();
+	DrawGLEntities();
 	DrawGameInfo();
 	DetermineCollisions();
 	ResetThrustAndRotation();

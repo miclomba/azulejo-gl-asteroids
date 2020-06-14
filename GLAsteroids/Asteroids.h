@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <boost/asio/thread_pool.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "Events/EventConsumer.h"
@@ -26,10 +27,10 @@ class ASTEROIDS_DLL_EXPORT Asteroids : public GLEntity
 public:
 	Asteroids();
 	~Asteroids();
-	Asteroids(const Asteroids&);
-	Asteroids(Asteroids&&);
-	Asteroids& operator=(const Asteroids&);
-	Asteroids& operator=(Asteroids&&);
+	Asteroids(const Asteroids&) = delete;
+	Asteroids(Asteroids&&) = delete;
+	Asteroids& operator=(const Asteroids&) = delete;
+	Asteroids& operator=(Asteroids&&) = delete;
 
 	void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
 	void Load(boost::property_tree::ptree& tree, const std::string& path) override;
@@ -92,7 +93,10 @@ private:
     Rock* Collision(Bullet* bullet);
     void ProcessCollision(Bullet* bullet, Rock* rock);
 
-	void DrawRockAndShip();
+	void UpdateRockTask(entity::Entity* sharedRock);
+	void UpdateShipTask(entity::Entity* sharedShip, std::vector<std::future<entity::Entity*>>& futures);
+
+	void DrawGLEntities();
 	void DrawGameInfo();
 	void ResetThrustAndRotation();
 
@@ -100,6 +104,8 @@ private:
 	GLint rockCount_{0};
 	GLfloat orientationAngle_{0.0f};
 	GLfloat thrust_{0.0f};
+
+	boost::asio::thread_pool threadPool_;
 
 	std::shared_ptr<events::EventConsumer<void(void)>> leftArrowConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> rightArrowConsumer_;

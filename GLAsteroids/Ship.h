@@ -2,11 +2,13 @@
 #define	asteroids_ship_h
 
 #include <array>
+#include <future>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <boost/asio/thread_pool.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "test_filesystem_adapters/ContainerResource.h"
@@ -40,8 +42,14 @@ public:
 	static void RegisterSerializationResources(const std::string& key);
 	static void RegisterTabularizationResources(const std::string& key);
 
-	void Update(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys);
-	void Draw(const GLfloat _orientationAngle, const std::set<std::string>& serializedKeys);
+	void Update(
+		const GLfloat _orientationAngle, 
+		const GLfloat _thrust, 
+		const std::set<std::string>& serializedKeys, 
+		boost::asio::thread_pool& threadPool,
+		std::vector<std::future<entity::Entity*>>& futures
+	);
+	void Draw(const GLfloat _orientationAngle);
 	void Fire();
 
 	static GLint BulletNumber();
@@ -72,7 +80,12 @@ private:
 	void ChangeShipOrientation(const GLfloat _orientationAngle);
 	void MoveShip();
 	void WrapAroundMoveShip();
-	void DrawBullets(const std::set<std::string>& serializedKeys);
+	void UpdateBullets(
+		const std::set<std::string>& serializedKeys, 
+		boost::asio::thread_pool& threadPool, 
+		std::vector<std::future<entity::Entity*>>& futures
+	);
+	void UpdateBulletTask(entity::Entity* sharedBullet);
 
 	mutable std::set<std::string> outOfScopeBulletKeys_;
 

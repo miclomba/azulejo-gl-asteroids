@@ -1,11 +1,13 @@
 #include "Ship.h"
 
 #include <filesystem>
+#include <future>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include <boost/asio/post.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -17,6 +19,7 @@
 #include "DatabaseAdapters/ResourceDetabularizer.h"
 #include "DatabaseAdapters/ResourceTabularizer.h"
 #include "DatabaseAdapters/Sqlite.h"
+#include "Entities/Entity.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
@@ -26,17 +29,20 @@
 
 #include "Common.h"
 #include "Bullet.h"
+#include "GLEntityTask.h"
 #include "Ship.h"
 
 using boost::property_tree::ptree;
 using asteroids::Bullet;
 using asteroids::GLEntity;
+using asteroids::GLEntityTask;
 using asteroids::Ship;
 using database_adapters::EntityDetabularizer;
 using database_adapters::ITabularizableResource;
 using database_adapters::ResourceDetabularizer;
 using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
+using entity::Entity;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
@@ -255,7 +261,17 @@ void Ship::WrapAroundMoveShip()
 	}
 }
 
-void Ship::DrawBullets(const std::set<std::string>& serializedKeys)
+void Ship::UpdateBulletTask(Entity* sharedBullet)
+{
+	Bullet* bullet = dynamic_cast<Bullet*>(sharedBullet);
+	bullet->Update(orientationAngle_, GetSpeed());
+}
+
+void Ship::UpdateBullets(
+	const std::set<std::string>& serializedKeys, 
+	boost::asio::thread_pool& threadPool,
+	std::vector<std::future<Entity*>>& futures
+)
 {
 	if (bulletFired_ == false)
 		return;
@@ -275,7 +291,10 @@ void Ship::DrawBullets(const std::set<std::string>& serializedKeys)
 		}
 		else if (bullet)
 		{
-			bullet->Draw(orientationAngle_, GetSpeed());
+			GLEntityTask task([this, bullet]() { UpdateBulletTask(bullet); return bullet; });
+			futures.push_back(task.GetFuture());
+			boost::asio::post(threadPool, task);
+
 			bulletFired_ = true;
 		}
 	}
@@ -284,14 +303,13 @@ void Ship::DrawBullets(const std::set<std::string>& serializedKeys)
 		RemoveBullet(bulletKey, serializedKeys);
 }
 
-void Ship::Draw(const GLfloat _orientationAngle, const std::set<std::string>& serializedKeys)
+void Ship::Draw(const GLfloat _orientationAngle)
 {
 	glPushMatrix();
 
 	ChangeShipOrientation(_orientationAngle);
 	MoveShip();
 	WrapAroundMoveShip();
-	DrawBullets(serializedKeys);
 
 	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.Data());
 	glColor3f(0.0f, 1.0f, 0.0f);
@@ -303,7 +321,13 @@ void Ship::Draw(const GLfloat _orientationAngle, const std::set<std::string>& se
     glPopMatrix();
 }
 
-void Ship::Update(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys) 
+void Ship::Update(
+	const GLfloat _orientationAngle, 
+	const GLfloat _thrust, 
+	const std::set<std::string>& serializedKeys, 
+	boost::asio::thread_pool& threadPool,
+	std::vector<std::future<Entity*>>& futures
+)
 {
 	RecomputeShipVelocity(_thrust);
 
@@ -330,6 +354,8 @@ void Ship::Update(const GLfloat _orientationAngle, const GLfloat _thrust, const 
 			{0.0f,0.0f,0.0f,1.0f}
 		});
 	}
+
+	UpdateBullets(serializedKeys, threadPool, futures);
 }
 
 void Ship::RemoveBullet(const Ship::Key& key, const std::set<std::string>& serializedKeys)

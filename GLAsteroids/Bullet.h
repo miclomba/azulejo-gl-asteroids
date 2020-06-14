@@ -36,7 +36,8 @@ public:
 	static void RegisterSerializationResources(const std::string& key);
 	static void RegisterTabularizationResources(const std::string& key);
 
-    void Draw(const GLfloat _velocityAngle, const GLfloat _speed);
+    void Update(const GLfloat _velocityAngle, const GLfloat _speed);
+    void Draw();
 
 	bool IsOutOfBounds() const;
 

@@ -171,18 +171,21 @@ void Bullet::SetBulletOutOfBounds()
 	}
 }
 
-void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed) 
+void Bullet::Update(const GLfloat _velocityAngle, const GLfloat _speed)
 {
 	if (!bulletInitialized_)
 		InitializeBullet(_velocityAngle, _speed);
 	bulletInitialized_ = true;
 
+	// Move the bullet ( p = av + frame )
+	SetSMatrix();
+	SetTMatrix();
+}
+
+void Bullet::Draw() 
+{
 	auto MoveBullet = [this]() 
 	{
-		// Move the bullet ( p = av + frame )
-		SetSMatrix();
-		SetTMatrix();
-
 		glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
 		glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
 		glMultMatrixf(static_cast<GLfloat*>(T_.Data()));
@@ -205,11 +208,11 @@ void Bullet::Draw(const GLfloat _velocityAngle, const GLfloat _speed)
 	projectionMatrix_ = Resource2DGLfloat(buffer);
 
     glPushMatrix();
-	{
-		MoveBullet();
-		SetBulletOutOfBounds();
-		DrawBullet();
-	}
+
+	MoveBullet();
+	SetBulletOutOfBounds();
+	DrawBullet();
+
     glPopMatrix();
 }
 
