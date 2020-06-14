@@ -470,6 +470,8 @@ void Asteroids::DetermineCollisions()
 	if (!sharedShip)
 		return;
 
+	std::vector<std::pair<Bullet*, std::future<GLEntity*>>> bulletAndRockFuture;
+
 	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
 	std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys();
 
@@ -478,39 +480,60 @@ void Asteroids::DetermineCollisions()
 	{
 		Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
 		Bullet* bullet = dynamic_cast<Bullet*>(sharedBullet.get());
-		Rock* rock = Collision(bullet);
+
+		GLEntityTask task([bullet, this]() { return Collision(bullet); });
+		bulletAndRockFuture.emplace_back(bullet, task.GetFuture());
+
+		boost::asio::post(threadPool_, task);
+	}
+
+	for (std::pair<Bullet*,std::future<GLEntity*>>& bulletRock : bulletAndRockFuture)
+	{
+		Rock* rock = dynamic_cast<Rock*>(bulletRock.second.get()); 
+		Bullet* bullet = bulletRock.first;
 
 		if (rock)
 			collisionPairs.push_back(std::make_pair(bullet,rock->GetKey()));
 	}
 
+	std::vector<std::future<GLEntity*>> collisionFutures;
+
 	for (std::pair<Bullet*, Key>& collisions : collisionPairs)
 	{
 		if (HasRock(collisions.second))
 		{
-			SharedEntity& rock = GetRock(collisions.second);
-			ProcessCollision(collisions.first, dynamic_cast<Rock*>(rock.get()));
-			if (!HasRocks())
-			{
-				ResetGame();
-				return;
-			}
+			Bullet* bullet = collisions.first;
+			Key rockKey = collisions.second;
+
+			GLEntityTask task([bullet, rockKey, this]() { ProcessCollision(bullet, rockKey); return bullet; });
+			collisionFutures.emplace_back(task.GetFuture());
+			boost::asio::post(threadPool_, task);
 		}
 	}
 
-	if (ShipCollision()) 
+	for (std::future<GLEntity*>& future : collisionFutures)
+		future.get();
+
+	if (!HasRocks() || ShipCollision()) 
 		ResetGame();
 }
 
-void Asteroids::ProcessCollision(Bullet* bullet, Rock* rock) 
+void Asteroids::ProcessCollision(Bullet* bullet, const Key& rockKey) 
 {
-	score_ += 1;
-	if (rock->GetState() != State::SMALL)
 	{
-		CalculateConservationOfMomentum(bullet, rock);
-		BreakRock(rock);
+		std::lock_guard<std::mutex> lock(rockCollisionMutex_);
+		if (HasRock(rockKey))
+		{
+			Rock* rock = dynamic_cast<Rock*>(GetRock(rockKey).get());
+			score_ += 1;
+			if (rock->GetState() != State::SMALL)
+			{
+				CalculateConservationOfMomentum(bullet, rock);
+				BreakRock(rock);
+			}
+			DestroyRock(rock);
+		}
 	}
-	DestroyRock(rock);
 	DestroyBullet(bullet);
 }
 

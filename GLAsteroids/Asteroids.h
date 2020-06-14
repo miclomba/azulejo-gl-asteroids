@@ -2,6 +2,7 @@
 #define	asteroids_asteroids_h
 
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -91,7 +92,7 @@ private:
 	void DetermineCollisions();
     Rock* ShipCollision();
     Rock* Collision(Bullet* bullet);
-    void ProcessCollision(Bullet* bullet, Rock* rock);
+    void ProcessCollision(Bullet* bullet, const Key& rockKey);
 
 	void UpdateRockTask(GLEntity* sharedRock);
 	void UpdateShipTask(GLEntity* sharedShip, std::vector<std::future<GLEntity*>>& futures);
@@ -106,6 +107,7 @@ private:
 	GLfloat thrust_{0.0f};
 
 	boost::asio::thread_pool threadPool_;
+	std::mutex rockCollisionMutex_;
 
 	std::shared_ptr<events::EventConsumer<void(void)>> leftArrowConsumer_;
 	std::shared_ptr<events::EventConsumer<void(void)>> rightArrowConsumer_;
