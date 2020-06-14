@@ -5,22 +5,20 @@
 #include <future>
 #include <memory>
 
-namespace entity {
-class Entity;
-}
-
 namespace asteroids {
+
+class GLEntity;
 
 struct GLEntityTask
 {
-	GLEntityTask(std::function<entity::Entity*()> lambda);
+	GLEntityTask(std::function<GLEntity*()> lambda);
 
 	void operator()();
 
-	std::future<entity::Entity*> GetFuture();
+	std::future<GLEntity*> GetFuture();
 
 private:
-	std::shared_ptr<std::packaged_task<entity::Entity*()>> task_;
+	std::shared_ptr<std::packaged_task<GLEntity*()>> task_;
 };
 
 } // asteroids

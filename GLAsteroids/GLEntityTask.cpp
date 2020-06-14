@@ -3,14 +3,14 @@
 #include <functional>
 #include <future>
 
-#include "Entities/Entity.h"
+#include "GLEntity.h"
 
+using asteroids::GLEntity;
 using asteroids::GLEntityTask;
-using entity::Entity;
 
-GLEntityTask::GLEntityTask(std::function<entity::Entity*()> lambda)
+GLEntityTask::GLEntityTask(std::function<GLEntity*()> lambda)
 {
-	task_ = std::make_shared<std::packaged_task<Entity*()>>(lambda);
+	task_ = std::make_shared<std::packaged_task<GLEntity*()>>(lambda);
 }
 
 void GLEntityTask::operator()()
@@ -18,7 +18,7 @@ void GLEntityTask::operator()()
 	return (*task_)();
 }
 
-std::future<entity::Entity*> GLEntityTask::GetFuture()
+std::future<GLEntity*> GLEntityTask::GetFuture()
 {
 	return task_->get_future();
 }

@@ -23,7 +23,6 @@
 #include "DatabaseAdapters/EntityTabularizer.h"
 #include "DatabaseAdapters/ResourceDetabularizer.h"
 #include "DatabaseAdapters/ResourceTabularizer.h"
-#include "Entities/Entity.h"
 #include "FilesystemAdapters/EntitySerializer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
@@ -52,7 +51,6 @@ using database_adapters::EntityTabularizer;
 using database_adapters::ResourceDetabularizer;
 using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
-using entity::Entity;
 using events::EventConsumer;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::EntitySerializer;
@@ -331,7 +329,7 @@ void Asteroids::ResetGame()
 	score_ = 0;
 }
 
-void Asteroids::UpdateRockTask(Entity* sharedRock)
+void Asteroids::UpdateRockTask(GLEntity* sharedRock)
 {
 	Rock* rock = dynamic_cast<Rock*>(sharedRock);
 	GLint randy = rand();
@@ -339,7 +337,7 @@ void Asteroids::UpdateRockTask(Entity* sharedRock)
 	rock->Update((GLfloat)(M_PI*randy / 5), (GLfloat)(randy % 3) / 100, (GLfloat)(randy % 6) / 100);
 };
 
-void Asteroids::UpdateShipTask(Entity* sharedShip, std::vector<std::future<Entity*>>& futures)
+void Asteroids::UpdateShipTask(GLEntity* sharedShip, std::vector<std::future<GLEntity*>>& futures)
 {
 	Ship* ship = dynamic_cast<Ship*>(sharedShip);
 	ship->Update(orientationAngle_, thrust_, keysSerialized_, threadPool_, futures);
@@ -347,8 +345,8 @@ void Asteroids::UpdateShipTask(Entity* sharedShip, std::vector<std::future<Entit
 
 void Asteroids::DrawGLEntities()
 {
-	std::vector<std::future<Entity*>> futures;
-	std::vector<std::future<Entity*>> bulletFutures;
+	std::vector<std::future<GLEntity*>> futures;
+	std::vector<std::future<GLEntity*>> bulletFutures;
 
 	for (Key& key : GetRockKeys())
 	{
@@ -356,7 +354,7 @@ void Asteroids::DrawGLEntities()
 		if (!sharedRock)
 			continue;
 
-		Entity* rock = sharedRock.get();
+		GLEntity* rock = dynamic_cast<GLEntity*>(sharedRock.get());
 		GLEntityTask task([rock, this]() { UpdateRockTask(rock); return rock; });
 		futures.push_back(task.GetFuture());
 
@@ -366,29 +364,17 @@ void Asteroids::DrawGLEntities()
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Entity* ship = sharedShip.get();
+		GLEntity* ship = dynamic_cast<GLEntity*>(sharedShip.get());
 		GLEntityTask task([ship, &bulletFutures, this]() { UpdateShipTask(ship, bulletFutures); return ship; });
 		futures.push_back(task.GetFuture());
 
 		boost::asio::post(threadPool_, task);
 	}
 
-	for (std::future<Entity*>& future : futures)
-	{
-		Entity* obj = future.get();
-
-		Rock* rock = dynamic_cast<Rock*>(obj);
-		if (rock) 
-			rock->Draw();
-		else 
-			dynamic_cast<Ship*>(obj)->Draw();
-	}
-
-	for (std::future<Entity*>& future : bulletFutures)
-	{
-		Entity* obj = future.get();
-		dynamic_cast<Bullet*>(obj)->Draw();
-	}
+	for (std::future<GLEntity*>& future : futures)
+		future.get()->Draw();
+	for (std::future<GLEntity*>& future : bulletFutures)
+		future.get()->Draw();
 }
 
 void Asteroids::DrawGameInfo()

@@ -40,7 +40,7 @@ public:
 	static void RegisterTabularizationResources(const std::string& key);
 
 	void Update(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
-	void Draw();
+	void Draw() override;
 
     GLfloat GetSpin() const;
     GLfloat GetSpinEpsilon() const;

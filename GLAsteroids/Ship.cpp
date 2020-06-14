@@ -19,7 +19,6 @@
 #include "DatabaseAdapters/ResourceDetabularizer.h"
 #include "DatabaseAdapters/ResourceTabularizer.h"
 #include "DatabaseAdapters/Sqlite.h"
-#include "Entities/Entity.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
@@ -42,7 +41,6 @@ using database_adapters::ITabularizableResource;
 using database_adapters::ResourceDetabularizer;
 using database_adapters::ResourceTabularizer;
 using database_adapters::Sqlite;
-using entity::Entity;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
@@ -258,7 +256,7 @@ void Ship::WrapAroundMoveShip()
 	}
 }
 
-void Ship::UpdateBulletTask(Entity* sharedBullet)
+void Ship::UpdateBulletTask(GLEntity* sharedBullet)
 {
 	Bullet* bullet = dynamic_cast<Bullet*>(sharedBullet);
 	bullet->Update(orientationAngle_, GetSpeed());
@@ -267,7 +265,7 @@ void Ship::UpdateBulletTask(Entity* sharedBullet)
 void Ship::UpdateBullets(
 	const std::set<std::string>& serializedKeys, 
 	boost::asio::thread_pool& threadPool,
-	std::vector<std::future<Entity*>>& futures
+	std::vector<std::future<GLEntity*>>& futures
 )
 {
 	if (bulletFired_ == false)
@@ -326,7 +324,7 @@ void Ship::Update(
 	const GLfloat _thrust, 
 	const std::set<std::string>& serializedKeys, 
 	boost::asio::thread_pool& threadPool,
-	std::vector<std::future<Entity*>>& futures
+	std::vector<std::future<GLEntity*>>& futures
 )
 {
 	RecomputeShipVelocity(_thrust);

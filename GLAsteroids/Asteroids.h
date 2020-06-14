@@ -50,7 +50,7 @@ public:
 
 private:
 	// commands
-	void Draw();
+	void Draw() override;
 	void Fire();
 	void RotateLeft();
 	void RotateRight();
@@ -93,8 +93,8 @@ private:
     Rock* Collision(Bullet* bullet);
     void ProcessCollision(Bullet* bullet, Rock* rock);
 
-	void UpdateRockTask(entity::Entity* sharedRock);
-	void UpdateShipTask(entity::Entity* sharedShip, std::vector<std::future<entity::Entity*>>& futures);
+	void UpdateRockTask(GLEntity* sharedRock);
+	void UpdateShipTask(GLEntity* sharedShip, std::vector<std::future<GLEntity*>>& futures);
 
 	void DrawGLEntities();
 	void DrawGameInfo();

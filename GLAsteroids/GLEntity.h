@@ -29,6 +29,8 @@ public:
 	GLEntity& operator=(const GLEntity&);
 	GLEntity& operator=(GLEntity&&);
 
+	virtual void Draw();
+
 	Resource2DGLfloat& GetFrame();
 	Resource2DGLfloat& GetUnitVelocity();
 	GLfloat GetSpeed() const;

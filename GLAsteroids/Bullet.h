@@ -37,7 +37,7 @@ public:
 	static void RegisterTabularizationResources(const std::string& key);
 
     void Update(const GLfloat _velocityAngle, const GLfloat _speed);
-    void Draw();
+    void Draw() override;
 
 	bool IsOutOfBounds() const;
 

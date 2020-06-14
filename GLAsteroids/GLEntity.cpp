@@ -100,6 +100,10 @@ GLEntity::GLEntity(GLEntity&&) = default;
 GLEntity& GLEntity::operator=(const GLEntity&) = default;
 GLEntity& GLEntity::operator=(GLEntity&&) = default;
 
+void GLEntity::Draw()
+{
+}
+
 Resource2DGLfloat& GLEntity::GetFrame()
 {
 	return frame_;

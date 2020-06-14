@@ -47,9 +47,9 @@ public:
 		const GLfloat _thrust, 
 		const std::set<std::string>& serializedKeys, 
 		boost::asio::thread_pool& threadPool,
-		std::vector<std::future<entity::Entity*>>& futures
+		std::vector<std::future<GLEntity*>>& futures
 	);
-	void Draw();
+	void Draw() override;
 	void Fire();
 
 	static GLint BulletNumber();
@@ -83,9 +83,9 @@ private:
 	void UpdateBullets(
 		const std::set<std::string>& serializedKeys, 
 		boost::asio::thread_pool& threadPool, 
-		std::vector<std::future<entity::Entity*>>& futures
+		std::vector<std::future<GLEntity*>>& futures
 	);
-	void UpdateBulletTask(entity::Entity* sharedBullet);
+	void UpdateBulletTask(GLEntity* sharedBullet);
 
 	mutable std::set<std::string> outOfScopeBulletKeys_;
 
