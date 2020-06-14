@@ -184,7 +184,7 @@ void UntabularizeShipResources(Ship* ship)
 } // end namespace
 
 Asteroids::Asteroids() :
-	threadPool_(std::thread::hardware_concurrency())
+	threadPool_(std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1)
 {
 	SetKey(ASTEROIDS_KEY);
 
