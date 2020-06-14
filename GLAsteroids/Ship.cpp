@@ -205,11 +205,8 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 		SetVelocityAngle(GetVelocityAngle() + 2 * M_PI);
 }
 
-void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
+void Ship::ChangeShipOrientation()
 {
-	if (fabs(_orientationAngle - 0.0f) <= 0.00001f)
-		return;
-
 	glLoadMatrixf(static_cast<GLfloat*>(unitOrientation_.Data()));
 	glMultMatrixf(static_cast<GLfloat*>(R_.Data()));
 	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(unitOrientation_.Data()));
@@ -303,11 +300,14 @@ void Ship::UpdateBullets(
 		RemoveBullet(bulletKey, serializedKeys);
 }
 
-void Ship::Draw(const GLfloat _orientationAngle)
+void Ship::Draw()
 {
 	glPushMatrix();
 
-	ChangeShipOrientation(_orientationAngle);
+	if (doRotate_)
+		ChangeShipOrientation();
+	doRotate_ = false;
+
 	MoveShip();
 	WrapAroundMoveShip();
 
@@ -353,6 +353,8 @@ void Ship::Update(
 			{0.0f,0.0f,1.0f,0.0f},
 			{0.0f,0.0f,0.0f,1.0f}
 		});
+
+		doRotate_ = true;
 	}
 
 	UpdateBullets(serializedKeys, threadPool, futures);

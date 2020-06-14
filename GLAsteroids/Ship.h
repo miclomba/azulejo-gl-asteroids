@@ -49,7 +49,7 @@ public:
 		boost::asio::thread_pool& threadPool,
 		std::vector<std::future<entity::Entity*>>& futures
 	);
-	void Draw(const GLfloat _orientationAngle);
+	void Draw();
 	void Fire();
 
 	static GLint BulletNumber();
@@ -77,7 +77,7 @@ private:
 	std::string GenerateUUID() const;
 
 	void RecomputeShipVelocity(const GLfloat _thrust);
-	void ChangeShipOrientation(const GLfloat _orientationAngle);
+	void ChangeShipOrientation();
 	void MoveShip();
 	void WrapAroundMoveShip();
 	void UpdateBullets(
@@ -89,7 +89,8 @@ private:
 
 	mutable std::set<std::string> outOfScopeBulletKeys_;
 
-	bool bulletFired_{false};
+	bool bulletFired_{ false };
+	bool doRotate_{ false };
 	GLfloat orientationAngle_{ static_cast<GLfloat>(M_PI) / 2 };
 
     Resource2DGLfloat unitOrientation_;

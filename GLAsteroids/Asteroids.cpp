@@ -381,7 +381,7 @@ void Asteroids::DrawGLEntities()
 		if (rock) 
 			rock->Draw();
 		else 
-			dynamic_cast<Ship*>(obj)->Draw(orientationAngle_);
+			dynamic_cast<Ship*>(obj)->Draw();
 	}
 
 	for (std::future<Entity*>& future : bulletFutures)
