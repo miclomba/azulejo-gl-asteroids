@@ -6,6 +6,7 @@
 #include <future>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -183,7 +184,7 @@ void UntabularizeShipResources(Ship* ship)
 } // end namespace
 
 Asteroids::Asteroids() :
-	threadPool_(3)
+	threadPool_(std::thread::hardware_concurrency())
 {
 	SetKey(ASTEROIDS_KEY);
 
