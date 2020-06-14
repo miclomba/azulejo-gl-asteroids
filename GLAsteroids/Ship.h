@@ -40,7 +40,8 @@ public:
 	static void RegisterSerializationResources(const std::string& key);
 	static void RegisterTabularizationResources(const std::string& key);
 
-	void Draw(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys);
+	void Update(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys);
+	void Draw(const GLfloat _orientationAngle, const std::set<std::string>& serializedKeys);
 	void Fire();
 
 	static GLint BulletNumber();
@@ -72,7 +73,6 @@ private:
 	void MoveShip();
 	void WrapAroundMoveShip();
 	void DrawBullets(const std::set<std::string>& serializedKeys);
-	void DrawShip();
 
 	mutable std::set<std::string> outOfScopeBulletKeys_;
 

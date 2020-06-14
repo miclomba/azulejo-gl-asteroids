@@ -183,9 +183,9 @@ void UntabularizeShipResources(Ship* ship)
 
 struct Task
 {
-	Task(std::function<bool()> lambda)
+	Task(std::function<entity::Entity*()> lambda)
 	{
-		task_ = std::make_shared<std::packaged_task<bool()>>(lambda);
+		task_ = std::make_shared<std::packaged_task<entity::Entity*()>>(lambda);
 	}
 
 	void operator()()
@@ -193,13 +193,13 @@ struct Task
 		return (*task_)();
 	}
 
-	std::future<bool> GetFuture()
+	std::future<entity::Entity*> GetFuture()
 	{
 		return task_->get_future();
 	}
 
 private:
-	std::shared_ptr<std::packaged_task<bool()>> task_;
+	std::shared_ptr<std::packaged_task<entity::Entity*()>> task_;
 };
 } // end namespace
 
@@ -360,7 +360,7 @@ void Asteroids::DrawRockAndShip()
 		Rock* rock = dynamic_cast<Rock*>(sharedRock);
 		GLint randy = rand();
 		randy = (randy % 9) + 1;
-		rock->Draw((GLfloat)(M_PI*randy / 5),
+		rock->Update((GLfloat)(M_PI*randy / 5),
 			(GLfloat)(randy % 3) / 100,
 			(GLfloat)(randy % 6) / 100);
 	};
@@ -368,10 +368,10 @@ void Asteroids::DrawRockAndShip()
 	auto DrawShip = [this](Entity* sharedShip)
 	{
 		Ship* ship = dynamic_cast<Ship*>(sharedShip);
-		ship->Draw(orientationAngle_, thrust_, keysSerialized_);
+		ship->Update(orientationAngle_, thrust_, keysSerialized_);
 	};
 
-	std::vector<std::future<bool>> futures;
+	std::vector<std::future<entity::Entity*>> futures;
 
 	GLint randy;
 	std::vector<Key> rockKeys = GetRockKeys();
@@ -383,26 +383,32 @@ void Asteroids::DrawRockAndShip()
 			continue;
 
 		Entity* rock = sharedRock.get();
-		Task task([rock, &DrawRock]() { DrawRock(rock); return true; });
+		Task task([rock, &DrawRock]() { DrawRock(rock); return rock; });
 		futures.push_back(task.GetFuture());
 
-		//boost::asio::post(POOL, task);
-		task();
+		boost::asio::post(POOL, task);
 	}
 
 	SharedEntity& sharedShip = GetShip();
 	if (sharedShip)
 	{
 		Entity* ship = sharedShip.get();
-		Task task([ship, &DrawShip]() { DrawShip(ship); return true; });
+		Task task([ship, &DrawShip]() { DrawShip(ship); return ship; });
 		futures.push_back(task.GetFuture());
 
-		//boost::asio::post(POOL, task);
-		task();
+		boost::asio::post(POOL, task);
 	}
 
-	for (std::future<bool>& future : futures)
-		future.get();
+	for (std::future<entity::Entity*>& future : futures)
+	{
+		entity::Entity* obj = future.get();
+
+		Rock* rock = dynamic_cast<Rock*>(obj);
+		if (rock)
+			rock->Draw();
+		else
+			dynamic_cast<Ship*>(obj)->Draw(orientationAngle_, keysSerialized_);
+	}
 }
 
 void Asteroids::DrawGameInfo()

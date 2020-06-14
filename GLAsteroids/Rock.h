@@ -39,7 +39,8 @@ public:
 	static void RegisterSerializationResources(const std::string& key);
 	static void RegisterTabularizationResources(const std::string& key);
 
-	void Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
+	void Update(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
+	void Draw();
 
     GLfloat GetSpin() const;
     GLfloat GetSpinEpsilon() const;
@@ -63,9 +64,9 @@ private:
 	void UpdateSpin();
 	void MoveRock();
 	void WrapAroundMoveRock();
-	void DrawRock();
 
     GLint index_;
+	GLfloat epsilon_;
     /*=============================== State ==================================*/
 	GLfloat spin_{0.0f};
 	GLfloat spinEpsilon_{0.01f};

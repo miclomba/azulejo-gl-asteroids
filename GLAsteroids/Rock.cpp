@@ -177,20 +177,6 @@ void Rock::UpdateSpin()
 
 void Rock::MoveRock()
 {
-	S_ = Resource2DGLfloat({ 
-		{GetSpeed(),0.0f,0.0f,0.0f},
-		{0.0f,GetSpeed(),0.0f,0.0f},
-		{0.0f,0.0f,GetSpeed(),0.0f},
-		{0.0f,0.0f,0.0f,1.0f} 
-	});
-
-	T_ = Resource2DGLfloat({ 
-		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
-		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
-		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
-		{0.0f,0.0f,0.0f,1.0f} 
-	});
-
 	/*======================= p = av + frame =============================*/
 	glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
 	glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
@@ -203,58 +189,72 @@ void Rock::WrapAroundMoveRock()
 	GLfloat projectionMatrix[16];
 	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
 
-	GLfloat epsilon;
-	if (state_ == State::LARGE)
-		epsilon = 0.7f;
-	else if (state_ == State::MEDIUM)
-		epsilon = 0.5f;
-	else
-		epsilon = 0.2f;
-
 	GLfloat left, right, bottom, top;
 	right = (1 / fabs(projectionMatrix[0]));
 	left = -1 * right;
 	top = (1 / fabs(projectionMatrix[5]));
 	bottom = -1 * top;
 
-	if (GetFrame().GetData(0,0) <= left - epsilon) {
-		SetFrame(0,0,right + epsilon);
+	if (GetFrame().GetData(0,0) <= left - epsilon_) {
+		SetFrame(0,0,right + epsilon_);
 		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().GetData(0,0) >= right + epsilon) {
-		SetFrame(0,0,left - epsilon);
+	else if (GetFrame().GetData(0,0) >= right + epsilon_) {
+		SetFrame(0,0,left - epsilon_);
 		SetFrame(1,0, GetFrame().GetData(1,0) * -1);
 	}
-	else if (GetFrame().GetData(1,0) >= top + epsilon) {
-		SetFrame(1,0,bottom - epsilon);
+	else if (GetFrame().GetData(1,0) >= top + epsilon_) {
+		SetFrame(1,0,bottom - epsilon_);
 		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
-	else if (GetFrame().GetData(1,0) <= bottom - epsilon) {
-		SetFrame(1,0,top + epsilon);
+	else if (GetFrame().GetData(1,0) <= bottom - epsilon_) {
+		SetFrame(1,0,top + epsilon_);
 		SetFrame(0,0, GetFrame().GetData(0,0) * -1);
 	}
 }
 
-void Rock::DrawRock()
+void Rock::Draw()
 {
+	glPushMatrix();
+
+	MoveRock();
+	WrapAroundMoveRock();
+
 	glVertexPointer(3, GL_FLOAT, 0, rockVertices_.Data());
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glLoadIdentity();
 	glTranslatef(GetFrame().GetData(0,0), GetFrame().GetData(1,0), GetFrame().GetData(2,0));
 	glRotatef(spin_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data());
+
+    glPopMatrix();
 }
 
-void Rock::Draw(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin) 
+void Rock::Update(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin) 
 {
 	InitializeRock(_velocityAngle, _speed, _spin);
 	UpdateSpin();
 
-    glPushMatrix();
-		MoveRock();
-		WrapAroundMoveRock();
-		DrawRock();
-    glPopMatrix();
+	S_ = Resource2DGLfloat({
+		{GetSpeed(),0.0f,0.0f,0.0f},
+		{0.0f,GetSpeed(),0.0f,0.0f},
+		{0.0f,0.0f,GetSpeed(),0.0f},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
+
+	T_ = Resource2DGLfloat({
+		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
+
+	if (state_ == State::LARGE)
+		epsilon_ = 0.7f;
+	else if (state_ == State::MEDIUM)
+		epsilon_ = 0.5f;
+	else
+		epsilon_ = 0.2f;
 }
 
 GLfloat Rock::GetSpin() const

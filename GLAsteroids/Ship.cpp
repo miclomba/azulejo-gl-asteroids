@@ -204,13 +204,6 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 	if (fabs(_orientationAngle - 0.0f) <= 0.00001f)
 		return;
 
-	R_ = Resource2DGLfloat({ 
-		{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
-		{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
-		{0.0f,0.0f,1.0f,0.0f},
-		{0.0f,0.0f,0.0f,1.0f} 
-	});
-
 	glLoadMatrixf(static_cast<GLfloat*>(unitOrientation_.Data()));
 	glMultMatrixf(static_cast<GLfloat*>(R_.Data()));
 	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat*>(unitOrientation_.Data()));
@@ -225,20 +218,6 @@ void Ship::ChangeShipOrientation(const GLfloat _orientationAngle)
 
 void Ship::MoveShip()
 {
-	S_ = Resource2DGLfloat({ 
-		{GetSpeed(),0.0f,0.0f,0.0f},
-		{0.0f,GetSpeed(),0.0f,0.0f},
-		{0.0f,0.0f,GetSpeed(),0.0f},
-		{0.0f,0.0f,0.0f,1.0f} 
-	});
-
-	T_ = Resource2DGLfloat({ 
-		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
-		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
-		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
-		{0.0f,0.0f,0.0f,1.0f} 
-	});
-
 	/*======================= p = av + frame =============================*/
 	glLoadMatrixf(static_cast<GLfloat*>(GetUnitVelocity().Data()));
 	glMultMatrixf(static_cast<GLfloat*>(S_.Data()));
@@ -305,27 +284,52 @@ void Ship::DrawBullets(const std::set<std::string>& serializedKeys)
 		RemoveBullet(bulletKey, serializedKeys);
 }
 
-void Ship::DrawShip()
+void Ship::Draw(const GLfloat _orientationAngle, const std::set<std::string>& serializedKeys)
 {
+	glPushMatrix();
+
+	ChangeShipOrientation(_orientationAngle);
+	MoveShip();
+	WrapAroundMoveShip();
+	DrawBullets(serializedKeys);
+
 	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.Data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
 	glTranslatef(GetFrame().GetData(0,0), GetFrame().GetData(1,0), GetFrame().GetData(2,0));
 	glRotatef(orientationAngle_*(180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
+
+    glPopMatrix();
 }
 
-void Ship::Draw(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys) 
+void Ship::Update(const GLfloat _orientationAngle, const GLfloat _thrust, const std::set<std::string>& serializedKeys) 
 {
 	RecomputeShipVelocity(_thrust);
 
-    glPushMatrix();
-		ChangeShipOrientation(_orientationAngle);
-		MoveShip();
-		WrapAroundMoveShip();
-		DrawBullets(serializedKeys);
-		DrawShip();
-    glPopMatrix();
+	S_ = Resource2DGLfloat({
+		{GetSpeed(),0.0f,0.0f,0.0f},
+		{0.0f,GetSpeed(),0.0f,0.0f},
+		{0.0f,0.0f,GetSpeed(),0.0f},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
+
+	T_ = Resource2DGLfloat({
+		{1.0f,0.0f,0.0f,GetFrame().GetData(0,0)},
+		{0.0f,1.0f,0.0f,GetFrame().GetData(1,0)},
+		{0.0f,0.0f,1.0f,GetFrame().GetData(2,0)},
+		{0.0f,0.0f,0.0f,1.0f}
+	});
+
+	if (!(fabs(_orientationAngle - 0.0f) <= 0.00001f))
+	{
+		R_ = Resource2DGLfloat({
+			{cos(_orientationAngle),-sin(_orientationAngle),0.0f,0.0f},
+			{sin(_orientationAngle),cos(_orientationAngle),0.0f,0.0f},
+			{0.0f,0.0f,1.0f,0.0f},
+			{0.0f,0.0f,0.0f,1.0f}
+		});
+	}
 }
 
 void Ship::RemoveBullet(const Ship::Key& key, const std::set<std::string>& serializedKeys)
