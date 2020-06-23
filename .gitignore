@@ -2,9 +2,5 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/GLAsteroids/v15
-/GLAsteroids/Debug/GLAsteroids.tlog
-/GLAsteroids/x64/Debug
-/GLAsteroids/Debug
-/Debug
-/x64/Debug
+/.vs
+/GLAsteroids/out

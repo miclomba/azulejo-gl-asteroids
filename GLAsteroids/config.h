@@ -1,9 +1,9 @@
 #ifndef asteroids_config_h
 
 #if defined (__APPLE__) || defined (MACOSX)
-#include <GLUT/glut.h>
+#include <GLUT/freeglut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 
 #ifndef M_PI
