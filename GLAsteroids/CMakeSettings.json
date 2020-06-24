@@ -1,7 +1,8 @@
 ﻿{
   "environments": [
     {
-      "PATH": "${env.PATH};C:\\Users\\miclomba\\source\\repos\\Backend\\X\\x64\\Debug;C:\\Program Files\\boost\\boost_1_69_0\\stage\\lib;C:\\Program Files\\freeglut\\bin"
+      "PATH": "${env.PATH};C:\\Users\\miclomba\\source\\repos\\Backend\\X\\x64\\Debug;C:\\Program Files\\boost\\boost_1_69_0\\stage\\lib;C:\\Program Files\\freeglut\\bin",
+      "X_LINK_DIR": "${projectDir}/../../Backend/X/x64/Debug"
     }
   ],
   // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
