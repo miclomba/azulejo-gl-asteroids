@@ -1,7 +1,7 @@
 ﻿{
   "environments": [
     {
-      "PATH": "${env.PATH};${projectDir}/../../Backend/X/out/install/X;C:/Program Files/boost/boost_1_69_0/stage/lib;C:/Program Files/freeglut/bin;C:/Program Files/freeglut/lib",
+      "PATH": "${env.PATH};C:/Users/miclomba/source/repos/Backend/X/out/install/X;C:/Program Files/boost/boost_1_69_0/stage/lib;C:/Program Files/freeglut/bin;C:/Program Files/freeglut/lib",
       "FREEGLUT_LINK_BIN": "C:/Program Files/freeglut/bin",
       "FREEGLUT_LINK_LIB": "C:/Program Files/freeglut/lib",
       "FREEGLUT_INCL_DIR": "C:/Program Files/freeglut/include",
