@@ -5,7 +5,7 @@ project("GLAsteroids")
 set(CMAKE_CXX_STANDARD 17)
 
 if (MSVC)
-set(CMAKE_CXX_FLAGS "/permissive- /EHsc")
+set(CMAKE_CXX_FLAGS "/permissive- /EHsc /WX")
 endif()
 
 include_directories(

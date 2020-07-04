@@ -284,7 +284,7 @@ void Asteroids::ResetGame()
 {
 	auto CreateRock = [this](const GLint randy1, const GLint randy2, const std::string& uuidStr)
 	{
-        SharedEntity rock = std::make_shared<Rock>(State::LARGE,randy1,randy2);
+        SharedEntity rock = std::make_shared<Rock>(State::LARGE, static_cast<const GLfloat>(randy1), static_cast<const GLfloat>(randy2));
 		rock->SetKey(Rock::RockPrefix() + uuidStr);
 
 		AggregateMember(rock);
