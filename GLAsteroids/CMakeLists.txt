@@ -4,6 +4,10 @@ project("GLAsteroids")
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (MSVC)
+set(CMAKE_CXX_FLAGS "/permissive- /EHsc")
+endif()
+
 include_directories(
 "$ENV{X_INCL_DIR}"
 "$ENV{BOOST_INCL_DIR}"
