@@ -32,8 +32,14 @@ add_executable("${PROJECT_NAME}"
 "Bullet.cpp"
 )
 
+if (APPLE)
+set(FREEGLUT_LIB "glut")
+else()
+set(FREEGLUT_LIB "freeglutd")
+endif()
+
 target_link_libraries("${PROJECT_NAME}" 
-"freeglutd" 
+${FREEGLUT_LIB}
 "Entities" 
 "Resources" 
 "Events" 
