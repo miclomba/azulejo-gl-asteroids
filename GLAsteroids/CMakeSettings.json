@@ -5,6 +5,7 @@
       "FREEGLUT_LINK_BIN": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/bin",
       "FREEGLUT_LINK_LIB": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/lib",
       "FREEGLUT_INCL_DIR": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/include",
+      "BOOST_LIB_SUFFIX": "-vc141-mt-gd-x64-1_69",
       "BOOST_LINK_DIR": "C:/Program Files/boost/boost_1_69_0/stage/lib",
       "BOOST_INCL_DIR": "C:/Program Files/boost/boost_1_69_0",
       "X_INCL_DIR": "${projectDir}/../../Backend/X",

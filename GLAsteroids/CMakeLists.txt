@@ -45,5 +45,6 @@ ${FREEGLUT_LIB}
 "Events" 
 "FilesystemAdapters" 
 "DatabaseAdapters"
+"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
 )
 
