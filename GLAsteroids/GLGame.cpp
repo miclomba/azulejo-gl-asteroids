@@ -1,5 +1,6 @@
 #include "GLGame.h"
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
@@ -44,7 +45,7 @@ GLGame::GLGame(int _argc, char* _argv[])
 	if (!callbackInstance_)
 		callbackInstance_ = this;
 
-	fill(keysPressed_.begin(), keysPressed_.end(), false);
+	std::fill(keysPressed_.begin(), keysPressed_.end(), false);
 
 	InitGlut(_argc, _argv);
 	RegisterCallbacks();
