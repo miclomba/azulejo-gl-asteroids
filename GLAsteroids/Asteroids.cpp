@@ -394,7 +394,7 @@ void Asteroids::DrawGameInfo()
 	for (i = 0; i < 7; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, score[i]);
 	char amount[4];
-	i = sprintf_s(amount, "%d", score_);
+	i = sprintf(amount, "%d", score_);
 	for (i = 0; i < 4; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }
