@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 if (MSVC)
 set(CMAKE_CXX_FLAGS "/permissive- /EHsc /WX")
+elseif(APPLE)
+set(CMAKE_CXX_FLAGS "-framework GLUT -framework OpenGL")
 endif()
 
 include_directories(
@@ -32,14 +34,9 @@ add_executable("${PROJECT_NAME}"
 "Bullet.cpp"
 )
 
-if (APPLE)
-set(FREEGLUT_LIB "libglut")
-else()
-set(FREEGLUT_LIB "freeglutd")
-endif()
-
+if (MSVC)
 target_link_libraries("${PROJECT_NAME}" 
-${FREEGLUT_LIB}
+"freeglutd"
 "Entities" 
 "Resources" 
 "Events" 
@@ -47,4 +44,14 @@ ${FREEGLUT_LIB}
 "DatabaseAdapters"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
 )
+elseif (APPLE)
+target_link_libraries("${PROJECT_NAME}" 
+"Entities" 
+"Resources" 
+"Events" 
+"FilesystemAdapters" 
+"DatabaseAdapters"
+"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+)
+endif()
 

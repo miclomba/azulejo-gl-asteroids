@@ -15,13 +15,14 @@ export BOOST_INCL_DIR="$REPOS/boost/boost_1_69_0"
 export BOOST_LINK_DIR="$REPOS/boost/boost_1_69_0/stage/lib"
 
 # brew install freeglut
-export FREEGLUT_INCL_DIR="/usr/local/Cellar/freeglut/3.2.1/include"
-export FREEGLUT_LINK_LIB="/usr/local/Cellar/freeglut/3.2.1/lib"
+export FREEGLUT_INCL_DIR="/System/Library/Frameworks/GLUT.framework/Headers"
+export FREEGLUT_LINK_LIB=""
+export FREEGLUT_LINK_BIN=""
 
 export X_LINK_DIR="$X_DIR/out/xcode/install"
 export X_INCL_DIR="$X_DIR"
 
-export PATH="$PATH:$X_LINK_DIR:$FREEGLUT_LINK_LIB"
+export PATH="$PATH:$X_LINK_DIR"
 
 cmake -G Xcode ../../
 
