@@ -12,7 +12,17 @@
 
 #define BOOST_ALL_DYN_LINK 1
 
+#if defined(_WIN64) || defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define ASTEROIDS_DLL_EXPORT __declspec(dllexport)
+#elif defined(__APPLE__) || defined(__MACH__)
+#define ASTEROIDS_DLL_EXPORT __attribute__((visibility ("default")))
+#elif defined(__linux__)
+#define ASTEROIDS_DLL_EXPORT __attribute__((visibility ("default")))
+#elif defined(__FreeBSD__)
+#define ASTEROIDS_DLL_EXPORT __attribute__((visibility ("default")))
+#elif defined(__ANDROID__)
+#define ASTEROIDS_DLL_EXPORT __attribute__((visibility ("default")))
+#endif
 
 #ifdef _WIN32
 #define USERS_PATH "c:/users"
