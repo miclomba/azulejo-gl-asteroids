@@ -33,7 +33,7 @@ add_executable("${PROJECT_NAME}"
 )
 
 if (APPLE)
-set(FREEGLUT_LIB "glut")
+set(FREEGLUT_LIB "libglut")
 else()
 set(FREEGLUT_LIB "freeglutd")
 endif()
