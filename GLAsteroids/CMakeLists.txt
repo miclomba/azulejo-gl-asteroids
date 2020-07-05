@@ -7,21 +7,38 @@ set(CMAKE_CXX_STANDARD 17)
 if (MSVC)
 set(CMAKE_CXX_FLAGS "/permissive- /EHsc /WX")
 elseif(APPLE)
-set(CMAKE_CXX_FLAGS "-framework GLUT -framework OpenGL")
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 endif()
 
+if (MSVC)
 include_directories(
 "$ENV{X_INCL_DIR}"
 "$ENV{BOOST_INCL_DIR}"
 "$ENV{FREEGLUT_INCL_DIR}"
 )
+elseif (APPLE)
+include_directories(
+"$ENV{X_INCL_DIR}"
+"$ENV{BOOST_INCL_DIR}"
+"${OPENGL_INCLUDE_DIR}"
+"${GLUT_INCLUDE_DIR}"
+)
+endif()
 
+if (MSVC)
 link_directories(
 "$ENV{X_LINK_DIR}"
 "$ENV{BOOST_LINK_DIR}" 
 "$ENV{FREEGLUT_LINK_BIN}"
 "$ENV{FREEGLUT_LINK_LIB}"
 )
+elseif (APPLE)
+link_directories(
+"$ENV{X_LINK_DIR}"
+"$ENV{BOOST_LINK_DIR}" 
+)
+endif()
 
 add_executable("${PROJECT_NAME}" 
 "main.cpp" 
@@ -36,13 +53,13 @@ add_executable("${PROJECT_NAME}"
 
 if (MSVC)
 target_link_libraries("${PROJECT_NAME}" 
-"freeglutd"
 "Entities" 
 "Resources" 
 "Events" 
 "FilesystemAdapters" 
 "DatabaseAdapters"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+"freeglutd"
 )
 elseif (APPLE)
 target_link_libraries("${PROJECT_NAME}" 
@@ -52,6 +69,8 @@ target_link_libraries("${PROJECT_NAME}"
 "FilesystemAdapters" 
 "DatabaseAdapters"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+"${OPENGL_LIBRARIES}"
+"${GLUT_LIBRARY}"
 )
 endif()
 
