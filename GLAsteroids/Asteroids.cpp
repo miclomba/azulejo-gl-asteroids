@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <future>
 #include <memory>
+#include <stdio.h>
 #include <string>
 #include <thread>
 #include <utility>
