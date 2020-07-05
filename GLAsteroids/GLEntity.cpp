@@ -29,7 +29,6 @@ using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 
-namespace fs = std::filesystem;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace

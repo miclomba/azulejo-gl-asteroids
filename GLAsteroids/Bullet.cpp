@@ -36,8 +36,6 @@ using filesystem_adapters::ResourceSerializer;
 using ResourceGLubyte = ContainerResource<GLubyte>;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
-namespace fs = std::filesystem;
-
 namespace
 {
 const GLfloat BULLET_SPEED_ = 0.5;

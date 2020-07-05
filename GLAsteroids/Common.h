@@ -3,15 +3,15 @@
 
 #include "config.h"
 
-#include <filesystem>
 #include <string>
+#include "filesystem.h"
 
 namespace
 {
 const std::string DB_NAME = "asteroids.sqlite";
 const std::string JSON_NAME = "asteroids.json";
-const std::filesystem::path ROOT_PATH = std::filesystem::path(USERS_PATH) / "miclomba" / "desktop";
-const std::filesystem::path SERIALIZATION_PATH = ROOT_PATH / JSON_NAME;
+const Path ROOT_PATH = Path(USERS_PATH) / "miclomba" / "desktop";
+const Path SERIALIZATION_PATH = ROOT_PATH / JSON_NAME;
 
 std::string FormatKey(const std::string& key)
 {

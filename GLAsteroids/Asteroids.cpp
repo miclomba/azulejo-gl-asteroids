@@ -58,7 +58,6 @@ using filesystem_adapters::EntitySerializer;
 using filesystem_adapters::ResourceDeserializer;
 using filesystem_adapters::ResourceSerializer;
 
-namespace fs = std::filesystem;
 namespace pt = boost::property_tree;
 
 namespace

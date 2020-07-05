@@ -49,8 +49,6 @@ using filesystem_adapters::ResourceSerializer;
 using ResourceGLubyte = ContainerResource<GLubyte>;
 using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
-namespace fs = std::filesystem;
-
 namespace
 {
 const std::string SHIP_VERTICES_KEY = "ship_vertices";
