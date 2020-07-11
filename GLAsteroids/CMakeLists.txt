@@ -60,6 +60,7 @@ target_link_libraries("${PROJECT_NAME}"
 "DatabaseAdapters"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
 "freeglutd"
+"bcrypt"
 )
 elseif (APPLE)
 target_link_libraries("${PROJECT_NAME}" 

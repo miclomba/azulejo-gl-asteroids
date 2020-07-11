@@ -1,13 +1,13 @@
 ﻿{
   "environments": [
     {
-      "PATH": "${env.PATH};C:/Users/miclomba/source/repos/Backend/X/out/install/X;C:/Program Files/boost/boost_1_69_0/stage/lib;C:/Users/miclomba/source/repos/freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/bin;C:/Users/miclomba/source/repos/freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/lib",
-      "FREEGLUT_LINK_BIN": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/bin",
-      "FREEGLUT_LINK_LIB": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/lib",
-      "FREEGLUT_INCL_DIR": "${projectDir}/../../freeglut/freeglut-3.2.1/out/install/x64-Debug (default)/include",
-      "BOOST_LIB_SUFFIX": "-vc141-mt-gd-x64-1_69",
-      "BOOST_LINK_DIR": "C:/Program Files/boost/boost_1_69_0/stage/lib",
-      "BOOST_INCL_DIR": "C:/Program Files/boost/boost_1_69_0",
+      "PATH": "${env.PATH};C:/Users/miclomba/source/repos/Backend/X/out/install/X;C:/Users/miclomba/source/repos/vcpkg/installed/x64-windows/debug/bin;C:/Users/miclomba/source/repos/vcpkg/installed/x64-windows/debug/lib",
+      "FREEGLUT_LINK_BIN": "${projectDir}/../../vcpkg/installed/x64-windows/debug/bin",
+      "FREEGLUT_LINK_LIB": "${projectDir}/../../vcpkg/installed/x64-windows/debug/lib",
+      "FREEGLUT_INCL_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/include",
+      "BOOST_LIB_SUFFIX": "-vc140-mt-gd",
+      "BOOST_LINK_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/debug/lib",
+      "BOOST_INCL_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/include",
       "X_INCL_DIR": "${projectDir}/../../Backend/X",
       "X_LINK_DIR": "${projectDir}/../../Backend/X/out/install/X"
     }

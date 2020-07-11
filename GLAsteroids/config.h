@@ -10,7 +10,9 @@
 #define M_PI (3.14159265358979323846)
 #endif
 
-#define BOOST_ALL_DYN_LINK 1
+#ifndef BOOST_ALL_DYN_LINK
+#define BOOST_ALL_DYN_LINK
+#endif
 
 #if defined(_WIN64) || defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define ASTEROIDS_DLL_EXPORT __declspec(dllexport)
