@@ -5,11 +5,11 @@
 
 ## How to Play
 
-s - yaw left
-f - yaw right
-e - thrust
-j - fire
-x - reset
++ `s` yaw left
++ `f` yaw right
++ `e` thrust
++ `j` fire
++ `x` reset
 
 ## Prerequisites
 
