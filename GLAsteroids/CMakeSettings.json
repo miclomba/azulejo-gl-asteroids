@@ -1,13 +1,14 @@
 ﻿{
   "environments": [
     {
-      "PATH": "${env.PATH};C:/Users/miclomba/source/repos/Backend/X/out/install/X;C:/Users/miclomba/source/repos/vcpkg/installed/x64-windows/debug/bin;C:/Users/miclomba/source/repos/vcpkg/installed/x64-windows/debug/lib",
-      "FREEGLUT_LINK_BIN": "${projectDir}/../../vcpkg/installed/x64-windows/debug/bin",
-      "FREEGLUT_LINK_LIB": "${projectDir}/../../vcpkg/installed/x64-windows/debug/lib",
-      "FREEGLUT_INCL_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/include",
-      "BOOST_LIB_SUFFIX": "-vc140-mt-gd",
-      "BOOST_LINK_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/debug/lib",
-      "BOOST_INCL_DIR": "${projectDir}/../../vcpkg/installed/x64-windows/include",
+      "BOOST_LIB_SUFFIX": "-vc143-mt-gd-x64-1_86",
+      "xProjectDir": "${projectDir}/../../Backend/X",
+      "PATH": "${env.PATH};${projectDir}/../../Backend/X/out/install/X;${projectDir}/vcpkg_installed/x64-windows/debug/bin;${projectDir}/vcpkg_installed/x64-windows/debug/lib",
+      "FREEGLUT_LINK_BIN": "${projectDir}/vcpkg_installed/x64-windows/debug/bin",
+      "FREEGLUT_LINK_LIB": "${projectDir}/vcpkg_installed/x64-windows/debug/lib",
+      "FREEGLUT_INCL_DIR": "${projectDir}/vcpkg_installed/x64-windows/include",
+      "BOOST_LINK_DIR": "${projectDir}/vcpkg_installed/x64-windows/debug/lib",
+      "BOOST_INCL_DIR": "${projectDir}/vcpkg_installed/x64-windows/include",
       "X_INCL_DIR": "${projectDir}/../../Backend/X",
       "X_LINK_DIR": "${projectDir}/../../Backend/X/out/install/X"
     }

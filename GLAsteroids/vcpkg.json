@@ -1,0 +1,12 @@
+{
+  "name": "x",
+  "version": "1.0.0",
+  "dependencies": [
+    {
+      "name": "boost"
+    },
+    {
+      "name": "freeglut"
+    }
+  ]
+}

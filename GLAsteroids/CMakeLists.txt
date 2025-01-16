@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 if (MSVC)
 set(CMAKE_CXX_FLAGS "/permissive- /EHsc /WX")
+add_definitions(-D_WIN32_WINNT=0x0A00)
 elseif(APPLE)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
