@@ -10,7 +10,11 @@ namespace
 {
 const std::string DB_NAME = "asteroids.sqlite";
 const std::string JSON_NAME = "asteroids.json";
-const Path ROOT_PATH = Path(USERS_PATH) / "miclomba" / "downloads";
+#ifdef _WIN32
+const Path ROOT_PATH = Path(std::getenv("USERPROFILE")) / "downloads";
+#else
+const Path ROOT_PATH = Path(std::getenv("HOME")) / "downloads";
+#endif
 const Path SERIALIZATION_PATH = ROOT_PATH / JSON_NAME;
 
 std::string FormatKey(const std::string& key)

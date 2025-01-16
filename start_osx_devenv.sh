@@ -12,7 +12,7 @@ export BOOST_LINK_DIR="$REPOS/boost/boost_1_69_0/stage/lib"
 export FREEGLUT_INCL_DIR="/System/Library/Frameworks/GLUT.framework/Headers"
 
 export X_LINK_DIR="/usr/local/lib"
-export X_INCL_DIR="$REPOS/Backend/X"
+export X_INCL_DIR="$REPOS/azulejo-common-lib"
 
 export PATH="$PATH:$X_LINK_DIR"
 

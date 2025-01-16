@@ -16,5 +16,7 @@ Build and install the GLAsteroids project:
 4. If the 'out' directory is not created automatically (Cmake configuration step) then run: Project > Generate Cache for GLAsteroids
 5. Build > Build All
 6. Build > Install GLAsteroids
-7. Select the start up item to be 'GLAsteroids.exe'
-8. Debug > Start Debugging
+
+Run GLAsteroids:
+0. Select the start up item to be 'GLAsteroids.exe'
+1. Debug > Start Debugging
