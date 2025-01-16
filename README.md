@@ -3,6 +3,14 @@
 
 ![GLAsteroids.png](./GLAsteroids.png)
 
+## How to Play
+
+s - yaw left
+f - yaw right
+e - thrust
+j - fire
+x - reset
+
 ## Prerequisites
 
 Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) adjacent to this package.
@@ -26,7 +34,7 @@ vcpkg install --x-manifest-root=. --feature-flags=versions,manifests
 5. `Build > Build All`
 6. `Build > Install GLAsteroids`
 
-### Run
+## Run
 
 0. `Select the Startup Item` to be `GLAsteroids.exe`
 1. `Debug > Start Debugging`
