@@ -58,11 +58,32 @@ public:
     /**
      * @brief Destructor for the Rock class.
      */
-    ~Rock();
+    virtual ~Rock();
 
-    Rock(const Rock&);
-    Rock(Rock&&);
-    Rock& operator=(const Rock&);
+    /**
+     * @brief Copy constructor.
+     * @param other The Rock instance to copy from.
+     */
+    Rock(const Rock& other);
+
+    /**
+     * @brief Move constructor.
+     * @param other The Rock instance to move from.
+     */
+    Rock(Rock&& other);
+
+    /**
+     * @brief Copy assignment operator.
+     * @param other The Rock instance to copy from.
+     * @return Reference to the updated instance.
+     */
+    Rock& operator=(const Rock& other);
+
+    /**
+     * @brief Move assignment operator.
+     * @param other The Rock instance to move from.
+     * @return Reference to the updated instance.
+     */
     Rock& operator=(Rock&&);
 
     /**
@@ -132,10 +153,32 @@ public:
      */
     void SetSpinEpsilon(const GLfloat spinEpsilon);
 
+    /**
+    * @brief Save the entity data to a property tree.
+    * @param tree The property tree to save data into.
+    * @param path The path within the tree where the data should be saved.
+    */
     void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+
+    /**
+    * @brief Load the entity data from a property tree.
+    * @param tree The property tree containing the data.
+    * @param path The path within the tree where the data is stored.
+    */
     void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+    /**
+    * @brief Save the entity data to a database.
+    * @param tree The property tree containing the entity's data.
+    * @param database The SQLite database instance to save data into.
+    */
     void Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const override;
+
+    /**
+    * @brief Load the entity data from a database.
+    * @param tree The property tree to populate with the entity's data.
+    * @param database The SQLite database instance to load data from.
+    */
     void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
     /**
@@ -145,9 +188,28 @@ public:
     static std::string RockPrefix();
 
 private:
+
+    /**
+    * @brief Helper function to initialize this object.
+    * @param _velocityAngle The angle of the velocity vector.
+    * @param _speed The speed of the velocity vector.
+    * @param _spin The spin velocity of this object.
+    */
     void InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin);
+
+    /**
+    * @brief Update the spin per time step.
+    */
     void UpdateSpin();
+
+    /**
+    * @brief Move per time step.
+    */
     void MoveRock();
+
+    /**
+    * @brief Teleport the rock to the other side of the screen if it moves out of bounds.
+    */
     void WrapAroundMoveRock();
 
     GLint index_; /**< Rock index in the game. */

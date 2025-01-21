@@ -51,12 +51,33 @@ public:
     /**
      * @brief Destructor for the Bullet class.
      */
-    ~Bullet();
+    virtual ~Bullet();
 
-    Bullet(const Bullet&);
-    Bullet(Bullet&&);
-    Bullet& operator=(const Bullet&);
-    Bullet& operator=(Bullet&&);
+    /**
+     * @brief Copy constructor.
+     * @param other The Bullet instance to copy from.
+     */
+    Bullet(const Bullet& other);
+
+    /**
+     * @brief Move constructor.
+     * @param other The Bullet instance to move from.
+     */
+    Bullet(Bullet&& other);
+
+    /**
+     * @brief Copy assignment operator.
+     * @param other The Bullet instance to copy from.
+     * @return Reference to the updated instance.
+     */
+    Bullet& operator=(const Bullet& other);
+
+    /**
+     * @brief Move assignment operator.
+     * @param other The Bullet instance to move from.
+     * @return Reference to the updated instance.
+     */
+    Bullet& operator=(Bullet&& other);
 
     /**
      * @brief Register serialization resources for the bullet.
@@ -88,10 +109,32 @@ public:
      */
     bool IsOutOfBounds() const;
 
+    /**
+    * @brief Save the entity data to a property tree.
+    * @param tree The property tree to save data into.
+    * @param path The path within the tree where the data should be saved.
+    */
     void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+
+    /**
+    * @brief Load the entity data from a property tree.
+    * @param tree The property tree containing the data.
+    * @param path The path within the tree where the data is stored.
+    */
     void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+    /**
+    * @brief Save the entity data to a database.
+    * @param tree The property tree containing the entity's data.
+    * @param database The SQLite database instance to save data into.
+    */
     void Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const override;
+
+    /**
+    * @brief Load the entity data from a database.
+    * @param tree The property tree to populate with the entity's data.
+    * @param database The SQLite database instance to load data from.
+    */
     void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
     /**
