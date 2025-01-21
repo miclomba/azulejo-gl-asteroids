@@ -41,7 +41,7 @@ public:
     /**
      * @brief Destructor for GLEntity.
      */
-    ~GLEntity();
+    virtual ~GLEntity();
 
     /**
      * @brief Copy constructor.
@@ -150,11 +150,34 @@ public:
      */
     void SetUnitVelocity(const Resource2DGLfloat& unitVelocity);
 
+    /**
+     * @brief Set speed of this GL object.
+     * @param speed The velocity (m/s).
+     */
     void SetSpeed(const GLfloat speed);
+
+    /**
+     * @brief Set mass of this GL object.
+     * @param mass The mass (kg).
+     */
     void SetMass(const GLfloat mass);
+
+    /**
+     * @brief Set the velocity angle (in radians).
+     * @param angle The angle in radians.
+     */
     void SetVelocityAngle(const GLfloat angle);
 
+    /**
+     * @brief Register serialization keys with the deserializer.
+     * @param key The entity key.
+     */
     static void RegisterSerializationResources(const std::string& key);
+
+    /**
+     * @brief Register serialization keys with the detabularizer.
+     * @param key The entity key.
+     */
     static void RegisterTabularizationResources(const std::string& key);
 
 protected:
@@ -162,12 +185,39 @@ protected:
     Resource2DGLfloat T_; /**< Translation transformation matrix. */
     Resource2DGLfloat R_; /**< Rotation transformation matrix. */
 
+    /**
+    * @brief Save the entity data to a property tree.
+    * @param tree The property tree to save data into.
+    * @param path The path within the tree where the data should be saved.
+    */
     void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+
+    /**
+    * @brief Load the entity data from a property tree.
+    * @param tree The property tree containing the data.
+    * @param path The path within the tree where the data is stored.
+    */
     void Load(boost::property_tree::ptree& tree, const std::string& path) override;
 
+    /**
+    * @brief Save the entity data to a database.
+    * @param tree The property tree containing the entity's data.
+    * @param database The SQLite database instance to save data into.
+    */
     void Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const override;
+
+    /**
+    * @brief Load the entity data from a database.
+    * @param tree The property tree to populate with the entity's data.
+    * @param database The SQLite database instance to load data from.
+    */
     void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
+    /**
+     * @brief Get the aggregated entity by key.
+     * @param key The entity key.
+     * @return The aggregated entity corresponding to the key param.
+     */
     SharedEntity& GetAggregatedMember(const Key& key) const override;
 
 private:
