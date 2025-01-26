@@ -1,0 +1,17 @@
+{
+    "cmake.buildDirectory": "${workspaceFolder}/out",
+    "cmake.generator": "Ninja",
+    "cmake.environment": {
+        "PATH": "${env.PATH};${workspaceFolder}/../azulejo-common-lib/out/install/X;${workspaceFolder}/vcpkg_installed/x64-osx/debug/lib",
+        "FREEGLUT_LINK_BIN": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
+        "FREEGLUT_LINK_LIB": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
+        "FREEGLUT_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
+        "BOOST_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
+        "BOOST_LINK_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
+        "X_INCL_DIR": "${workspaceFolder}/../azulejo-common-lib",
+        "X_LINK_DIR": "${workspaceFolder}/../azulejo-common-lib/out/install/X"
+    },
+    "files.associations": {
+        "*.ipp": "cpp"
+    }
+}

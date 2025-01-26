@@ -11,35 +11,18 @@ elseif(APPLE)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 endif()
-
-if (MSVC)
 include_directories(
 "$ENV{X_INCL_DIR}"
 "$ENV{BOOST_INCL_DIR}"
 "$ENV{FREEGLUT_INCL_DIR}"
 )
-elseif (APPLE)
-include_directories(
-"$ENV{X_INCL_DIR}"
-"$ENV{BOOST_INCL_DIR}"
-"${OPENGL_INCLUDE_DIR}"
-"${GLUT_INCLUDE_DIR}"
-)
-endif()
 
-if (MSVC)
 link_directories(
 "$ENV{X_LINK_DIR}"
 "$ENV{BOOST_LINK_DIR}" 
 "$ENV{FREEGLUT_LINK_BIN}"
 "$ENV{FREEGLUT_LINK_LIB}"
 )
-elseif (APPLE)
-link_directories(
-"$ENV{X_LINK_DIR}"
-"$ENV{BOOST_LINK_DIR}" 
-)
-endif()
 
 add_executable("${PROJECT_NAME}" 
 "main.cpp" 
@@ -71,8 +54,8 @@ target_link_libraries("${PROJECT_NAME}"
 "FilesystemAdapters" 
 "DatabaseAdapters"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
-"${OPENGL_LIBRARIES}"
-"${GLUT_LIBRARY}"
+"GLUT::GLUT" 
+"OpenGL::GL"
 )
 endif()
 
