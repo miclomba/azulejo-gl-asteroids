@@ -1,8 +1,10 @@
 # azulejo-gl-asteroids
 
 ![GLAsteroids.png](./GLAsteroids.png)
+
+## Demo
+
 https://bit.ly/azulejo-gl-asteroids
-https://drive.google.com/file/d/1DappiQU8nbDeZjlxRFqY9cK7VjnfuRjy/view?usp=sharing
 
 ## How to Play
 
