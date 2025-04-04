@@ -2,10 +2,6 @@
 
 ![GLAsteroids.png](./GLAsteroids.png)
 
-## Demo
-
-https://bit.ly/azulejo-gl-asteroids
-
 ## How to Play
 
 - `s` yaw left
