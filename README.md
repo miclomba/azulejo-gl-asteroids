@@ -4,7 +4,7 @@
 
 ## Demo
 
-https://bit.ly/azulejo-gl-asteroids
+![GLAsteroids.mov](./GLAsteroids.mov)
 
 ## How to Play
 
