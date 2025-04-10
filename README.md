@@ -1,6 +1,6 @@
 # azulejo-gl-asteroids
 
-![GLAsteroids.png](./GLAsteroids.png)
+![GLAsteroids.gif](./assets/GLAsteroids.gif)
 
 ## How to Play
 
