@@ -26,7 +26,7 @@ link_directories(
 
 add_executable("${PROJECT_NAME}" 
 "main.cpp" 
-"GLGame.cpp" 
+"GLBackend.cpp" 
 "Asteroids.cpp" 
 "GLEntity.cpp" 
 "GLEntityTask.cpp" 

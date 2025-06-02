@@ -4,37 +4,37 @@
 #include "Events/EventChannel.h"
 
 #include "Asteroids.h"
-#include "GLGame.h"
+#include "GLBackend.h"
 
 using asteroids::Asteroids;
-using asteroids::GLGame;
+using asteroids::GLBackend;
 using events::EventChannel;
 
 namespace
 {
-const int TIME = 25;
-const int VAL = 0;
-const std::string LEFT_EVENT = "left_event";
-const std::string LEFT_ACTION = "left_action";
-const std::string RIGHT_EVENT = "right_event";
-const std::string RIGHT_ACTION = "right_action";
-const std::string THRUST_EVENT = "thrust_event";
-const std::string THRUST_ACTION = "thrust_action";
-const std::string FIRE_EVENT = "fire_event";
-const std::string FIRE_ACTION = "fire_action";
-const std::string RESET_EVENT = "reset_event";
-const std::string RESET_ACTION = "reset_action";
-const std::string DRAW_EVENT = "draw_event";
-const std::string DRAW_ACTION = "draw_action";
-const std::string RUN_EVENT = "run_event";
-const std::string RUN_ACTION = "run_action";
-const std::string SERIALIZE_EVENT = "serialize_event";
-const std::string SERIALIZE_ACTION = "serialize_action";
-const std::string DESERIALIZE_EVENT = "deserialize_event";
-const std::string DESERIALIZE_ACTION = "deserialize_action";
+	const int TIME = 25;
+	const int VAL = 0;
+	const std::string LEFT_EVENT = "left_event";
+	const std::string LEFT_ACTION = "left_action";
+	const std::string RIGHT_EVENT = "right_event";
+	const std::string RIGHT_ACTION = "right_action";
+	const std::string THRUST_EVENT = "thrust_event";
+	const std::string THRUST_ACTION = "thrust_action";
+	const std::string FIRE_EVENT = "fire_event";
+	const std::string FIRE_ACTION = "fire_action";
+	const std::string RESET_EVENT = "reset_event";
+	const std::string RESET_ACTION = "reset_action";
+	const std::string DRAW_EVENT = "draw_event";
+	const std::string DRAW_ACTION = "draw_action";
+	const std::string RUN_EVENT = "run_event";
+	const std::string RUN_ACTION = "run_action";
+	const std::string SERIALIZE_EVENT = "serialize_event";
+	const std::string SERIALIZE_ACTION = "serialize_action";
+	const std::string DESERIALIZE_EVENT = "deserialize_event";
+	const std::string DESERIALIZE_ACTION = "deserialize_action";
 }
 
-void RegisterEvents(Asteroids& asteroids, GLGame& game, EventChannel& channel)
+void RegisterEvents(Asteroids &asteroids, GLBackend &game, EventChannel &channel)
 {
 	channel.RegisterEmitter(LEFT_EVENT, game.GetLeftArrowEmitter());
 	channel.RegisterConsumer(LEFT_ACTION, LEFT_EVENT, asteroids.GetLeftArrowConsumer());
@@ -56,15 +56,15 @@ void RegisterEvents(Asteroids& asteroids, GLGame& game, EventChannel& channel)
 	channel.RegisterConsumer(DESERIALIZE_ACTION, DESERIALIZE_EVENT, asteroids.GetDeserializeConsumer());
 }
 
-int main(int _argc, char* _argv[]) 
+int main(int _argc, char *_argv[])
 {
-	GLGame game(_argc,_argv);
-    glutTimerFunc(TIME,game.TimerCallback,VAL);
+	GLBackend game(_argc, _argv);
+	glutTimerFunc(TIME, game.TimerCallback, VAL);
 
 	Asteroids asteroids;
 	EventChannel channel;
 
 	RegisterEvents(asteroids, game, channel);
 
-    game.Run();
+	game.Run();
 }

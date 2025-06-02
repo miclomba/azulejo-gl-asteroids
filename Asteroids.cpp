@@ -9,7 +9,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "filesystem.hpp"
+#include "config/filesystem.hpp"
 
 #include <boost/asio/packaged_task.hpp>
 #include <boost/asio/post.hpp>
@@ -63,128 +63,127 @@ namespace pt = boost::property_tree;
 
 namespace
 {
-const int ROCK_NUMBER = 6;
-const std::string ASTEROIDS_KEY = "Asteroids";
-const std::string SCORE_KEY = "score";
-const std::string ROCK_COUNT_KEY = "rock_count";
-const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
-const std::string THRUST_KEY = "thrust";
-const std::string ROCK_PREFIX = "Rock";
-const std::string BULLET_PREFIX = "Bullet";
-const std::vector<std::string> ROCK_RESOURCES = { "rock_vertices", "rock_indices", "frame", "unit_velocity", "S", "T", "R" };
-const std::vector<std::string> BULLET_RESOURCES = { "bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R" };
-const std::vector<std::string> SHIP_RESOURCES = { "frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation" };
+	const int ROCK_NUMBER = 6;
+	const std::string ASTEROIDS_KEY = "Asteroids";
+	const std::string SCORE_KEY = "score";
+	const std::string ROCK_COUNT_KEY = "rock_count";
+	const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
+	const std::string THRUST_KEY = "thrust";
+	const std::string ROCK_PREFIX = "Rock";
+	const std::string BULLET_PREFIX = "Bullet";
+	const std::vector<std::string> ROCK_RESOURCES = {"rock_vertices", "rock_indices", "frame", "unit_velocity", "S", "T", "R"};
+	const std::vector<std::string> BULLET_RESOURCES = {"bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R"};
+	const std::vector<std::string> SHIP_RESOURCES = {"frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation"};
 
-EntityDeserializer* const Deserializer = EntityDeserializer::GetInstance();
-EntitySerializer* const Serializer = EntitySerializer::GetInstance();
-EntityDetabularizer* const Detabularizer = EntityDetabularizer::GetInstance();
-EntityTabularizer* const Tabularizer = EntityTabularizer::GetInstance();
-ResourceDeserializer* const RDeserializer = ResourceDeserializer::GetInstance();
-ResourceSerializer* const RSerializer = ResourceSerializer::GetInstance();
-ResourceDetabularizer* const RDetabularizer = ResourceDetabularizer::GetInstance();
-ResourceTabularizer* const RTabularizer = ResourceTabularizer::GetInstance();
+	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
+	EntitySerializer *const Serializer = EntitySerializer::GetInstance();
+	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
+	EntityTabularizer *const Tabularizer = EntityTabularizer::GetInstance();
+	ResourceDeserializer *const RDeserializer = ResourceDeserializer::GetInstance();
+	ResourceSerializer *const RSerializer = ResourceSerializer::GetInstance();
+	ResourceDetabularizer *const RDetabularizer = ResourceDetabularizer::GetInstance();
+	ResourceTabularizer *const RTabularizer = ResourceTabularizer::GetInstance();
 
-void RegisterEntitiesForSerialization(const ptree& tree)
-{
-	for (const std::pair<std::string, ptree>& keyValue : tree)
+	void RegisterEntitiesForSerialization(const ptree &tree)
 	{
-		std::string nodeKey = keyValue.first;
-		ptree node = keyValue.second;
+		for (const std::pair<std::string, ptree> &keyValue : tree)
+		{
+			std::string nodeKey = keyValue.first;
+			ptree node = keyValue.second;
 
-		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
-		{
-			Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-			Rock::RegisterSerializationResources(nodeKey);
+			if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+			{
+				Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+				Rock::RegisterSerializationResources(nodeKey);
+			}
+			else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			{
+				Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+				Bullet::RegisterSerializationResources(nodeKey);
+			}
+			else if (nodeKey == Ship::ShipKey())
+			{
+				Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+				Ship::RegisterSerializationResources(nodeKey);
+			}
+			else if (nodeKey == ASTEROIDS_KEY)
+			{
+				Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+				Asteroids::RegisterSerializationResources(nodeKey);
+			}
+			RegisterEntitiesForSerialization(node);
 		}
-		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
-		{
-			Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-			Bullet::RegisterSerializationResources(nodeKey);
-		}
-		else if (nodeKey == Ship::ShipKey())
-		{
-			Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-			Ship::RegisterSerializationResources(nodeKey);
-		}
-		else if (nodeKey == ASTEROIDS_KEY)
-		{
-			Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-			Asteroids::RegisterSerializationResources(nodeKey);
-		}
-		RegisterEntitiesForSerialization(node);
 	}
-}
 
-void RegisterEntitiesForTabularization(const ptree& tree)
-{
-	for (const std::pair<std::string, ptree>& keyValue : tree)
+	void RegisterEntitiesForTabularization(const ptree &tree)
 	{
-		std::string nodeKey = keyValue.first;
-		ptree node = keyValue.second;
+		for (const std::pair<std::string, ptree> &keyValue : tree)
+		{
+			std::string nodeKey = keyValue.first;
+			ptree node = keyValue.second;
 
-		if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
-		{
-			Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-			Rock::RegisterTabularizationResources(nodeKey);
+			if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+			{
+				Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+				Rock::RegisterTabularizationResources(nodeKey);
+			}
+			else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			{
+				Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+				Bullet::RegisterTabularizationResources(nodeKey);
+			}
+			else if (nodeKey == Ship::ShipKey())
+			{
+				Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+				Ship::RegisterTabularizationResources(nodeKey);
+			}
+			else if (nodeKey == ASTEROIDS_KEY)
+			{
+				Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+				Asteroids::RegisterTabularizationResources(nodeKey);
+			}
+			RegisterEntitiesForTabularization(node);
 		}
-		else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
-		{
-			Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-			Bullet::RegisterTabularizationResources(nodeKey);
-		}
-		else if (nodeKey == Ship::ShipKey())
-		{
-			Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-			Ship::RegisterTabularizationResources(nodeKey);
-		}
-		else if (nodeKey == ASTEROIDS_KEY)
-		{
-			Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-			Asteroids::RegisterTabularizationResources(nodeKey);
-		}
-		RegisterEntitiesForTabularization(node);
 	}
-}
 
-std::vector<std::string> RockResourceKeys(const std::string& key)
-{
-	std::vector<std::string> keys;
-	for (const std::string& suffix : ROCK_RESOURCES)
-		keys.push_back(FormatKey(key + suffix));
-	return keys;
-}
+	std::vector<std::string> RockResourceKeys(const std::string &key)
+	{
+		std::vector<std::string> keys;
+		for (const std::string &suffix : ROCK_RESOURCES)
+			keys.push_back(FormatKey(key + suffix));
+		return keys;
+	}
 
-std::vector<std::string> BulletResourceKeys(const std::string& key)
-{
-	std::vector<std::string> keys;
-	for (const std::string& suffix : BULLET_RESOURCES)
-		keys.push_back(FormatKey(key + suffix));
-	return keys;
-}
+	std::vector<std::string> BulletResourceKeys(const std::string &key)
+	{
+		std::vector<std::string> keys;
+		for (const std::string &suffix : BULLET_RESOURCES)
+			keys.push_back(FormatKey(key + suffix));
+		return keys;
+	}
 
-void UntabularizeShipResources(Ship* ship)
-{
-	if (ship->GetFrame().GetDirty())
-		RTabularizer->Untabularize("Shipframe");
-	if (ship->GetUnitVelocity().GetDirty())
-		RTabularizer->Untabularize("Shipunitvelocity");
-	if (ship->SMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipS");
-	if (ship->TMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipT");
-	if (ship->RMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipR");
-	if (ship->GetShipVertices().GetDirty())
-		RTabularizer->Untabularize("Shipshipvertices");
-	if (ship->GetShipIndices().GetDirty())
-		RTabularizer->Untabularize("Shipshipindices");
-	if (ship->GetUnitOrientation().GetDirty())
-		RTabularizer->Untabularize("Shipunitorientation");
-}
+	void UntabularizeShipResources(Ship *ship)
+	{
+		if (ship->GetFrame().GetDirty())
+			RTabularizer->Untabularize("Shipframe");
+		if (ship->GetUnitVelocity().GetDirty())
+			RTabularizer->Untabularize("Shipunitvelocity");
+		if (ship->SMatrix().GetDirty())
+			RTabularizer->Untabularize("ShipS");
+		if (ship->TMatrix().GetDirty())
+			RTabularizer->Untabularize("ShipT");
+		if (ship->RMatrix().GetDirty())
+			RTabularizer->Untabularize("ShipR");
+		if (ship->GetShipVertices().GetDirty())
+			RTabularizer->Untabularize("Shipshipvertices");
+		if (ship->GetShipIndices().GetDirty())
+			RTabularizer->Untabularize("Shipshipindices");
+		if (ship->GetUnitOrientation().GetDirty())
+			RTabularizer->Untabularize("Shipunitorientation");
+	}
 } // end namespace
 
-Asteroids::Asteroids() :
-	threadPool_(std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1)
+Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1)
 {
 	SetKey(ASTEROIDS_KEY);
 
@@ -197,15 +196,24 @@ Asteroids::Asteroids() :
 	Detabularizer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #endif
 
-	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateLeft(); });
-	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->RotateRight(); });
-	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Thrust(); });
-	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Fire(); });
-	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->ResetGame(); });
-	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Draw(); });
-	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Run(); });
-	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Serialize(); });
-	deserializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]() { this->Deserialize(); });
+	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																	 { this->RotateLeft(); });
+	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																	  { this->RotateRight(); });
+	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																  { this->Thrust(); });
+	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																{ this->Fire(); });
+	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																 { this->ResetGame(); });
+	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																{ this->Draw(); });
+	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+															   { this->Run(); });
+	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																	 { this->Serialize(); });
+	deserializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
+																	   { this->Deserialize(); });
 
 	ResetGame();
 }
@@ -246,7 +254,7 @@ void Asteroids::Run()
 #endif
 }
 
-Asteroids::SharedEntity& Asteroids::GetRock(const std::string& key)
+Asteroids::SharedEntity &Asteroids::GetRock(const std::string &key)
 {
 	return GetAggregatedMember(key);
 }
@@ -256,7 +264,7 @@ std::vector<Asteroids::Key> Asteroids::GetRockKeys() const
 	return GetAggregatedMemberKeys<Rock>();
 }
 
-Asteroids::SharedEntity& Asteroids::GetShip()
+Asteroids::SharedEntity &Asteroids::GetShip()
 {
 	return GetAggregatedMember(Ship::ShipKey());
 }
@@ -264,7 +272,7 @@ Asteroids::SharedEntity& Asteroids::GetShip()
 void Asteroids::ClearGame()
 {
 	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key& key : rockKeys)
+	for (Key &key : rockKeys)
 	{
 		AddToRemoveKeys(key);
 		RemoveMember(key);
@@ -280,11 +288,11 @@ std::string Asteroids::GenerateUUID() const
 	return val;
 }
 
-void Asteroids::ResetGame() 
+void Asteroids::ResetGame()
 {
-	auto CreateRock = [this](const GLint randy1, const GLint randy2, const std::string& uuidStr)
+	auto CreateRock = [this](const GLint randy1, const GLint randy2, const std::string &uuidStr)
 	{
-        SharedEntity rock = std::make_shared<Rock>(State::LARGE, static_cast<const GLfloat>(randy1), static_cast<const GLfloat>(randy2));
+		SharedEntity rock = std::make_shared<Rock>(State::LARGE, static_cast<const GLfloat>(randy1), static_cast<const GLfloat>(randy2));
 		rock->SetKey(Rock::RockPrefix() + uuidStr);
 
 		AggregateMember(rock);
@@ -299,7 +307,7 @@ void Asteroids::ResetGame()
 
 	auto CreateShip = [this]()
 	{
-		SharedEntity& sharedShip = GetShip();
+		SharedEntity &sharedShip = GetShip();
 		sharedShip = std::make_shared<Ship>(Ship::ShipKey());
 #ifndef SAVE_TO_DB
 		Ship::RegisterSerializationResources(sharedShip->GetKey());
@@ -312,69 +320,73 @@ void Asteroids::ResetGame()
 	ClearBullets();
 	ClearShip();
 
-    GLint randy1, randy2;
-    for (GLint nextRock = 0; nextRock < 10; ++nextRock) {
-        do {
-            randy1 = rand();
-            randy2 = rand();
-            randy1 = pow(-1,nextRock) * randy1;
-            randy1 = randy1 % 15;
-            randy2 = pow(-1,nextRock % 2) * randy2;
-            randy2 = randy2 % 15;
-        } while (fabs(randy1) < 3 || fabs(randy2) < 3);
+	GLint randy1, randy2;
+	for (GLint nextRock = 0; nextRock < 10; ++nextRock)
+	{
+		do
+		{
+			randy1 = rand();
+			randy2 = rand();
+			randy1 = pow(-1, nextRock) * randy1;
+			randy1 = randy1 % 15;
+			randy2 = pow(-1, nextRock % 2) * randy2;
+			randy2 = randy2 % 15;
+		} while (fabs(randy1) < 3 || fabs(randy2) < 3);
 
-		CreateRock(randy1, randy2, GenerateUUID()); 
-    }
+		CreateRock(randy1, randy2, GenerateUUID());
+	}
 
 	CreateShip();
 	score_ = 0;
 }
 
-void Asteroids::UpdateRockTask(GLEntity* sharedRock)
+void Asteroids::UpdateRockTask(GLEntity *sharedRock)
 {
-	Rock* rock = dynamic_cast<Rock*>(sharedRock);
+	Rock *rock = dynamic_cast<Rock *>(sharedRock);
 	GLint randy = rand();
 	randy = (randy % 9) + 1;
-	rock->Update((GLfloat)(M_PI*randy / 5), (GLfloat)(randy % 3) / 100, (GLfloat)(randy % 6) / 100);
+	rock->Update((GLfloat)(M_PI * randy / 5), (GLfloat)(randy % 3) / 100, (GLfloat)(randy % 6) / 100);
 };
 
-void Asteroids::UpdateShipTask(GLEntity* sharedShip, std::vector<std::future<GLEntity*>>& futures)
+void Asteroids::UpdateShipTask(GLEntity *sharedShip, std::vector<std::future<GLEntity *>> &futures)
 {
-	Ship* ship = dynamic_cast<Ship*>(sharedShip);
+	Ship *ship = dynamic_cast<Ship *>(sharedShip);
 	ship->Update(orientationAngle_, thrust_, keysSerialized_, threadPool_, futures);
 };
 
 void Asteroids::DrawGLEntities()
 {
-	std::vector<std::future<GLEntity*>> futures;
-	std::vector<std::future<GLEntity*>> bulletFutures;
+	std::vector<std::future<GLEntity *>> futures;
+	std::vector<std::future<GLEntity *>> bulletFutures;
 
-	for (Key& key : GetRockKeys())
+	for (Key &key : GetRockKeys())
 	{
-		SharedEntity& sharedRock = GetRock(key);
+		SharedEntity &sharedRock = GetRock(key);
 		if (!sharedRock)
 			continue;
 
-		GLEntity* rock = dynamic_cast<GLEntity*>(sharedRock.get());
-		GLEntityTask task([rock, this]() { UpdateRockTask(rock); return rock; });
+		GLEntity *rock = dynamic_cast<GLEntity *>(sharedRock.get());
+		GLEntityTask task([rock, this]()
+						  { UpdateRockTask(rock); return rock; });
 		futures.push_back(task.GetFuture());
 
 		boost::asio::post(threadPool_, task);
 	}
 
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (sharedShip)
 	{
-		GLEntity* ship = dynamic_cast<GLEntity*>(sharedShip.get());
-		GLEntityTask task([ship, &bulletFutures, this]() { UpdateShipTask(ship, bulletFutures); return ship; });
+		GLEntity *ship = dynamic_cast<GLEntity *>(sharedShip.get());
+		GLEntityTask task([ship, &bulletFutures, this]()
+						  { UpdateShipTask(ship, bulletFutures); return ship; });
 		futures.push_back(task.GetFuture());
 
 		boost::asio::post(threadPool_, task);
 	}
 
-	for (std::future<GLEntity*>& future : futures)
+	for (std::future<GLEntity *> &future : futures)
 		future.get()->Draw();
-	for (std::future<GLEntity*>& future : bulletFutures)
+	for (std::future<GLEntity *> &future : bulletFutures)
 		future.get()->Draw();
 }
 
@@ -384,13 +396,13 @@ void Asteroids::DrawGameInfo()
 
 	GLint i;
 	glRasterPos3f(7.5f, -9.0f, 0.0f);
-	char reset[16] = { 'P','r','e','s','s',' ','X',' ','t','o',' ',
-					  'R','E','S','E','T' };
+	char reset[16] = {'P', 'r', 'e', 's', 's', ' ', 'X', ' ', 't', 'o', ' ',
+					  'R', 'E', 'S', 'E', 'T'};
 	for (i = 0; i < 16; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, reset[i]);
 
 	glRasterPos3f(-12.0f, 9.0f, 0.0f);
-	char score[7] = { 'S','C','O','R','E',':',' ' };
+	char score[7] = {'S', 'C', 'O', 'R', 'E', ':', ' '};
 	for (i = 0; i < 7; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, score[i]);
 	char amount[4];
@@ -410,25 +422,25 @@ void Asteroids::Draw()
 void Asteroids::ClearRocks()
 {
 	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key& key : rockKeys)
+	for (Key &key : rockKeys)
 	{
 		AddToRemoveKeys(key);
-		SharedEntity& sharedRock = GetRock(key);
+		SharedEntity &sharedRock = GetRock(key);
 		RemoveMember(sharedRock);
 	}
 }
 
 void Asteroids::ClearBullets()
 {
-	Ship* ship = dynamic_cast<Ship*>(GetShip().get());
+	Ship *ship = dynamic_cast<Ship *>(GetShip().get());
 	if (!ship)
 		return;
 
 	std::vector<Key> bulletKeys = ship->GetBulletKeys();
-	for (Key& key : bulletKeys)
+	for (Key &key : bulletKeys)
 	{
 		AddToRemoveKeys(key);
-		SharedEntity& sharedBullet = ship->GetBullet(key);
+		SharedEntity &sharedBullet = ship->GetBullet(key);
 		ship->RemoveBullet(sharedBullet->GetKey(), keysSerialized_);
 	}
 
@@ -437,7 +449,7 @@ void Asteroids::ClearBullets()
 
 void Asteroids::ClearShip()
 {
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (!sharedShip)
 		return;
 
@@ -449,82 +461,85 @@ void Asteroids::ClearShip()
 bool Asteroids::HasRocks()
 {
 	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key& key : rockKeys)
+	for (Key &key : rockKeys)
 	{
-		SharedEntity& sharedRock = GetRock(key);
+		SharedEntity &sharedRock = GetRock(key);
 		if (sharedRock)
 			return true;
 	}
 	return false;
 }
 
-bool Asteroids::HasRock(const std::string& key) const
+bool Asteroids::HasRock(const std::string &key) const
 {
 	std::vector<Key> rockKeys = GetRockKeys();
-	return std::any_of(rockKeys.begin(), rockKeys.end(), [&key](const std::string& rockKey) { return rockKey == key; });
+	return std::any_of(rockKeys.begin(), rockKeys.end(), [&key](const std::string &rockKey)
+					   { return rockKey == key; });
 }
 
 void Asteroids::DetermineCollisions()
 {
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (!sharedShip)
 		return;
 
-	std::vector<std::pair<Bullet*, std::future<GLEntity*>>> bulletAndRockFuture;
+	std::vector<std::pair<Bullet *, std::future<GLEntity *>>> bulletAndRockFuture;
 
-	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
+	Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
 	std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys();
 
-	std::vector<std::pair<Bullet*, Key>> collisionPairs;
-	for (Ship::Key& bulletKey : bulletKeys)
+	std::vector<std::pair<Bullet *, Key>> collisionPairs;
+	for (Ship::Key &bulletKey : bulletKeys)
 	{
-		Ship::SharedEntity& sharedBullet = ship->GetBullet(bulletKey);
-		Bullet* bullet = dynamic_cast<Bullet*>(sharedBullet.get());
+		Ship::SharedEntity &sharedBullet = ship->GetBullet(bulletKey);
+		Bullet *bullet = dynamic_cast<Bullet *>(sharedBullet.get());
 
-		GLEntityTask task([bullet, this]() { return Collision(bullet); });
+		GLEntityTask task([bullet, this]()
+						  { return Collision(bullet); });
 		bulletAndRockFuture.emplace_back(bullet, task.GetFuture());
 
 		boost::asio::post(threadPool_, task);
 	}
 
-	for (std::pair<Bullet*,std::future<GLEntity*>>& bulletRock : bulletAndRockFuture)
+	for (std::pair<Bullet *, std::future<GLEntity *>> &bulletRock : bulletAndRockFuture)
 	{
-		Rock* rock = dynamic_cast<Rock*>(bulletRock.second.get()); 
-		Bullet* bullet = bulletRock.first;
+		Rock *rock = dynamic_cast<Rock *>(bulletRock.second.get());
+		Bullet *bullet = bulletRock.first;
 
 		if (rock)
-			collisionPairs.push_back(std::make_pair(bullet,rock->GetKey()));
+			collisionPairs.push_back(std::make_pair(bullet, rock->GetKey()));
 	}
 
-	std::vector<std::future<GLEntity*>> collisionFutures;
+	std::vector<std::future<GLEntity *>> collisionFutures;
 
-	for (std::pair<Bullet*, Key>& collisions : collisionPairs)
+	for (std::pair<Bullet *, Key> &collisions : collisionPairs)
 	{
 		if (HasRock(collisions.second))
 		{
-			Bullet* bullet = collisions.first;
+			Bullet *bullet = collisions.first;
 			Key rockKey = collisions.second;
 
-			GLEntityTask task([bullet, rockKey, this]() { ProcessCollision(bullet, rockKey); return bullet; });
+			GLEntityTask task([bullet, rockKey, this]()
+							  { ProcessCollision(bullet, rockKey); return bullet; });
 			collisionFutures.emplace_back(task.GetFuture());
 			boost::asio::post(threadPool_, task);
 		}
 	}
 
-	for (std::future<GLEntity*>& future : collisionFutures)
+	for (std::future<GLEntity *> &future : collisionFutures)
 		future.get();
 
-	if (!HasRocks() || ShipCollision()) 
+	if (!HasRocks() || ShipCollision())
 		ResetGame();
 }
 
-void Asteroids::ProcessCollision(Bullet* bullet, const Key& rockKey) 
+void Asteroids::ProcessCollision(Bullet *bullet, const Key &rockKey)
 {
 	{
 		std::lock_guard<std::mutex> lock(rockCollisionMutex_);
 		if (HasRock(rockKey))
 		{
-			Rock* rock = dynamic_cast<Rock*>(GetRock(rockKey).get());
+			Rock *rock = dynamic_cast<Rock *>(GetRock(rockKey).get());
 			score_ += 1;
 			if (rock->GetState() != State::SMALL)
 			{
@@ -537,53 +552,54 @@ void Asteroids::ProcessCollision(Bullet* bullet, const Key& rockKey)
 	DestroyBullet(bullet);
 }
 
-Rock* Asteroids::Collision(Bullet* _bullet) 
+Rock *Asteroids::Collision(Bullet *_bullet)
 {
-    GLfloat epsilon;
-    GLfloat ray;
+	GLfloat epsilon;
+	GLfloat ray;
 
 	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key& key : rockKeys)
+	for (Key &key : rockKeys)
 	{
-		SharedEntity& sharedRock = GetRock(key);
+		SharedEntity &sharedRock = GetRock(key);
 		if (!sharedRock)
 			continue;
 
-		Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
-        ray= sqrt(pow(fabs(_bullet->GetFrame().GetData(0,0) - rock->GetFrame().GetData(0,0)),2) +
-                pow(fabs(_bullet->GetFrame().GetData(1,0) - rock->GetFrame().GetData(1,0)),2));
-        
-        if (rock->GetState() == State::LARGE)
-            epsilon = 1.7f;
-        else if (rock->GetState() == State::MEDIUM)
-            epsilon = 1.3f;
-        else
-            epsilon = 0.8f;
+		Rock *rock = dynamic_cast<Rock *>(sharedRock.get());
+		ray = sqrt(pow(fabs(_bullet->GetFrame().GetData(0, 0) - rock->GetFrame().GetData(0, 0)), 2) +
+				   pow(fabs(_bullet->GetFrame().GetData(1, 0) - rock->GetFrame().GetData(1, 0)), 2));
 
-        if (ray < epsilon)
-            return rock;
-    }
-    return nullptr;
+		if (rock->GetState() == State::LARGE)
+			epsilon = 1.7f;
+		else if (rock->GetState() == State::MEDIUM)
+			epsilon = 1.3f;
+		else
+			epsilon = 0.8f;
+
+		if (ray < epsilon)
+			return rock;
+	}
+	return nullptr;
 }
 
-Rock* Asteroids::ShipCollision() {
-    GLfloat epsilon;
-    GLfloat ray;
+Rock *Asteroids::ShipCollision()
+{
+	GLfloat epsilon;
+	GLfloat ray;
 
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
+		Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
 		std::vector<Key> rockKeys = GetRockKeys();
-		for (Key& key : rockKeys)
+		for (Key &key : rockKeys)
 		{
-			SharedEntity& sharedRock = GetRock(key);
+			SharedEntity &sharedRock = GetRock(key);
 			if (!sharedRock)
 				continue;
 
-			Rock* rock = dynamic_cast<Rock*>(sharedRock.get());
-			ray = sqrt(pow(fabs(ship->GetFrame().GetData(0,0) - rock->GetFrame().GetData(0,0)), 2) +
-				pow(fabs(ship->GetFrame().GetData(1,0) - rock->GetFrame().GetData(1,0)), 2));
+			Rock *rock = dynamic_cast<Rock *>(sharedRock.get());
+			ray = sqrt(pow(fabs(ship->GetFrame().GetData(0, 0) - rock->GetFrame().GetData(0, 0)), 2) +
+					   pow(fabs(ship->GetFrame().GetData(1, 0) - rock->GetFrame().GetData(1, 0)), 2));
 
 			if (rock->GetState() == State::LARGE)
 				epsilon = 2.2f;
@@ -596,10 +612,10 @@ Rock* Asteroids::ShipCollision() {
 				return rock;
 		}
 	}
-    return nullptr;
+	return nullptr;
 }
 
-void Asteroids::CalculateConservationOfMomentum(Bullet* bullet, Rock* rock)
+void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 {
 	GLfloat xCompMomentumB = bullet->GetMass() * bullet->GetSpeed() * cos(bullet->GetVelocityAngle());
 	GLfloat yCompMomentumB = bullet->GetMass() * bullet->GetSpeed() * sin(bullet->GetVelocityAngle());
@@ -622,18 +638,18 @@ void Asteroids::CalculateConservationOfMomentum(Bullet* bullet, Rock* rock)
 
 	rock->SetVelocityAngle(momentumAngle);
 
-	rock->SetUnitVelocity(0,0,cos(momentumAngle));
-	rock->SetUnitVelocity(1,0,sin(momentumAngle));
+	rock->SetUnitVelocity(0, 0, cos(momentumAngle));
+	rock->SetUnitVelocity(1, 0, sin(momentumAngle));
 }
 
-std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, const bool halfMass, const bool clockwise)
+std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock *rock, const bool halfMass, const bool clockwise)
 {
 	GLint massDenominator = halfMass ? 2 : 1;
 	GLfloat angleMultiplier = clockwise ? 1.0 : -1.0;
 
-	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().GetData(0,0), rock->GetFrame().GetData(1,0));
+	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().GetData(0, 0), rock->GetFrame().GetData(1, 0));
 
-	rock1->SetKey(Rock::RockPrefix() + GenerateUUID()); 
+	rock1->SetKey(Rock::RockPrefix() + GenerateUUID());
 #ifndef SAVE_TO_DB
 	Rock::RegisterSerializationResources(rock1->GetKey());
 #else
@@ -645,14 +661,14 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock* rock, cons
 	rock1->SetSpin(rock->GetSpin());
 	rock1->SetSpinEpsilon(rock->GetSpinEpsilon());
 	rock1->SetVelocityAngle(rock->GetVelocityAngle() + angleMultiplier * M_PI / 4);
-	rock1->SetUnitVelocity(0,0,cos(rock1->GetVelocityAngle()));
-	rock1->SetUnitVelocity(1,0,sin(rock1->GetVelocityAngle()));
+	rock1->SetUnitVelocity(0, 0, cos(rock1->GetVelocityAngle()));
+	rock1->SetUnitVelocity(1, 0, sin(rock1->GetVelocityAngle()));
 	rock1->SetRockInitialized(true);
 
 	return rock1;
 }
 
-void Asteroids::BreakRock(Rock* rock)
+void Asteroids::BreakRock(Rock *rock)
 {
 	std::shared_ptr<Rock> rock1;
 	std::shared_ptr<Rock> rock2;
@@ -677,16 +693,16 @@ void Asteroids::BreakRock(Rock* rock)
 #endif
 }
 
-void Asteroids::DestroyBullet(Bullet* bullet)
+void Asteroids::DestroyBullet(Bullet *bullet)
 {
 	std::string bulletKey = bullet->GetKey();
 	AddToRemoveKeys(bulletKey);
 
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (!sharedShip)
 		return;
 
-	Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
+	Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
 
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(bulletKey);
@@ -696,7 +712,7 @@ void Asteroids::DestroyBullet(Bullet* bullet)
 	ship->RemoveBullet(bulletKey, keysSerialized_);
 }
 
-void Asteroids::DestroyRock(Rock* rock)
+void Asteroids::DestroyRock(Rock *rock)
 {
 	std::string rockKey = rock->GetKey();
 	AddToRemoveKeys(rockKey);
@@ -717,30 +733,30 @@ void Asteroids::ResetThrustAndRotation()
 
 void Asteroids::Fire()
 {
-	SharedEntity& sharedShip = GetShip();
+	SharedEntity &sharedShip = GetShip();
 	if (sharedShip)
 	{
-		Ship* ship = dynamic_cast<Ship*>(sharedShip.get());
+		Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
 		ship->Fire();
 	}
 }
 
 void Asteroids::RotateLeft()
 {
-	orientationAngle_ = 0.15f; 
+	orientationAngle_ = 0.15f;
 }
 
 void Asteroids::RotateRight()
 {
-	orientationAngle_ = -0.15f; 
+	orientationAngle_ = -0.15f;
 }
 
 void Asteroids::Thrust()
 {
-	thrust_ = 0.01f; 
+	thrust_ = 0.01f;
 }
 
-void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path) const
+void Asteroids::Save(boost::property_tree::ptree &tree, const std::string &path) const
 {
 	if (!fs::exists(path))
 		fs::create_directories(path);
@@ -750,28 +766,28 @@ void Asteroids::Save(boost::property_tree::ptree& tree, const std::string& path)
 	tree.put(THRUST_KEY, thrust_);
 }
 
-void Asteroids::Load(boost::property_tree::ptree& tree, const std::string& path)
+void Asteroids::Load(boost::property_tree::ptree &tree, const std::string &path)
 {
 	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
-void Asteroids::Save(boost::property_tree::ptree& tree, Sqlite& database) const
+void Asteroids::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 {
 	tree.put(SCORE_KEY, score_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
 	tree.put(THRUST_KEY, thrust_);
 }
 
-void Asteroids::Load(boost::property_tree::ptree& tree, Sqlite& database)
+void Asteroids::Load(boost::property_tree::ptree &tree, Sqlite &database)
 {
 	score_ = std::stoi(tree.get_child(SCORE_KEY).data());
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
-void Asteroids::AddToRemoveKeys(const std::string& key)
+void Asteroids::AddToRemoveKeys(const std::string &key)
 {
 	if (keysSerialized_.find(key) != keysSerialized_.end())
 		keysToRemove_.insert(key);
@@ -780,8 +796,8 @@ void Asteroids::AddToRemoveKeys(const std::string& key)
 void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
 {
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
-	const std::set<std::string>& outOfScopeBullets = ship->GetOutOfScopeBulletKeys();
-	for (const Key& key : outOfScopeBullets)
+	const std::set<std::string> &outOfScopeBullets = ship->GetOutOfScopeBulletKeys();
+	for (const Key &key : outOfScopeBullets)
 		AddToRemoveKeys(key);
 	ship->ClearOutOfScopeBulletKeys();
 }
@@ -790,13 +806,13 @@ void Asteroids::ClearUnusedSerializationKeys()
 {
 	AddOutOfScopeBulletsToRemovalKeys();
 
-	for (const std::string& key : keysToRemove_)
+	for (const std::string &key : keysToRemove_)
 	{
 		if (key.find(ROCK_PREFIX) != std::string::npos)
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
 			RSerializer->SetSerializationPath((resourceFolder).string());
-			for (const std::string& resourceKey : ROCK_RESOURCES)
+			for (const std::string &resourceKey : ROCK_RESOURCES)
 				RSerializer->Unserialize(resourceKey);
 			fs::remove(resourceFolder);
 		}
@@ -804,7 +820,7 @@ void Asteroids::ClearUnusedSerializationKeys()
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / Ship::ShipKey() / key;
 			RSerializer->SetSerializationPath((resourceFolder).string());
-			for (const std::string& resourceKey : BULLET_RESOURCES)
+			for (const std::string &resourceKey : BULLET_RESOURCES)
 				RSerializer->Unserialize(resourceKey);
 			fs::remove(resourceFolder);
 		}
@@ -812,7 +828,7 @@ void Asteroids::ClearUnusedSerializationKeys()
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
 			RSerializer->SetSerializationPath((resourceFolder).string());
-			for (const std::string& resourceKey : SHIP_RESOURCES)
+			for (const std::string &resourceKey : SHIP_RESOURCES)
 				RSerializer->Unserialize(resourceKey);
 		}
 	}
@@ -823,21 +839,21 @@ void Asteroids::ClearUnusedTabularizationKeys()
 {
 	AddOutOfScopeBulletsToRemovalKeys();
 
-	for (const std::string& key : keysToRemove_)
+	for (const std::string &key : keysToRemove_)
 	{
 		if (key.find(ROCK_PREFIX) != std::string::npos)
 		{
-			for (const std::string& resourceKey : RockResourceKeys(key))
+			for (const std::string &resourceKey : RockResourceKeys(key))
 				RTabularizer->Untabularize(resourceKey);
 		}
 		else if (key.find(BULLET_PREFIX) != std::string::npos)
 		{
-			for (const std::string& resourceKey : BulletResourceKeys(key))
+			for (const std::string &resourceKey : BulletResourceKeys(key))
 				RTabularizer->Untabularize(resourceKey);
 		}
 		else
 		{
-			Ship* ship = dynamic_cast<Ship*>(GetShip().get());
+			Ship *ship = dynamic_cast<Ship *>(GetShip().get());
 			UntabularizeShipResources(ship);
 		}
 	}
@@ -869,7 +885,7 @@ void Asteroids::Serialize()
 	ClearUnusedTabularizationKeys();
 
 	Tabularizer->Tabularize(*this);
-	
+
 	Tabularizer->CloseDatabase();
 	RTabularizer->CloseDatabase();
 #endif

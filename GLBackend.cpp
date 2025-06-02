@@ -1,4 +1,4 @@
-#include "GLGame.h"
+#include "GLBackend.h"
 
 #include <algorithm>
 #include <memory>
@@ -9,25 +9,25 @@
 
 using events::EventEmitter;
 
-using asteroids::GLGame;
+using asteroids::GLBackend;
 
 namespace
 {
-const int WIN_WIDTH = 600;
-const int WIN_HEIGHT = 480;
-const int NUMBER_KEYS = 256;
-const int INIT_WIN_X = 100;
-const int INIT_WIN_Y = 100;
-const std::string ASTEROIDS_TITLE = "Asteroids";
+	const int WIN_WIDTH = 600;
+	const int WIN_HEIGHT = 480;
+	const int NUMBER_KEYS = 256;
+	const int INIT_WIN_X = 100;
+	const int INIT_WIN_Y = 100;
+	const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
 /*======================== CALLBACK POINTER ==================================*/
-GLGame* GLGame::callbackInstance_(nullptr);
+GLBackend *GLBackend::callbackInstance_(nullptr);
 /*============================================================================*/
 
-GLGame::~GLGame() = default;
+GLBackend::~GLBackend() = default;
 
-void GLGame::TimerCallback(int _idx)
+void GLBackend::TimerCallback(int _idx)
 {
 	switch (_idx)
 	{
@@ -40,7 +40,7 @@ void GLGame::TimerCallback(int _idx)
 	}
 }
 
-GLGame::GLGame(int _argc, char* _argv[])
+GLBackend::GLBackend(int _argc, char *_argv[])
 {
 	if (!callbackInstance_)
 		callbackInstance_ = this;
@@ -63,22 +63,22 @@ GLGame::GLGame(int _argc, char* _argv[])
 	deserializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 }
 
-void GLGame::Run()
+void GLBackend::Run()
 {
 	runEmitter_->Signal()();
 
 	glutMainLoop();
 };
 
-void GLGame::RegisterCallbacks() const
+void GLBackend::RegisterCallbacks() const
 {
-	glutDisplayFunc(DisplayWrapper);   
+	glutDisplayFunc(DisplayWrapper);
 	glutReshapeFunc(ReshapeWrapper);
-	glutKeyboardFunc(KeyboardWrapper); 
+	glutKeyboardFunc(KeyboardWrapper);
 	glutKeyboardUpFunc(KeyboardUpWrapper);
 }
 
-void GLGame::InitGlut(int _argc, char* _argv[]) const
+void GLBackend::InitGlut(int _argc, char *_argv[]) const
 {
 	glutInit(&_argc, _argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -87,7 +87,7 @@ void GLGame::InitGlut(int _argc, char* _argv[]) const
 	glutCreateWindow(ASTEROIDS_TITLE.c_str());
 }
 
-void GLGame::InitServer() const
+void GLBackend::InitServer() const
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glShadeModel(GL_SMOOTH);
@@ -100,32 +100,32 @@ void GLGame::InitServer() const
 	glCullFace(GL_BACK);
 }
 
-void GLGame::InitClient() const
+void GLBackend::InitClient() const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLGame::DisplayWrapper()
+void GLBackend::DisplayWrapper()
 {
 	callbackInstance_->Display();
 }
 
-void GLGame::ReshapeWrapper(const int _w, const int _h)
+void GLBackend::ReshapeWrapper(const int _w, const int _h)
 {
 	callbackInstance_->Reshape(_w, _h);
 }
 
-void GLGame::KeyboardWrapper(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::KeyboardWrapper(const unsigned char _chr, const int _x, const int _y)
 {
 	callbackInstance_->Keyboard(_chr, _x, _y);
 }
 
-void GLGame::KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y)
 {
 	callbackInstance_->KeyboardUp(_chr, _x, _y);
 }
 
-void GLGame::Display()
+void GLBackend::Display()
 {
 	KeyboardUpdateState();
 
@@ -138,7 +138,7 @@ void GLGame::Display()
 	glutSwapBuffers();
 }
 
-void GLGame::Reshape(const int _w, const int _h) const
+void GLBackend::Reshape(const int _w, const int _h) const
 {
 	//========================= DEFINE VIEWPORT ==============================*/
 	glViewport(0, 0, _w, _h);
@@ -147,48 +147,55 @@ void GLGame::Reshape(const int _w, const int _h) const
 	glLoadIdentity();
 
 	if (_w <= _h)
-		glOrtho(-10.0, 10.0, -10.0*((GLfloat)_h / (GLfloat)_w),
-			10.0*((GLfloat)_h / (GLfloat)_w), 10, -10);
+		glOrtho(-10.0, 10.0, -10.0 * ((GLfloat)_h / (GLfloat)_w),
+				10.0 * ((GLfloat)_h / (GLfloat)_w), 10, -10);
 	else
-		glOrtho(-10.0*((GLfloat)_w / (GLfloat)_h),
-			10.0*((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
+		glOrtho(-10.0 * ((GLfloat)_w / (GLfloat)_h),
+				10.0 * ((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
 	/*========================= REDISPLAY ====================================*/
 	glMatrixMode(GL_MODELVIEW);
 	glutPostRedisplay();
 }
 
-void GLGame::Keyboard(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::Keyboard(const unsigned char _chr, const int _x, const int _y)
 {
 	keysPressed_[_chr] = true;
 }
 
-void GLGame::KeyboardUp(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::KeyboardUp(const unsigned char _chr, const int _x, const int _y)
 {
 	keysPressed_[_chr] = false;
 }
 
-void GLGame::KeyboardUpdateState()
+void GLBackend::KeyboardUpdateState()
 {
 	for (int i = 0; i < NUMBER_KEYS; i++)
 	{
-		if (keysPressed_[i]) 
+		if (keysPressed_[i])
 		{
 			switch (i)
 			{
 			case 's':
-				leftArrowEmitter_->Signal()(); break;
+				leftArrowEmitter_->Signal()();
+				break;
 			case 'f':
-				rightArrowEmitter_->Signal()(); break;
+				rightArrowEmitter_->Signal()();
+				break;
 			case 'e':
-				thrustEmitter_->Signal()(); break;
+				thrustEmitter_->Signal()();
+				break;
 			case 'j':
-				fireEmitter_->Signal()(); break;
+				fireEmitter_->Signal()();
+				break;
 			case 'x':
-				resetEmitter_->Signal()(); break;
+				resetEmitter_->Signal()();
+				break;
 			case 'u':
-				serializeEmitter_->Signal()(); break;
+				serializeEmitter_->Signal()();
+				break;
 			case 'i':
-				deserializeEmitter_->Signal()(); break;
+				deserializeEmitter_->Signal()();
+				break;
 			default:
 				break;
 			}
@@ -196,47 +203,47 @@ void GLGame::KeyboardUpdateState()
 	}
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetLeftArrowEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetLeftArrowEmitter()
 {
 	return leftArrowEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetRightArrowEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetRightArrowEmitter()
 {
 	return rightArrowEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetThrustEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetThrustEmitter()
 {
 	return thrustEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetFireEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetFireEmitter()
 {
 	return fireEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetResetEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetResetEmitter()
 {
 	return resetEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetDrawEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetDrawEmitter()
 {
 	return drawEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetRunEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetRunEmitter()
 {
 	return runEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetSerializeEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetSerializeEmitter()
 {
 	return serializeEmitter_;
 }
 
-std::shared_ptr<EventEmitter<void(void)>> GLGame::GetDeserializeEmitter()
+std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetDeserializeEmitter()
 {
 	return deserializeEmitter_;
 }
