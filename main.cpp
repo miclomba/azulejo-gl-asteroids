@@ -34,37 +34,37 @@ namespace
 	const std::string DESERIALIZE_ACTION = "deserialize_action";
 }
 
-void RegisterEvents(Asteroids &asteroids, GLBackend &game, EventChannel &channel)
+void RegisterEvents(Asteroids &asteroids, GLBackend &backend, EventChannel &channel)
 {
-	channel.RegisterEmitter(LEFT_EVENT, game.GetLeftArrowEmitter());
+	channel.RegisterEmitter(LEFT_EVENT, backend.GetLeftArrowEmitter());
 	channel.RegisterConsumer(LEFT_ACTION, LEFT_EVENT, asteroids.GetLeftArrowConsumer());
-	channel.RegisterEmitter(RIGHT_EVENT, game.GetRightArrowEmitter());
+	channel.RegisterEmitter(RIGHT_EVENT, backend.GetRightArrowEmitter());
 	channel.RegisterConsumer(RIGHT_ACTION, RIGHT_EVENT, asteroids.GetRightArrowConsumer());
-	channel.RegisterEmitter(THRUST_EVENT, game.GetThrustEmitter());
+	channel.RegisterEmitter(THRUST_EVENT, backend.GetThrustEmitter());
 	channel.RegisterConsumer(THRUST_ACTION, THRUST_EVENT, asteroids.GetThrustConsumer());
-	channel.RegisterEmitter(FIRE_EVENT, game.GetFireEmitter());
+	channel.RegisterEmitter(FIRE_EVENT, backend.GetFireEmitter());
 	channel.RegisterConsumer(FIRE_ACTION, FIRE_EVENT, asteroids.GetFireConsumer());
-	channel.RegisterEmitter(RESET_EVENT, game.GetResetEmitter());
+	channel.RegisterEmitter(RESET_EVENT, backend.GetResetEmitter());
 	channel.RegisterConsumer(RESET_ACTION, RESET_EVENT, asteroids.GetResetConsumer());
-	channel.RegisterEmitter(DRAW_EVENT, game.GetDrawEmitter());
+	channel.RegisterEmitter(DRAW_EVENT, backend.GetDrawEmitter());
 	channel.RegisterConsumer(DRAW_ACTION, DRAW_EVENT, asteroids.GetDrawConsumer());
-	channel.RegisterEmitter(RUN_EVENT, game.GetRunEmitter());
+	channel.RegisterEmitter(RUN_EVENT, backend.GetRunEmitter());
 	channel.RegisterConsumer(RUN_ACTION, RUN_EVENT, asteroids.GetRunConsumer());
-	channel.RegisterEmitter(SERIALIZE_EVENT, game.GetSerializeEmitter());
+	channel.RegisterEmitter(SERIALIZE_EVENT, backend.GetSerializeEmitter());
 	channel.RegisterConsumer(SERIALIZE_ACTION, SERIALIZE_EVENT, asteroids.GetSerializeConsumer());
-	channel.RegisterEmitter(DESERIALIZE_EVENT, game.GetDeserializeEmitter());
+	channel.RegisterEmitter(DESERIALIZE_EVENT, backend.GetDeserializeEmitter());
 	channel.RegisterConsumer(DESERIALIZE_ACTION, DESERIALIZE_EVENT, asteroids.GetDeserializeConsumer());
 }
 
 int main(int _argc, char *_argv[])
 {
-	GLBackend game(_argc, _argv);
-	glutTimerFunc(TIME, game.TimerCallback, VAL);
+	GLBackend backend(_argc, _argv);
+	glutTimerFunc(TIME, backend.TimerCallback, VAL);
 
 	Asteroids asteroids;
 	EventChannel channel;
 
-	RegisterEvents(asteroids, game, channel);
+	RegisterEvents(asteroids, backend, channel);
 
-	game.Run();
+	backend.Run();
 }
