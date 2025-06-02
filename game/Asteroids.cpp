@@ -1,4 +1,4 @@
-#include "Asteroids.h"
+#include "game/Asteroids.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -33,11 +33,11 @@
 #include "Events/EventConsumer.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "Bullet.h"
-#include "Rock.h"
-#include "Ship.h"
 #include "configuration/filesystem.hpp"
 #include "configuration/serialization.h"
+#include "game/Bullet.h"
+#include "game/Rock.h"
+#include "game/Ship.h"
 #include "gl/GLEntityTask.h"
 
 using boost::property_tree::ptree;

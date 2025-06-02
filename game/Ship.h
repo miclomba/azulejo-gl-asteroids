@@ -19,8 +19,8 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "Bullet.h"
 #include "configuration/config.h"
+#include "game/Bullet.h"
 #include "gl/GLEntity.h"
 
 namespace database_adapters

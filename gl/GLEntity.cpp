@@ -1,3 +1,5 @@
+#include "gl/GLEntity.h"
+
 #include <algorithm>
 #include <array>
 #include <numeric>
@@ -16,7 +18,6 @@
 
 #include "configuration/filesystem.hpp"
 #include "configuration/serialization.h"
-#include "GLEntity.h"
 
 using asteroids::GLEntity;
 using boost::property_tree::ptree;

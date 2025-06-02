@@ -1,4 +1,4 @@
-#include "Bullet.h"
+#include "game/Bullet.h"
 
 #include <memory>
 #include <string>
@@ -17,7 +17,6 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "Bullet.h"
 #include "configuration/filesystem.hpp"
 #include "configuration/serialization.h"
 
