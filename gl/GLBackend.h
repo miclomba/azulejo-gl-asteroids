@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "Events/EventEmitter.h"
-#include "config/config.h"
+#include "configuration/config.h"
 
 namespace asteroids
 {

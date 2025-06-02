@@ -18,7 +18,7 @@
 #include "Events/EventConsumer.h"
 #include "Rock.h"
 #include "Ship.h"
-#include "config/config.h"
+#include "configuration/config.h"
 #include "gl/GLEntity.h"
 
 namespace database_adapters

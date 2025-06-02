@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "config/filesystem.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -19,7 +18,8 @@
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
-#include "config/serialization.h"
+#include "configuration/filesystem.hpp"
+#include "configuration/serialization.h"
 
 using asteroids::Bullet;
 using asteroids::GLEntity;

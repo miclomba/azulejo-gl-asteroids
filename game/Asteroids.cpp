@@ -9,7 +9,6 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "config/filesystem.hpp"
 
 #include <boost/asio/packaged_task.hpp>
 #include <boost/asio/post.hpp>
@@ -37,7 +36,8 @@
 #include "Bullet.h"
 #include "Rock.h"
 #include "Ship.h"
-#include "config/serialization.h"
+#include "configuration/filesystem.hpp"
+#include "configuration/serialization.h"
 #include "gl/GLEntityTask.h"
 
 using boost::property_tree::ptree;
@@ -406,7 +406,7 @@ void Asteroids::DrawGameInfo()
 	for (i = 0; i < 7; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, score[i]);
 	char amount[4];
-	i = sprintf(amount, "%d", score_);
+	i = snprintf(amount, sizeof(amount), "%d", score_);
 	for (i = 0; i < 4; i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }

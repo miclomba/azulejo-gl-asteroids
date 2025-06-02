@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "config/filesystem.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -18,7 +17,8 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "config/serialization.h"
+#include "configuration/filesystem.hpp"
+#include "configuration/serialization.h"
 #include "gl/GLEntity.h"
 
 using asteroids::GLEntity;

@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "config/filesystem.hpp"
 
 #include <boost/asio/post.hpp>
 #include <boost/lexical_cast.hpp>
@@ -27,7 +26,8 @@
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
-#include "config/serialization.h"
+#include "configuration/filesystem.hpp"
+#include "configuration/serialization.h"
 #include "gl/GLEntityTask.h"
 
 using asteroids::Bullet;

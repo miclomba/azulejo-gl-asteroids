@@ -14,7 +14,7 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "config/config.h"
+#include "configuration/config.h"
 #include "gl/GLEntity.h"
 
 namespace database_adapters

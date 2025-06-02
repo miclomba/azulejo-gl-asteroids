@@ -2,7 +2,6 @@
 #include <array>
 #include <numeric>
 #include <string>
-#include "config/filesystem.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -15,7 +14,8 @@
 #include "FilesystemAdapters/ResourceSerializer.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "config/serialization.h"
+#include "configuration/filesystem.hpp"
+#include "configuration/serialization.h"
 #include "GLEntity.h"
 
 using asteroids::GLEntity;
