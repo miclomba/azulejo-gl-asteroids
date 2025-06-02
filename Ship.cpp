@@ -28,7 +28,7 @@
 
 #include "Common.h"
 #include "Bullet.h"
-#include "GLEntityTask.h"
+#include "gl/GLEntityTask.h"
 #include "Ship.h"
 
 using asteroids::Bullet;

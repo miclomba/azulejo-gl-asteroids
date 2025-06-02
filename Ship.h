@@ -21,7 +21,7 @@
 
 #include "config/config.h"
 #include "Bullet.h"
-#include "GLEntity.h"
+#include "gl/GLEntity.h"
 
 namespace database_adapters
 {

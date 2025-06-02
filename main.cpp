@@ -4,7 +4,7 @@
 #include "Events/EventChannel.h"
 
 #include "Asteroids.h"
-#include "GLBackend.h"
+#include "gl/GLBackend.h"
 
 using asteroids::Asteroids;
 using asteroids::GLBackend;

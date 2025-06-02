@@ -36,7 +36,7 @@
 
 #include "Bullet.h"
 #include "Common.h"
-#include "GLEntityTask.h"
+#include "gl/GLEntityTask.h"
 #include "Rock.h"
 #include "Ship.h"
 

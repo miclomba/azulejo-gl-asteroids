@@ -16,7 +16,7 @@
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "config/config.h"
-#include "GLEntity.h"
+#include "gl/GLEntity.h"
 
 namespace database_adapters
 {

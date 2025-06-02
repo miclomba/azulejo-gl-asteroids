@@ -19,7 +19,7 @@
 #include "config/config.h"
 #include "Rock.h"
 #include "Ship.h"
-#include "GLEntity.h"
+#include "gl/GLEntity.h"
 
 namespace database_adapters
 {
