@@ -12,11 +12,12 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "config/config.h"
 #include "DatabaseAdapters/ITabularizableEntity.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ISerializableEntity.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
+
+#include "config/config.h"
 
 namespace asteroids
 {

@@ -1,9 +1,8 @@
 #ifndef asteroids_common_h
 #define asteroids_common_h
 
-#include "config/config.h"
-
 #include <string>
+#include "config/config.h"
 #include "config/filesystem.h"
 
 namespace

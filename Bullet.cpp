@@ -19,7 +19,7 @@
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
-#include "Common.h"
+#include "config/serialization.h"
 
 using asteroids::Bullet;
 using asteroids::GLEntity;

@@ -26,10 +26,9 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "Common.h"
 #include "Bullet.h"
+#include "config/serialization.h"
 #include "gl/GLEntityTask.h"
-#include "Ship.h"
 
 using asteroids::Bullet;
 using asteroids::GLEntity;

@@ -18,9 +18,8 @@
 #include "test_filesystem_adapters/ContainerResource.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
-#include "Common.h"
+#include "config/serialization.h"
 #include "gl/GLEntity.h"
-#include "Rock.h"
 
 using asteroids::GLEntity;
 using asteroids::Rock;

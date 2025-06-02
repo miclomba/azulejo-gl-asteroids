@@ -35,10 +35,10 @@
 #include "test_filesystem_adapters/ContainerResource2D.h"
 
 #include "Bullet.h"
-#include "Common.h"
-#include "gl/GLEntityTask.h"
 #include "Rock.h"
 #include "Ship.h"
+#include "config/serialization.h"
+#include "gl/GLEntityTask.h"
 
 using boost::property_tree::ptree;
 

@@ -16,9 +16,9 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Events/EventConsumer.h"
-#include "config/config.h"
 #include "Rock.h"
 #include "Ship.h"
+#include "config/config.h"
 #include "gl/GLEntity.h"
 
 namespace database_adapters
