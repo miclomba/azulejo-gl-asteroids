@@ -26,37 +26,37 @@ link_directories(
 )
 
 add_executable("${PROJECT_NAME}" 
-"main.cpp" 
+"game/Asteroids.cpp" 
+"game/Bullet.cpp"
+"game/Rock.cpp" 
+"game/Ship.cpp" 
 "gl/GLBackend.cpp" 
-"Asteroids.cpp" 
 "gl/GLEntity.cpp" 
-"gl/GLEntityTask.cpp" 
-"Rock.cpp" 
-"Ship.cpp" 
-"Bullet.cpp"
+"gl/GLEntityTask.cpp"
+"main.cpp"
 )
 
 if (MSVC)
 target_link_libraries("${PROJECT_NAME}" 
+"DatabaseAdapters"
 "Entities" 
-"Resources" 
 "Events" 
 "FilesystemAdapters" 
-"DatabaseAdapters"
+"Resources" 
+"bcrypt"
 "boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
 "freeglutd"
-"bcrypt"
 )
 elseif (APPLE)
 target_link_libraries("${PROJECT_NAME}" 
+"DatabaseAdapters"
 "Entities" 
-"Resources" 
 "Events" 
 "FilesystemAdapters" 
-"DatabaseAdapters"
-"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+"Resources" 
 "GLUT::GLUT" 
 "OpenGL::GL"
+"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
 )
 endif()
 

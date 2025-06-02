@@ -3,7 +3,7 @@
 
 #include "Events/EventChannel.h"
 
-#include "Asteroids.h"
+#include "game/Asteroids.h"
 #include "gl/GLBackend.h"
 
 using asteroids::Asteroids;
