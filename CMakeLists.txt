@@ -32,6 +32,13 @@ set(COMMON_INCLUDES
 "$ENV{FREEGLUT_INCL_DIR}"
 )
 
+set(COMMON_LINK_DIRS
+"$ENV{X_LINK_DIR}"
+"$ENV{BOOST_LINK_DIR}" 
+"$ENV{FREEGLUT_LINK_BIN}"
+"$ENV{FREEGLUT_LINK_LIB}"
+)
+
 if (MSVC OR APPLE)
 include_directories(
 "${COMMON_INCLUDES}"
@@ -43,13 +50,16 @@ include_directories(
 )
 endif()
 
+if (MSVC OR APPLE)
 link_directories(
-"$ENV{X_LINK_DIR}"
-"$ENV{BOOST_LINK_DIR}" 
-"$ENV{FREEGLUT_LINK_BIN}"
-"$ENV{FREEGLUT_LINK_LIB}"
+"${COMMON_LINK_DIRS}"
+)
+elseif(UNIX)
+link_directories(
+"${COMMON_LINK_DIRS}"
 "${X11_LIBRARIES}"
 )
+endif()
 
 add_executable("${PROJECT_NAME}" 
 "game/Asteroids.cpp" 

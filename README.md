@@ -14,7 +14,15 @@
 
 Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) adjacent to this package.
 
-## Install VCPKG Dependencies
+#### VSCode
+
+0. Install `VSCode`
+1. Install VSCode extensions:
+
+- CMake Tools (by Microsoft)
+- C/C++ (by Microsoft)
+
+#### Install VCPKG Dependencies
 
 Install [vcpkg](https://github.com/microsoft/vcpkg).
 
@@ -47,14 +55,6 @@ sudo apt install -y \
 
 1. Copy settings `cp .vscode/settings.linux.json .vscode/settings.json`
 2. Copy launch settings `cp .vscode/launch.linux.json .vscode/launch.json`
-
-#### VSCode
-
-0. Install `VSCode`
-1. Install VSCode extensions:
-
-- CMake Tools (by Microsoft)
-- C/C++ (by Microsoft)
 
 ## Build
 
