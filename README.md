@@ -64,6 +64,22 @@ vcpkg install --x-manifest-root=. --feature-flags=versions,manifests
 
 1. Run `CMake: Build`
 
+### On Ubuntu
+
+0. Install dependencies: 
+```
+sudo apt install -y \
+  build-essential autoconf autoconf-archive automake libtool pkg-config cmake git unzip ninja-build curl \
+  libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncursesw5-dev libffi-dev \
+  libgdbm-dev liblzma-dev uuid-dev tk-dev xz-utils wget libgomp1
+  libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxrandr-dev libxi-dev libxmu-dev libxxf86vm-dev
+```
+1. Istall dependencies: `vcpkg install --x-manifest-root=. --feature-flags=manifests`
+2. Install `VSCode`
+3. Install VSCode extensions:
+- CMake Tools (by Microsoft)
+- C/C++ (by Microsoft)
+
 ## Run
 
 ### On Windows (Visual Studio)
