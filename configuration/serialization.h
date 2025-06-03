@@ -12,7 +12,7 @@ namespace
 #ifdef _WIN32
 	const Path ROOT_PATH = Path(std::getenv("USERPROFILE")) / "downloads";
 #else
-	const Path ROOT_PATH = Path(std::getenv("HOME")) / "downloads";
+	const Path ROOT_PATH = Path(std::getenv("HOME")) / "Downloads";
 #endif
 	const Path SERIALIZATION_PATH = ROOT_PATH / JSON_NAME;
 

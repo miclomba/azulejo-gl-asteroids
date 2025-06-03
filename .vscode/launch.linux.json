@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GLAsteroids",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/GLAsteroids",
+            "args": [], // Add command-line arguments if needed
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}", // Set the working directory
+            "environment": [],
+            "externalConsole": false, // Set to true to use an external terminal
+            "MIMode": "gdb"
+        }
+    ]
+}
