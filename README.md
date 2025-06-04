@@ -26,11 +26,6 @@ Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) ad
 
 Install [vcpkg](https://github.com/microsoft/vcpkg).
 
-### Windows
-
-0. Download [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
-1. Install dependencies: `vcpkg install --x-manifest-root=. --feature-flags=manifests`
-
 ### Mac OS
 
 0. Install `XCode`
@@ -58,16 +53,6 @@ sudo apt install -y \
 
 ## Build
 
-### On Windows (Visual Studio)
-
-0. Start Visual Studio
-1. Click `continue without code`
-2. Set configuration to be `x64-Debug`
-3. `File > Open > CMake`
-4. If the 'out' directory is not created automatically (Cmake configuration step) then run: `Project > Configure Cache`
-5. `Build > Build All`
-6. `Build > Install GLAsteroids`
-
 ### On macOS or Ubuntu (VSCode)
 
 0. Run `CMake: Configure` command and use the appropriate compiler:
@@ -79,11 +64,6 @@ sudo apt install -y \
 1. Run `CMake: Build`
 
 ## Run
-
-### On Windows (Visual Studio)
-
-0. `Select the Startup Item` to be `GLAsteroids.exe`
-1. `Debug > Start Debugging`
 
 ### On macOS or Ubuntu (VSCode)
 

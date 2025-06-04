@@ -8,7 +8,7 @@
         "FREEGLUT_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
         "BOOST_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
         "BOOST_LINK_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
-        "X_INCL_DIR": "${workspaceFolder}/../azulejo-common-lib",
+        "X_INCL_DIR": "${workspaceFolder}/../azulejo-common-lib/include",
         "X_LINK_DIR": "${workspaceFolder}/../azulejo-common-lib/out/install/X"
     },
     "files.associations": {
