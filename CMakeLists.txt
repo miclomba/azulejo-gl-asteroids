@@ -26,7 +26,7 @@ message(STATUS "X11_LIBRARIES: ${X11_LIBRARIES}")
 message(STATUS "X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 
 set(COMMON_INCLUDES
-"${CMAKE_SOURCE_DIR}"
+"${CMAKE_SOURCE_DIR}/include"
 "$ENV{X_INCL_DIR}"
 "$ENV{BOOST_INCL_DIR}"
 "$ENV{FREEGLUT_INCL_DIR}"
@@ -62,13 +62,13 @@ link_directories(
 endif()
 
 add_executable("${PROJECT_NAME}" 
-"game/Asteroids.cpp" 
-"game/Bullet.cpp"
-"game/Rock.cpp" 
-"game/Ship.cpp" 
-"gl/GLBackend.cpp" 
-"gl/GLEntity.cpp" 
-"gl/GLEntityTask.cpp"
+"src/game/Asteroids.cpp" 
+"src/game/Bullet.cpp"
+"src/game/Rock.cpp" 
+"src/game/Ship.cpp" 
+"src/gl/GLBackend.cpp" 
+"src/gl/GLEntity.cpp" 
+"src/gl/GLEntityTask.cpp"
 "main.cpp"
 )
 
