@@ -8,8 +8,8 @@
         "FREEGLUT_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-linux/include",
         "BOOST_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-linux/include",
         "BOOST_LINK_DIR": "${workspaceFolder}/vcpkg_installed/x64-linux/lib",
-        "X_INCL_DIR": "${workspaceFolder}/../azulejo-common-lib/include",
-        "X_LINK_DIR": "${workspaceFolder}/../azulejo-common-lib/out/install/X"
+        "X_INCL_DIR": "/usr/local/include",
+        "X_LINK_DIR": "/usr/local/lib"
     },
     "files.associations": {
         "*.ipp": "cpp"
