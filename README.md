@@ -12,7 +12,9 @@
 
 ## Prerequisites
 
-Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) adjacent to this package.
+Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) then configure, build, and install it.
+
+Note: You can uninstall via: `azulejo-common-lib/uninstall.sh`
 
 ### VSCode
 
