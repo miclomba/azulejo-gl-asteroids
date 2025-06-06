@@ -63,6 +63,7 @@ endif()
 
 add_executable("${PROJECT_NAME}" 
 "src/game/Asteroids.cpp" 
+"src/game/AsteroidsConsumers.cpp" 
 "src/game/Bullet.cpp"
 "src/game/Rock.cpp" 
 "src/game/Ship.cpp" 

@@ -197,27 +197,6 @@ Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? s
 	Detabularizer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #endif
 
-	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																	 { this->RotateLeft(); });
-	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																	  { this->RotateRight(); });
-	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																  { this->Thrust(); });
-	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																{ this->Fire(); });
-	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																 { this->ResetGame(); });
-	drawConsumer_ = std::make_shared<
-		EventConsumer<
-			void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>([this](GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)
-																																   { this->Draw(w_, h_, projOrtho_, projPerspective_); });
-	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-															   { this->Run(); });
-	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																	 { this->Serialize(); });
-	deserializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																	   { this->Deserialize(); });
-
 	ResetGame();
 }
 
@@ -924,52 +903,4 @@ void Asteroids::Deserialize()
 #endif
 
 	keysSerialized_ = GetKeysToSerialize();
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetLeftArrowConsumer()
-{
-	return leftArrowConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetRightArrowConsumer()
-{
-	return rightArrowConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetThrustConsumer()
-{
-	return thrustConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetFireConsumer()
-{
-	return fireConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetResetConsumer()
-{
-	return resetConsumer_;
-}
-
-std::shared_ptr<
-	EventConsumer<
-		void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-Asteroids::GetDrawConsumer()
-{
-	return drawConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetRunConsumer()
-{
-	return runConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetSerializeConsumer()
-{
-	return serializeConsumer_;
-}
-
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetDeserializeConsumer()
-{
-	return deserializeConsumer_;
 }

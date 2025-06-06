@@ -4,10 +4,12 @@
 #include "Events/EventChannel.h"
 
 #include "game/Asteroids.h"
+#include "game/AsteroidsConsumers.h"
 #include "gl/GLBackend.h"
 #include "gl/GLBackendEmitters.h"
 
 using asteroids::Asteroids;
+using asteroids::AsteroidsConsumers;
 using asteroids::GLBackend;
 using asteroids::GLBackendEmitters;
 using events::EventChannel;
@@ -34,7 +36,7 @@ namespace
 	const std::string DESERIALIZE_ACTION = "deserialize_action";
 }
 
-void RegisterEvents(Asteroids &frontend, GLBackend &backend, EventChannel &channel)
+void RegisterEvents(AsteroidsConsumers &frontend, GLBackend &backend, EventChannel &channel)
 {
 	GLBackendEmitters &emitters = backend.GetEmitters();
 	channel.RegisterEmitter(LEFT_EVENT, emitters.GetLeftArrowEmitter());
@@ -61,10 +63,11 @@ int main(int _argc, char *_argv[])
 {
 	GLBackend &backend = GLBackend::Get(_argc, _argv);
 
-	Asteroids frontend;
+	auto frontend = std::make_shared<Asteroids>();
+	AsteroidsConsumers frontendConsumers(frontend);
 	EventChannel channel;
 
-	RegisterEvents(frontend, backend, channel);
+	RegisterEvents(frontendConsumers, backend, channel);
 
 	backend.Run();
 }

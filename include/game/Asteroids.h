@@ -83,64 +83,6 @@ namespace asteroids
         void Load(boost::property_tree::ptree &tree, database_adapters::Sqlite &database) override;
 
         /**
-         * @brief Getter for the left arrow event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetLeftArrowConsumer();
-
-        /**
-         * @brief Getter for the right arrow event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetRightArrowConsumer();
-
-        /**
-         * @brief Getter for the thrust action event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetThrustConsumer();
-
-        /**
-         * @brief Getter for the fire event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetFireConsumer();
-
-        /**
-         * @brief Getter for the reset event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetResetConsumer();
-
-        /**
-         * @brief Getter for the draw event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<
-            events::EventConsumer<
-                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-        GetDrawConsumer();
-
-        /**
-         * @brief Getter for the run event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetRunConsumer();
-
-        /**
-         * @brief Getter for the serialize event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetSerializeConsumer();
-
-        /**
-         * @brief Getter for the deserialize event consumer.
-         * @return An event consumer.
-         */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetDeserializeConsumer();
-
-    private:
-        /**
          * @brief Render the game entities.
          * @param w_ the width of the window
          * @param h_ the height of the window
@@ -189,6 +131,7 @@ namespace asteroids
          */
         void Deserialize();
 
+    private:
         /**
          * @brief Generate a UUID.
          * @return A UUID.
@@ -372,19 +315,6 @@ namespace asteroids
 
         boost::asio::thread_pool threadPool_;
         std::mutex rockCollisionMutex_;
-
-        std::shared_ptr<events::EventConsumer<void(void)>> leftArrowConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> rightArrowConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> thrustConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> fireConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> resetConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> runConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> serializeConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> deserializeConsumer_;
-        std::shared_ptr<
-            events::EventConsumer<
-                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-            drawConsumer_;
     };
 
 } // end namespace asteroids
