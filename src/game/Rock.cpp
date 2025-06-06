@@ -48,6 +48,8 @@ namespace
 	const std::string &ROCK_INDICES_KEY = "rock_indices";
 	const std::string TRUE_VAL = "true";
 
+	GLfloat PROJECTION_BUFFER[16];
+
 	const Resource2DGLfloat rockVerticesL({{-1.5f, -1.5f, 0.5f}, {1.5f, -1.5f, 0.5f}, {1.5f, 1.5f, 0.5f}, {-1.5f, 1.5f, 0.5f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}});
 	const Resource2DGLfloat rockVerticesM({{-1.0f, -1.0f, 0.5f}, {1.0f, -1.0f, 0.5f}, {1.0f, 1.0f, 0.5f}, {-1.0f, 1.0f, 0.5f}, {-0.75f, -0.75f, 1.0f}, {0.75f, -0.75f, 1.0f}, {0.75f, 0.75f, 1.0f}, {-0.75f, 0.75f, 1.0f}});
 	const Resource2DGLfloat rockVerticesS({{-0.5f, -0.5f, 0.5f}, {0.5f, -0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.25f, -0.25f, 1.0f}, {0.25f, -0.25f, 1.0f}, {0.25f, 0.25f, 1.0f}, {-0.25f, 0.25f, 1.0f}});
@@ -167,31 +169,31 @@ void Rock::MoveRock()
 
 void Rock::WrapAroundMoveRock()
 {
-	GLfloat projectionMatrix[16];
-	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
 
 	GLfloat left, right, bottom, top;
-	right = (1 / fabs(projectionMatrix[0]));
+	right = (1 / fabs(PROJECTION_BUFFER[0]));
 	left = -1 * right;
-	top = (1 / fabs(projectionMatrix[5]));
+	top = (1 / fabs(PROJECTION_BUFFER[5]));
 	bottom = -1 * top;
 
-	if (GetFrame().GetData(0, 0) <= left - epsilon_)
+	Resource2DGLfloat &frame = GetFrame();
+	if (frame.GetData(0, 0) <= left - epsilon_)
 	{
 		SetFrame(0, 0, right + epsilon_);
 		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
 	}
-	else if (GetFrame().GetData(0, 0) >= right + epsilon_)
+	else if (frame.GetData(0, 0) >= right + epsilon_)
 	{
 		SetFrame(0, 0, left - epsilon_);
 		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
 	}
-	else if (GetFrame().GetData(1, 0) >= top + epsilon_)
+	else if (frame.GetData(1, 0) >= top + epsilon_)
 	{
 		SetFrame(1, 0, bottom - epsilon_);
 		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
 	}
-	else if (GetFrame().GetData(1, 0) <= bottom - epsilon_)
+	else if (frame.GetData(1, 0) <= bottom - epsilon_)
 	{
 		SetFrame(1, 0, top + epsilon_);
 		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
@@ -220,14 +222,16 @@ void Rock::Update(const GLfloat _velocityAngle, const GLfloat _speed, const GLfl
 	InitializeRock(_velocityAngle, _speed, _spin);
 	UpdateSpin();
 
-	S_ = Resource2DGLfloat({{GetSpeed(), 0.0f, 0.0f, 0.0f},
-							{0.0f, GetSpeed(), 0.0f, 0.0f},
-							{0.0f, 0.0f, GetSpeed(), 0.0f},
+	GLfloat speed = GetSpeed();
+	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
+							{0.0f, speed, 0.0f, 0.0f},
+							{0.0f, 0.0f, speed, 0.0f},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 
-	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, GetFrame().GetData(0, 0)},
-							{0.0f, 1.0f, 0.0f, GetFrame().GetData(1, 0)},
-							{0.0f, 0.0f, 1.0f, GetFrame().GetData(2, 0)},
+	Resource2DGLfloat &frame = GetFrame();
+	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, frame.GetData(0, 0)},
+							{0.0f, 1.0f, 0.0f, frame.GetData(1, 0)},
+							{0.0f, 0.0f, 1.0f, frame.GetData(2, 0)},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 
 	if (state_ == State::LARGE)
