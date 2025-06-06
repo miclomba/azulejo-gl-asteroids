@@ -20,6 +20,17 @@ namespace
 	const std::string _ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
+std::unique_ptr<GL> GL::instance_ = nullptr;
+
+GL &GL::Get(int _argc, char *_argv[])
+{
+	if (!GL::instance_)
+	{
+		GL::instance_.reset(new GL(_argc, _argv));
+	}
+	return *GL::instance_;
+}
+
 GL::~GL() = default;
 
 void GL::TimerCallback(int _idx)

@@ -25,11 +25,11 @@ namespace asteroids
     {
     public:
         /**
-         * @brief Constructor for GL.
+         * @brief Singleton Get function.
          * @param _argc Number of command-line arguments.
          * @param _argv Command-line argument values.
          */
-        GL(int _argc, char *_argv[]);
+        static GL &Get(int _argc = 0, char *_argv[] = nullptr);
 
         /**
          * @brief Destructor for GL.
@@ -71,6 +71,13 @@ namespace asteroids
 
     private:
         /**
+         * @brief Constructor for GL.
+         * @param _argc Number of command-line arguments.
+         * @param _argv Command-line argument values.
+         */
+        GL(int _argc, char *_argv[]);
+
+        /**
          * @brief Timer callback function for periodic updates.
          * @param _idx Timer index.
          */
@@ -101,6 +108,7 @@ namespace asteroids
         void RegisterCallbacks() const;
 
         // Members
+        static std::unique_ptr<GL> instance_;
         GLWindow gameWindow_; /**< Handles window properties. */
     };
 
