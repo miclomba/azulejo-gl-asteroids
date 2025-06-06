@@ -45,6 +45,8 @@ namespace
 	const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
 	const std::string TRUE_VAL = "true";
 
+	std::vector<std::vector<GLfloat>> BUFFER({std::vector<GLfloat>(16)});
+
 	auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 	{ return std::make_unique<ResourceGLubyte>(); };
 	auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
@@ -126,17 +128,19 @@ void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed
 
 void Bullet::SetSMatrix()
 {
-	S_ = Resource2DGLfloat({{GetSpeed(), 0.0f, 0.0f, 0.0f},
-							{0.0f, GetSpeed(), 0.0f, 0.0f},
-							{0.0f, 0.0f, GetSpeed(), 0.0f},
+	GLfloat speed = GetSpeed();
+	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
+							{0.0f, speed, 0.0f, 0.0f},
+							{0.0f, 0.0f, speed, 0.0f},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 }
 
 void Bullet::SetTMatrix()
 {
-	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, GetFrame().GetData(0, 0)},
-							{0.0f, 1.0f, 0.0f, GetFrame().GetData(1, 0)},
-							{0.0f, 0.0f, 1.0f, GetFrame().GetData(2, 0)},
+	Resource2DGLfloat &frame = GetFrame();
+	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, frame.GetData(0, 0)},
+							{0.0f, 1.0f, 0.0f, frame.GetData(1, 0)},
+							{0.0f, 0.0f, 1.0f, frame.GetData(2, 0)},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 }
 
@@ -149,8 +153,9 @@ void Bullet::SetBulletOutOfBounds()
 	GLfloat top = (1 / fabs(static_cast<GLfloat *>(projectionMatrix_.Data())[5]));
 	GLfloat bottom = -1 * top;
 
-	if ((GetFrame().GetData(0, 0) <= left - epsilon) || (GetFrame().GetData(0, 0) >= right + epsilon) ||
-		(GetFrame().GetData(1, 0) >= top + epsilon) || (GetFrame().GetData(1, 0) <= bottom - epsilon))
+	Resource2DGLfloat &frame = GetFrame();
+	if ((frame.GetData(0, 0) <= left - epsilon) || (frame.GetData(0, 0) >= right + epsilon) ||
+		(frame.GetData(1, 0) >= top + epsilon) || (frame.GetData(1, 0) <= bottom - epsilon))
 	{
 		outOfBounds_ = true;
 	}
@@ -188,9 +193,8 @@ void Bullet::Draw()
 		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data());
 	};
 
-	std::vector<std::vector<GLfloat>> buffer({std::vector<GLfloat>(16)});
-	glGetFloatv(GL_PROJECTION_MATRIX, buffer[0].data());
-	projectionMatrix_ = Resource2DGLfloat(buffer);
+	glGetFloatv(GL_PROJECTION_MATRIX, BUFFER[0].data());
+	projectionMatrix_ = Resource2DGLfloat(BUFFER);
 
 	glPushMatrix();
 
