@@ -35,10 +35,8 @@ AsteroidsConsumers::AsteroidsConsumers(std::shared_ptr<Asteroids> asteroids) : E
 																{ asteroids->Fire(); });
 	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
 																 { asteroids->ResetGame(); });
-	drawConsumer_ = std::make_shared<
-		EventConsumer<
-			void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>([asteroids](GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)
-																																   { asteroids->Draw(w_, h_, projOrtho_, projPerspective_); });
+	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
+																{ asteroids->Draw(); });
 	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
 															   { asteroids->Run(); });
 	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
@@ -74,10 +72,7 @@ std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetResetConsumer(
 	return resetConsumer_;
 }
 
-std::shared_ptr<
-	EventConsumer<
-		void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-AsteroidsConsumers::GetDrawConsumer()
+std::shared_ptr<EventConsumer<void()>> AsteroidsConsumers::GetDrawConsumer()
 {
 	return drawConsumer_;
 }

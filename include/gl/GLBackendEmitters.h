@@ -76,9 +76,7 @@ namespace asteroids
          * @brief Get the event emitter for the draw input.
          * @return Shared pointer to the event emitter.
          */
-        std::shared_ptr<events::EventEmitter<
-            void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-        GetDrawEmitter();
+        std::shared_ptr<events::EventEmitter<void()>> GetDrawEmitter();
 
         /**
          * @brief Get the event emitter for the run action.
@@ -108,10 +106,7 @@ namespace asteroids
         std::shared_ptr<events::EventEmitter<void(void)>> runEmitter_;
         std::shared_ptr<events::EventEmitter<void(void)>> serializeEmitter_;
         std::shared_ptr<events::EventEmitter<void(void)>> deserializeEmitter_;
-
-        std::shared_ptr<events::EventEmitter<
-            void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-            drawEmitter_;
+        std::shared_ptr<events::EventEmitter<void()>> drawEmitter_;
     };
 
 } // end namespace asteroids

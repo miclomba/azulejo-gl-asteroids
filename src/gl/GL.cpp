@@ -1,13 +1,11 @@
 #include "gl/GL.h"
 #include "gl/GLBackend.h"
-#include "gl/GLProjectionInfo.h"
 
 #include <algorithm>
 #include <string>
 
 using asteroids::GL;
 using asteroids::GLBackend;
-using asteroids::GLProjectionInfo;
 
 namespace
 {
@@ -70,11 +68,6 @@ void GL::DisplayFlush()
 	glutSwapBuffers();
 }
 
-GLProjectionInfo &GL::GetGameProjectionInfo()
-{
-	return gameProjectionInfo_;
-}
-
 void GL::RegisterCallbacks() const
 {
 	glutDisplayFunc(GLBackend::DisplayCallback);
@@ -114,13 +107,11 @@ void GL::InitClient() const
 
 void GL::Reshape(const int _w, const int _h)
 {
-	gameProjectionInfo_.SetWidth(_w);
-	gameProjectionInfo_.SetHeight(_h);
-
 	GLdouble projection[16];
 
 	//========================= DEFINE VIEWPORT ==============================*/
 	glViewport(0, 0, _w, _h);
+	glScissor(0, 0, _w, _h);
 	/*========================= ORTHO PROJECTION =============================*/
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -133,8 +124,7 @@ void GL::Reshape(const int _w, const int _h)
 				10.0 * ((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
 
 	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	for (GLint i = 0; i < 16; i++)
-		gameProjectionInfo_.SetProjOrthoMatrix(projection[i], i);
+	glLoadMatrixd(projection);
 	/*========================= REDISPLAY ====================================*/
 	glMatrixMode(GL_MODELVIEW);
 	glutPostRedisplay();

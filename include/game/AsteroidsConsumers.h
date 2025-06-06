@@ -78,10 +78,7 @@ namespace asteroids
          * @brief Getter for the draw event consumer.
          * @return An event consumer.
          */
-        std::shared_ptr<
-            events::EventConsumer<
-                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-        GetDrawConsumer();
+        std::shared_ptr<events::EventConsumer<void()>> GetDrawConsumer();
 
         /**
          * @brief Getter for the run event consumer.
@@ -110,10 +107,7 @@ namespace asteroids
         std::shared_ptr<events::EventConsumer<void(void)>> runConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> serializeConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> deserializeConsumer_;
-        std::shared_ptr<
-            events::EventConsumer<
-                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
-            drawConsumer_;
+        std::shared_ptr<events::EventConsumer<void()>> drawConsumer_;
     };
 
 } // end namespace asteroids

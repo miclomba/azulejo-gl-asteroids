@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "configuration/config.h"
-#include "gl/GLProjectionInfo.h"
 
 namespace asteroids
 {
@@ -63,12 +62,6 @@ namespace asteroids
          */
         void Run();
 
-        /**
-         * @brief Get the game window instance.
-         * @return Reference to the GLProjectionInfo instance.
-         */
-        GLProjectionInfo &GetGameProjectionInfo();
-
     private:
         /**
          * @brief Constructor for GL.
@@ -109,7 +102,6 @@ namespace asteroids
 
         // Members
         static std::unique_ptr<GL> instance_;
-        GLProjectionInfo gameProjectionInfo_; /**< Handles window properties. */
     };
 
 } // end asteroids

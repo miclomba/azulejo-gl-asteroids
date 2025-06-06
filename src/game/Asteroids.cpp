@@ -393,20 +393,14 @@ void Asteroids::DrawGameInfo()
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }
 
-void Asteroids::Draw(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)
+void Asteroids::Draw()
 {
-	glViewport(0, 0, w_, h_);
-	glScissor(0, 0, w_, h_);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glLoadMatrixf(projOrtho_.data());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	DrawGLEntities();
 	DrawGameInfo();
 	DetermineCollisions();
 	ResetThrustAndRotation();
-	glLoadIdentity();
 }
 
 void Asteroids::ClearRocks()

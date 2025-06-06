@@ -84,12 +84,8 @@ namespace asteroids
 
         /**
          * @brief Render the game entities.
-         * @param w_ the width of the window
-         * @param h_ the height of the window
-         * @param projOrtho_ the orthogonal projection matrix
-         * @param projPerspective_ the perspective projection matrix
          */
-        void Draw(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_);
+        void Draw() override;
 
         /**
          * @brief Fire a bullet from the ship.
