@@ -108,7 +108,6 @@ namespace asteroids
         void KeyboardUpdateState();
 
         // Members
-        std::unique_ptr<GL> gl_;            /**< Graphics library wrapper. */
         std::array<bool, 256> keysPressed_; /** @brief Array to track pressed keys. */
         GLBackendEmitters emitters_;        /**< Handles input events and actions. */
 
