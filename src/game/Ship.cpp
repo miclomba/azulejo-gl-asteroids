@@ -57,6 +57,9 @@ namespace
 	const std::string BULLET_FIRED_KEY = "bullet_fired";
 	const std::string TRUE_VAL = "true";
 
+	GLfloat PROJECTION_BUFFER[16];
+	GLint BULLET_COUNT = 5;
+
 	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
 	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
 
@@ -218,14 +221,13 @@ void Ship::MoveShip()
 
 void Ship::WrapAroundMoveShip()
 {
-	GLfloat projectionMatrix[16];
-	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
 
 	GLfloat epsilon = 0.5f;
 
-	GLfloat right = (1 / fabs(projectionMatrix[0]));
+	GLfloat right = (1 / fabs(PROJECTION_BUFFER[0]));
 	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(projectionMatrix[5]));
+	GLfloat top = (1 / fabs(PROJECTION_BUFFER[5]));
 	GLfloat bottom = -1 * top;
 
 	if (GetFrame().GetData(0, 0) <= left - epsilon)
@@ -361,7 +363,7 @@ void Ship::AddBullet(const SharedEntity &bullet)
 
 GLint Ship::BulletNumber()
 {
-	return 5;
+	return BULLET_COUNT;
 }
 
 void Ship::Fire()
