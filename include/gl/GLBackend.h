@@ -9,9 +9,9 @@
 #include <array>
 #include <memory>
 
-#include "Events/EventEmitter.h"
 #include "configuration/config.h"
 #include "gl/GL.h"
+#include "gl/GLBackendEmitters.h"
 
 namespace asteroids
 {
@@ -37,24 +37,9 @@ namespace asteroids
          */
         virtual ~GLBackend();
 
-        /**
-         * @brief Deleted copy constructor.
-         */
         GLBackend(const GLBackend &) = delete;
-
-        /**
-         * @brief Deleted move constructor.
-         */
         GLBackend(GLBackend &&) = delete;
-
-        /**
-         * @brief Deleted copy assignment operator.
-         */
         GLBackend &operator=(const GLBackend &) = delete;
-
-        /**
-         * @brief Deleted move assignment operator.
-         */
         GLBackend &operator=(GLBackend &&) = delete;
 
         /**
@@ -63,24 +48,10 @@ namespace asteroids
         void Run();
 
         /**
-         * @brief Get the event emitter for the left arrow input.
-         * @return Shared pointer to the event emitter.
+         * @brief Get the event emitters associated with the game.
+         * @return Reference to the GLBackendEmitters instance.
          */
-        std::shared_ptr<events::EventEmitter<void(void)>> GetLeftArrowEmitter();
-
-        /**
-         * @brief Get the event emitter for the right arrow input.
-         * @return Shared pointer to the event emitter.
-         */
-        std::shared_ptr<events::EventEmitter<void(void)>> GetRightArrowEmitter();
-
-        std::shared_ptr<events::EventEmitter<void(void)>> GetThrustEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetFireEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetResetEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetDrawEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetRunEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetSerializeEmitter();
-        std::shared_ptr<events::EventEmitter<void(void)>> GetDeserializeEmitter();
+        GLBackendEmitters &GetEmitters();
 
         static void DisplayWrapper();
         static void ReshapeWrapper(const int _w, const int _h);
@@ -90,6 +61,8 @@ namespace asteroids
     private:
         /** @brief Pointer to the callback instance for static functions. */
         static GLBackend *callbackInstance_;
+
+        GLBackendEmitters emitters_; /**< Handles input events and actions. */
 
         /**
          * @brief GLUT display function.
@@ -127,17 +100,6 @@ namespace asteroids
         // Members
         std::unique_ptr<GL> gl_;            /**< Graphics library wrapper. */
         std::array<bool, 256> keysPressed_; /** @brief Array to track pressed keys. */
-
-        /** @brief Event emitters for various game actions. */
-        std::shared_ptr<events::EventEmitter<void(void)>> leftArrowEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> rightArrowEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> thrustEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> fireEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> resetEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> drawEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> runEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> serializeEmitter_;
-        std::shared_ptr<events::EventEmitter<void(void)>> deserializeEmitter_;
     };
 
 } // end asteroids

@@ -5,11 +5,12 @@
 #include <string>
 #include <utility>
 
-#include "Events/EventEmitter.h"
 #include "gl/GL.h"
+#include "gl/GLBackendEmitters.h"
 
 using asteroids::GL;
 using asteroids::GLBackend;
+using asteroids::GLBackendEmitters;
 using events::EventEmitter;
 
 namespace
@@ -36,24 +37,19 @@ GLBackend::GLBackend(int _argc, char *_argv[])
 	std::fill(keysPressed_.begin(), keysPressed_.end(), false);
 
 	gl_ = std::make_unique<GL>(_argc, _argv);
-
-	leftArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	rightArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	thrustEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	drawEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	runEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	serializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	deserializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 }
 
 void GLBackend::Run()
 {
-	runEmitter_->Signal()();
+	emitters_.GetRunEmitter()->Signal()();
 
 	gl_->Run();
 };
+
+GLBackendEmitters &GLBackend::GetEmitters()
+{
+	return emitters_;
+}
 
 void GLBackend::DisplayWrapper()
 {
@@ -81,7 +77,7 @@ void GLBackend::Display()
 
 	gl_->DisplayClear();
 
-	drawEmitter_->Signal()();
+	emitters_.GetDrawEmitter()->Signal()();
 
 	gl_->DisplayFlush();
 }
@@ -110,74 +106,29 @@ void GLBackend::KeyboardUpdateState()
 			switch (i)
 			{
 			case 's':
-				leftArrowEmitter_->Signal()();
+				emitters_.GetLeftArrowEmitter()->Signal()();
 				break;
 			case 'f':
-				rightArrowEmitter_->Signal()();
+				emitters_.GetRightArrowEmitter()->Signal()();
 				break;
 			case 'e':
-				thrustEmitter_->Signal()();
+				emitters_.GetThrustEmitter()->Signal()();
 				break;
 			case 'j':
-				fireEmitter_->Signal()();
+				emitters_.GetFireEmitter()->Signal()();
 				break;
 			case 'x':
-				resetEmitter_->Signal()();
+				emitters_.GetResetEmitter()->Signal()();
 				break;
 			case 'u':
-				serializeEmitter_->Signal()();
+				emitters_.GetSerializeEmitter()->Signal()();
 				break;
 			case 'i':
-				deserializeEmitter_->Signal()();
+				emitters_.GetDeserializeEmitter()->Signal()();
 				break;
 			default:
 				break;
 			}
 		}
 	}
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetLeftArrowEmitter()
-{
-	return leftArrowEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetRightArrowEmitter()
-{
-	return rightArrowEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetThrustEmitter()
-{
-	return thrustEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetFireEmitter()
-{
-	return fireEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetResetEmitter()
-{
-	return resetEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetDrawEmitter()
-{
-	return drawEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetRunEmitter()
-{
-	return runEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetSerializeEmitter()
-{
-	return serializeEmitter_;
-}
-
-std::shared_ptr<EventEmitter<void(void)>> GLBackend::GetDeserializeEmitter()
-{
-	return deserializeEmitter_;
 }

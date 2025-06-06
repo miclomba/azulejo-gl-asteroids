@@ -5,9 +5,11 @@
 
 #include "game/Asteroids.h"
 #include "gl/GLBackend.h"
+#include "gl/GLBackendEmitters.h"
 
 using asteroids::Asteroids;
 using asteroids::GLBackend;
+using asteroids::GLBackendEmitters;
 using events::EventChannel;
 
 namespace
@@ -34,23 +36,24 @@ namespace
 
 void RegisterEvents(Asteroids &frontend, GLBackend &backend, EventChannel &channel)
 {
-	channel.RegisterEmitter(LEFT_EVENT, backend.GetLeftArrowEmitter());
+	GLBackendEmitters &emitters = backend.GetEmitters();
+	channel.RegisterEmitter(LEFT_EVENT, emitters.GetLeftArrowEmitter());
 	channel.RegisterConsumer(LEFT_ACTION, LEFT_EVENT, frontend.GetLeftArrowConsumer());
-	channel.RegisterEmitter(RIGHT_EVENT, backend.GetRightArrowEmitter());
+	channel.RegisterEmitter(RIGHT_EVENT, emitters.GetRightArrowEmitter());
 	channel.RegisterConsumer(RIGHT_ACTION, RIGHT_EVENT, frontend.GetRightArrowConsumer());
-	channel.RegisterEmitter(THRUST_EVENT, backend.GetThrustEmitter());
+	channel.RegisterEmitter(THRUST_EVENT, emitters.GetThrustEmitter());
 	channel.RegisterConsumer(THRUST_ACTION, THRUST_EVENT, frontend.GetThrustConsumer());
-	channel.RegisterEmitter(FIRE_EVENT, backend.GetFireEmitter());
+	channel.RegisterEmitter(FIRE_EVENT, emitters.GetFireEmitter());
 	channel.RegisterConsumer(FIRE_ACTION, FIRE_EVENT, frontend.GetFireConsumer());
-	channel.RegisterEmitter(RESET_EVENT, backend.GetResetEmitter());
+	channel.RegisterEmitter(RESET_EVENT, emitters.GetResetEmitter());
 	channel.RegisterConsumer(RESET_ACTION, RESET_EVENT, frontend.GetResetConsumer());
-	channel.RegisterEmitter(DRAW_EVENT, backend.GetDrawEmitter());
+	channel.RegisterEmitter(DRAW_EVENT, emitters.GetDrawEmitter());
 	channel.RegisterConsumer(DRAW_ACTION, DRAW_EVENT, frontend.GetDrawConsumer());
-	channel.RegisterEmitter(RUN_EVENT, backend.GetRunEmitter());
+	channel.RegisterEmitter(RUN_EVENT, emitters.GetRunEmitter());
 	channel.RegisterConsumer(RUN_ACTION, RUN_EVENT, frontend.GetRunConsumer());
-	channel.RegisterEmitter(SERIALIZE_EVENT, backend.GetSerializeEmitter());
+	channel.RegisterEmitter(SERIALIZE_EVENT, emitters.GetSerializeEmitter());
 	channel.RegisterConsumer(SERIALIZE_ACTION, SERIALIZE_EVENT, frontend.GetSerializeConsumer());
-	channel.RegisterEmitter(DESERIALIZE_EVENT, backend.GetDeserializeEmitter());
+	channel.RegisterEmitter(DESERIALIZE_EVENT, emitters.GetDeserializeEmitter());
 	channel.RegisterConsumer(DESERIALIZE_ACTION, DESERIALIZE_EVENT, frontend.GetDeserializeConsumer());
 }
 
