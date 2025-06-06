@@ -1,6 +1,6 @@
 /**
- * @file GLBackendWindow.h
- * @brief Declaration of the GLBackendWindow class for managing window properties in the Asteroids application.
+ * @file GLWindow.h
+ * @brief Declaration of the GLWindow class for managing window properties in the Asteroids application.
  */
 
 #ifndef asteroids_gl_backend_window_h
@@ -16,28 +16,28 @@ namespace asteroids
 {
 
     /**
-     * @class GLBackendWindow
+     * @class GLWindow
      * @brief A class for managing the properties of the game window in the Astreroids application.
      *
      * This class provides methods for retrieving and modifying window dimensions and projection matrices.
      */
-    class ASTEROIDS_DLL_EXPORT GLBackendWindow : public entity::Entity
+    class ASTEROIDS_DLL_EXPORT GLWindow : public entity::Entity
     {
     public:
         /**
-         * @brief Default constructor for GLBackendWindow.
+         * @brief Default constructor for GLWindow.
          */
-        GLBackendWindow();
+        GLWindow();
 
         /**
-         * @brief Destructor for GLBackendWindow.
+         * @brief Destructor for GLWindow.
          */
-        virtual ~GLBackendWindow();
+        virtual ~GLWindow();
 
-        GLBackendWindow(const GLBackendWindow &) = delete;
-        GLBackendWindow(GLBackendWindow &&) = delete;
-        GLBackendWindow &operator=(const GLBackendWindow &) = delete;
-        GLBackendWindow &operator=(GLBackendWindow &&) = delete;
+        GLWindow(const GLWindow &) = delete;
+        GLWindow(GLWindow &&) = delete;
+        GLWindow &operator=(const GLWindow &) = delete;
+        GLWindow &operator=(GLWindow &&) = delete;
 
         /**
          * @brief Get the width of the window.

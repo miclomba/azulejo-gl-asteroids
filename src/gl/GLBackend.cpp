@@ -7,12 +7,12 @@
 
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
-#include "gl/GLBackendWindow.h"
+#include "gl/GLWindow.h"
 
 using asteroids::GL;
 using asteroids::GLBackend;
 using asteroids::GLBackendEmitters;
-using asteroids::GLBackendWindow;
+using asteroids::GLWindow;
 using events::EventEmitter;
 
 namespace
@@ -53,11 +53,6 @@ GLBackendEmitters &GLBackend::GetEmitters()
 	return emitters_;
 }
 
-GLBackendWindow &GLBackend::GetGameWindow()
-{
-	return gl_->GetGameWindow();
-}
-
 void GLBackend::DisplayWrapper()
 {
 	callbackInstance_->Display();
@@ -84,7 +79,7 @@ void GLBackend::Display()
 
 	gl_->DisplayClear();
 
-	GLBackendWindow &gameWindow = gl_->GetGameWindow();
+	GLWindow &gameWindow = gl_->GetGameWindow();
 	emitters_.GetDrawEmitter()->Signal()(gameWindow.GetWidth(), gameWindow.GetHeight(), gameWindow.GetProjOrthoMatrix(), gameWindow.GetProjPerspectiveMatrix());
 
 	gl_->DisplayFlush();

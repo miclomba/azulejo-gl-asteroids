@@ -12,7 +12,6 @@
 #include "configuration/config.h"
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
-#include "gl/GLBackendWindow.h"
 
 namespace asteroids
 {
@@ -61,17 +60,6 @@ namespace asteroids
 
     private:
         /**
-         * @brief Get the game window instance.
-         * @return Reference to the GLBackendWindow instance.
-         */
-        GLBackendWindow &GetGameWindow();
-
-        /** @brief Pointer to the callback instance for static functions. */
-        static GLBackend *callbackInstance_;
-
-        GLBackendEmitters emitters_; /**< Handles input events and actions. */
-
-        /**
          * @brief GLUT display function.
          */
         void Display();
@@ -107,6 +95,10 @@ namespace asteroids
         // Members
         std::unique_ptr<GL> gl_;            /**< Graphics library wrapper. */
         std::array<bool, 256> keysPressed_; /** @brief Array to track pressed keys. */
+        GLBackendEmitters emitters_;        /**< Handles input events and actions. */
+
+        /** @brief Pointer to the callback instance for static functions. */
+        static GLBackend *callbackInstance_;
     };
 
 } // end asteroids

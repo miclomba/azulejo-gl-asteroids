@@ -1,13 +1,13 @@
 #include "gl/GL.h"
 #include "gl/GLBackend.h"
-#include "gl/GLBackendWindow.h"
+#include "gl/GLWindow.h"
 
 #include <algorithm>
 #include <string>
 
 using asteroids::GL;
 using asteroids::GLBackend;
-using asteroids::GLBackendWindow;
+using asteroids::GLWindow;
 
 namespace
 {
@@ -59,7 +59,7 @@ void GL::DisplayFlush()
 	glutSwapBuffers();
 }
 
-GLBackendWindow &GL::GetGameWindow()
+GLWindow &GL::GetGameWindow()
 {
 	return gameWindow_;
 }
