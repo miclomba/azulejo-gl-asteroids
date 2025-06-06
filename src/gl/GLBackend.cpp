@@ -6,10 +6,11 @@
 #include <utility>
 
 #include "Events/EventEmitter.h"
+#include "gl/GL.h"
 
-using events::EventEmitter;
-
+using asteroids::GL;
 using asteroids::GLBackend;
+using events::EventEmitter;
 
 namespace
 {
@@ -22,23 +23,10 @@ namespace
 } // end namespace
 
 /*======================== CALLBACK POINTER ==================================*/
-GLBackend *GLBackend::callbackInstance_(nullptr);
+GLBackend *GLBackend::callbackInstance_ = nullptr;
 /*============================================================================*/
 
 GLBackend::~GLBackend() = default;
-
-void GLBackend::TimerCallback(int _idx)
-{
-	switch (_idx)
-	{
-	case 0:
-		glutPostRedisplay();
-		glutTimerFunc(25, TimerCallback, 0);
-		break;
-	default:
-		break;
-	}
-}
 
 GLBackend::GLBackend(int _argc, char *_argv[])
 {
@@ -47,10 +35,7 @@ GLBackend::GLBackend(int _argc, char *_argv[])
 
 	std::fill(keysPressed_.begin(), keysPressed_.end(), false);
 
-	InitGlut(_argc, _argv);
-	RegisterCallbacks();
-	InitServer();
-	InitClient();
+	gl_ = std::make_unique<GL>(_argc, _argv);
 
 	leftArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	rightArrowEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
@@ -67,43 +52,8 @@ void GLBackend::Run()
 {
 	runEmitter_->Signal()();
 
-	glutMainLoop();
+	gl_->Run();
 };
-
-void GLBackend::RegisterCallbacks() const
-{
-	glutDisplayFunc(DisplayWrapper);
-	glutReshapeFunc(ReshapeWrapper);
-	glutKeyboardFunc(KeyboardWrapper);
-	glutKeyboardUpFunc(KeyboardUpWrapper);
-}
-
-void GLBackend::InitGlut(int _argc, char *_argv[]) const
-{
-	glutInit(&_argc, _argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowPosition(INIT_WIN_X, INIT_WIN_Y);
-	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	glutCreateWindow(ASTEROIDS_TITLE.c_str());
-}
-
-void GLBackend::InitServer() const
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
-	glDepthRange(0, 1);
-	glEnable(GL_AUTO_NORMAL);
-	glEnable(GL_NORMALIZE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-}
-
-void GLBackend::InitClient() const
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-}
 
 void GLBackend::DisplayWrapper()
 {
@@ -129,32 +79,16 @@ void GLBackend::Display()
 {
 	KeyboardUpdateState();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gl_->DisplayClear();
 
 	drawEmitter_->Signal()();
 
-	// RENDER
-	glFlush();
-	glutSwapBuffers();
+	gl_->DisplayFlush();
 }
 
 void GLBackend::Reshape(const int _w, const int _h) const
 {
-	//========================= DEFINE VIEWPORT ==============================*/
-	glViewport(0, 0, _w, _h);
-	/*========================= ORTHO PROJECTION =============================*/
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	if (_w <= _h)
-		glOrtho(-10.0, 10.0, -10.0 * ((GLfloat)_h / (GLfloat)_w),
-				10.0 * ((GLfloat)_h / (GLfloat)_w), 10, -10);
-	else
-		glOrtho(-10.0 * ((GLfloat)_w / (GLfloat)_h),
-				10.0 * ((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
-	/*========================= REDISPLAY ====================================*/
-	glMatrixMode(GL_MODELVIEW);
-	glutPostRedisplay();
+	gl_->Reshape(_w, _h);
 }
 
 void GLBackend::Keyboard(const unsigned char _chr, const int _x, const int _y)

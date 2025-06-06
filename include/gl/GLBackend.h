@@ -11,6 +11,7 @@
 
 #include "Events/EventEmitter.h"
 #include "configuration/config.h"
+#include "gl/GL.h"
 
 namespace asteroids
 {
@@ -34,7 +35,7 @@ namespace asteroids
         /**
          * @brief Destructor for the GLBackend class.
          */
-        ~GLBackend();
+        virtual ~GLBackend();
 
         /**
          * @brief Deleted copy constructor.
@@ -62,12 +63,6 @@ namespace asteroids
         void Run();
 
         /**
-         * @brief GLUT timer callback function.
-         * @param _idx Timer index.
-         */
-        static void TimerCallback(int _idx);
-
-        /**
          * @brief Get the event emitter for the left arrow input.
          * @return Shared pointer to the event emitter.
          */
@@ -87,41 +82,51 @@ namespace asteroids
         std::shared_ptr<events::EventEmitter<void(void)>> GetSerializeEmitter();
         std::shared_ptr<events::EventEmitter<void(void)>> GetDeserializeEmitter();
 
+        static void DisplayWrapper();
+        static void ReshapeWrapper(const int _w, const int _h);
+        static void KeyboardWrapper(unsigned char _chr, int _x, int _y);
+        static void KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y);
+
+    private:
         /** @brief Pointer to the callback instance for static functions. */
         static GLBackend *callbackInstance_;
 
-    private:
         /**
-         * @brief Register GLUT callbacks.
+         * @brief GLUT display function.
          */
-        void RegisterCallbacks() const;
-
-        /**
-         * @brief Initialize GLUT.
-         * @param _argc The argument count.
-         * @param _argv The argument vector.
-         */
-        void InitGlut(int _argc, char *_argv[]) const;
-
-        void InitServer() const;
-        void InitClient() const;
-
         void Display();
-        static void DisplayWrapper();
 
+        /**
+         * @brief GLUT reshape function.
+         * @param _w Window width.
+         * @param _h Window height.
+         */
         void Reshape(const int _w, const int _h) const;
-        static void ReshapeWrapper(const int _w, const int _h);
 
+        /**
+         * @brief GLUT keyboard input function.
+         * @param _chr Pressed character.
+         * @param _x X-coordinate of the mouse.
+         * @param _y Y-coordinate of the mouse.
+         */
         void Keyboard(const unsigned char _chr, const int _x, const int _y);
-        static void KeyboardWrapper(unsigned char _chr, int _x, int _y);
 
+        /**
+         * @brief GLUT keyboard release function.
+         * @param _chr Released character.
+         * @param _x X-coordinate of the mouse.
+         * @param _y Y-coordinate of the mouse.
+         */
         void KeyboardUp(const unsigned char _chr, const int _x, const int _y);
-        static void KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y);
 
+        /**
+         * @brief Update the keyboard state.
+         */
         void KeyboardUpdateState();
 
-        /** @brief Array to track pressed keys. */
-        std::array<bool, 256> keysPressed_;
+        // Members
+        std::unique_ptr<GL> gl_;            /**< Graphics library wrapper. */
+        std::array<bool, 256> keysPressed_; /** @brief Array to track pressed keys. */
 
         /** @brief Event emitters for various game actions. */
         std::shared_ptr<events::EventEmitter<void(void)>> leftArrowEmitter_;

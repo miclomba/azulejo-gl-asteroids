@@ -12,8 +12,6 @@ using events::EventChannel;
 
 namespace
 {
-	const int TIME = 25;
-	const int VAL = 0;
 	const std::string LEFT_EVENT = "left_event";
 	const std::string LEFT_ACTION = "left_action";
 	const std::string RIGHT_EVENT = "right_event";
@@ -59,7 +57,6 @@ void RegisterEvents(Asteroids &frontend, GLBackend &backend, EventChannel &chann
 int main(int _argc, char *_argv[])
 {
 	GLBackend backend(_argc, _argv);
-	glutTimerFunc(TIME, backend.TimerCallback, VAL);
 
 	Asteroids frontend;
 	EventChannel channel;
