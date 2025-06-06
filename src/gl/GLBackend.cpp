@@ -7,12 +7,12 @@
 
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
-#include "gl/GLWindow.h"
+#include "gl/GLProjectionInfo.h"
 
 using asteroids::GL;
 using asteroids::GLBackend;
 using asteroids::GLBackendEmitters;
-using asteroids::GLWindow;
+using asteroids::GLProjectionInfo;
 using events::EventEmitter;
 
 namespace
@@ -85,8 +85,8 @@ void GLBackend::Display()
 	GL &gl = GL::Get();
 	gl.DisplayClear();
 
-	GLWindow &gameWindow = gl.GetGameWindow();
-	emitters_.GetDrawEmitter()->Signal()(gameWindow.GetWidth(), gameWindow.GetHeight(), gameWindow.GetProjOrthoMatrix(), gameWindow.GetProjPerspectiveMatrix());
+	GLProjectionInfo &gameProjectionInfo = gl.GetGameProjectionInfo();
+	emitters_.GetDrawEmitter()->Signal()(gameProjectionInfo.GetWidth(), gameProjectionInfo.GetHeight(), gameProjectionInfo.GetProjOrthoMatrix(), gameProjectionInfo.GetProjPerspectiveMatrix());
 
 	gl.DisplayFlush();
 }

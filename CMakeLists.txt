@@ -70,9 +70,9 @@ add_executable("${PROJECT_NAME}"
 "src/gl/GL.cpp"
 "src/gl/GLBackend.cpp"
 "src/gl/GLBackendEmitters.cpp"
-"src/gl/GLWindow.cpp"
 "src/gl/GLEntity.cpp" 
 "src/gl/GLEntityTask.cpp"
+"src/gl/GLProjectionInfo.cpp"
 "main.cpp"
 )
 
