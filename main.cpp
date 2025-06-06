@@ -59,7 +59,7 @@ void RegisterEvents(Asteroids &frontend, GLBackend &backend, EventChannel &chann
 
 int main(int _argc, char *_argv[])
 {
-	GLBackend backend(_argc, _argv);
+	GLBackend &backend = GLBackend::Get(_argc, _argv);
 
 	Asteroids frontend;
 	EventChannel channel;

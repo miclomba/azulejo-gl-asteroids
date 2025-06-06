@@ -26,11 +26,11 @@ namespace asteroids
     {
     public:
         /**
-         * @brief Constructor for the GLBackend class.
-         * @param _argc The argument count passed to the GLUT initialization.
-         * @param _argv The argument vector passed to the GLUT initialization.
+         * @brief Singleton Get function.
+         * @param _argc Number of command-line arguments.
+         * @param _argv Command-line argument values.
          */
-        GLBackend(int _argc, char *_argv[]);
+        static GLBackend &Get(int _argc = 0, char *_argv[] = nullptr);
 
         /**
          * @brief Destructor for the GLBackend class.
@@ -75,6 +75,13 @@ namespace asteroids
 
     private:
         /**
+         * @brief Constructor for the GLBackend class.
+         * @param _argc The argument count passed to the GLUT initialization.
+         * @param _argv The argument vector passed to the GLUT initialization.
+         */
+        GLBackend(int _argc, char *_argv[]);
+
+        /**
          * @brief GLUT display function.
          */
         void Display();
@@ -112,7 +119,7 @@ namespace asteroids
         GLBackendEmitters emitters_;        /**< Handles input events and actions. */
 
         /** @brief Pointer to the callback instance for static functions. */
-        static GLBackend *callbackInstance_;
+        static std::unique_ptr<GLBackend> callbackInstance_;
     };
 
 } // end asteroids
