@@ -76,6 +76,9 @@ namespace
 	const std::vector<std::string> BULLET_RESOURCES = {"bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R"};
 	const std::vector<std::string> SHIP_RESOURCES = {"frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation"};
 
+	const std::string RESET = "Press X to RESET";
+	const std::string SCORE = "SCORE: ";
+
 	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
 	EntitySerializer *const Serializer = EntitySerializer::GetInstance();
 	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
@@ -378,15 +381,14 @@ void Asteroids::DrawGameInfo()
 
 	GLint i;
 	glRasterPos3f(7.5f, -9.0f, 0.0f);
-	char reset[16] = {'P', 'r', 'e', 's', 's', ' ', 'X', ' ', 't', 'o', ' ',
-					  'R', 'E', 'S', 'E', 'T'};
-	for (i = 0; i < 16; i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, reset[i]);
+
+	for (size_t i = 0; i < RESET.size(); ++i)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, RESET[i]);
 
 	glRasterPos3f(-12.0f, 9.0f, 0.0f);
-	char score[7] = {'S', 'C', 'O', 'R', 'E', ':', ' '};
-	for (i = 0; i < 7; i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, score[i]);
+
+	for (size_t i = 0; i < SCORE.size(); ++i)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, SCORE[i]);
 	char amount[4];
 	i = snprintf(amount, sizeof(amount), "%d", score_);
 	for (i = 0; i < 4; i++)
