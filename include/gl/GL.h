@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "configuration/config.h"
+#include "gl/GLBackendWindow.h"
 
 namespace asteroids
 {
@@ -62,6 +63,12 @@ namespace asteroids
          */
         void Run();
 
+        /**
+         * @brief Get the game window instance.
+         * @return Reference to the GLBackendWindow instance.
+         */
+        GLBackendWindow &GetGameWindow();
+
     private:
         /**
          * @brief Timer callback function for periodic updates.
@@ -92,6 +99,9 @@ namespace asteroids
          * @brief Register GLUT callbacks.
          */
         void RegisterCallbacks() const;
+
+        // Members
+        GLBackendWindow gameWindow_; /**< Handles window properties. */
     };
 
 } // end asteroids

@@ -1,5 +1,6 @@
 #include "gl/GLBackendEmitters.h"
 
+#include <array>
 #include <memory>
 #include <string>
 
@@ -26,10 +27,12 @@ GLBackendEmitters::GLBackendEmitters() : Entity()
 	thrustEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	fireEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	resetEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
-	drawEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	runEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	serializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
 	deserializeEmitter_ = std::make_shared<events::EventEmitter<void(void)>>();
+
+	drawEmitter_ = std::make_shared<events::EventEmitter<
+		void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>();
 }
 
 std::shared_ptr<EventEmitter<void(void)>> GLBackendEmitters::GetLeftArrowEmitter()
@@ -57,7 +60,9 @@ std::shared_ptr<events::EventEmitter<void(void)>> GLBackendEmitters::GetResetEmi
 	return resetEmitter_;
 }
 
-std::shared_ptr<events::EventEmitter<void(void)>> GLBackendEmitters::GetDrawEmitter()
+std::shared_ptr<EventEmitter<
+	void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
+GLBackendEmitters::GetDrawEmitter()
 {
 	return drawEmitter_;
 }

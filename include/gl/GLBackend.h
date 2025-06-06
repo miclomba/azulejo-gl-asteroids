@@ -12,6 +12,7 @@
 #include "configuration/config.h"
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
+#include "gl/GLBackendWindow.h"
 
 namespace asteroids
 {
@@ -59,6 +60,12 @@ namespace asteroids
         static void KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y);
 
     private:
+        /**
+         * @brief Get the game window instance.
+         * @return Reference to the GLBackendWindow instance.
+         */
+        GLBackendWindow &GetGameWindow();
+
         /** @brief Pointer to the callback instance for static functions. */
         static GLBackend *callbackInstance_;
 

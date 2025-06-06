@@ -1,6 +1,7 @@
 #include "game/Asteroids.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <future>
 #include <memory>
@@ -206,8 +207,10 @@ Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? s
 																{ this->Fire(); });
 	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
 																 { this->ResetGame(); });
-	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
-																{ this->Draw(); });
+	drawConsumer_ = std::make_shared<
+		EventConsumer<
+			void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>([this](GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)
+																																   { this->Draw(w_, h_, projOrtho_, projPerspective_); });
 	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
 															   { this->Run(); });
 	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([this]()
@@ -411,12 +414,20 @@ void Asteroids::DrawGameInfo()
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }
 
-void Asteroids::Draw()
+void Asteroids::Draw(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)
 {
+	glViewport(0, 0, w_, h_);
+	glScissor(0, 0, w_, h_);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glLoadMatrixf(projOrtho_.data());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	DrawGLEntities();
 	DrawGameInfo();
 	DetermineCollisions();
 	ResetThrustAndRotation();
+	glLoadIdentity();
 }
 
 void Asteroids::ClearRocks()
@@ -940,7 +951,10 @@ std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetResetConsumer()
 	return resetConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> Asteroids::GetDrawConsumer()
+std::shared_ptr<
+	EventConsumer<
+		void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
+Asteroids::GetDrawConsumer()
 {
 	return drawConsumer_;
 }

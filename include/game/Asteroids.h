@@ -116,7 +116,10 @@ namespace asteroids
          * @brief Getter for the draw event consumer.
          * @return An event consumer.
          */
-        std::shared_ptr<events::EventConsumer<void(void)>> GetDrawConsumer();
+        std::shared_ptr<
+            events::EventConsumer<
+                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
+        GetDrawConsumer();
 
         /**
          * @brief Getter for the run event consumer.
@@ -139,8 +142,12 @@ namespace asteroids
     private:
         /**
          * @brief Render the game entities.
+         * @param w_ the width of the window
+         * @param h_ the height of the window
+         * @param projOrtho_ the orthogonal projection matrix
+         * @param projPerspective_ the perspective projection matrix
          */
-        void Draw() override;
+        void Draw(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_);
 
         /**
          * @brief Fire a bullet from the ship.
@@ -371,10 +378,13 @@ namespace asteroids
         std::shared_ptr<events::EventConsumer<void(void)>> thrustConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> fireConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> resetConsumer_;
-        std::shared_ptr<events::EventConsumer<void(void)>> drawConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> runConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> serializeConsumer_;
         std::shared_ptr<events::EventConsumer<void(void)>> deserializeConsumer_;
+        std::shared_ptr<
+            events::EventConsumer<
+                void(GLint w_, GLint h_, const std::array<GLfloat, 16> &projOrtho_, const std::array<GLfloat, 16> &projPerspective_)>>
+            drawConsumer_;
     };
 
 } // end namespace asteroids
