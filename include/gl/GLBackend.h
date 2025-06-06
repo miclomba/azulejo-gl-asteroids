@@ -53,10 +53,25 @@ namespace asteroids
          */
         GLBackendEmitters &GetEmitters();
 
-        static void DisplayWrapper();
-        static void ReshapeWrapper(const int _w, const int _h);
-        static void KeyboardWrapper(unsigned char _chr, int _x, int _y);
-        static void KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y);
+        /**
+         * @brief Display callback for the underlying GL library.
+         */
+        static void DisplayCallback();
+
+        /**
+         * @brief Reshape callback for the underlying GL library.
+         */
+        static void ReshapeCallback(const int _w, const int _h);
+
+        /**
+         * @brief Keyboard callback for the underlying GL library.
+         */
+        static void KeyboardCallback(unsigned char _chr, int _x, int _y);
+
+        /**
+         * @brief KeyboardUp callback for the underlying GL library.
+         */
+        static void KeyboardUpCallback(const unsigned char _chr, const int _x, const int _y);
 
     private:
         /**

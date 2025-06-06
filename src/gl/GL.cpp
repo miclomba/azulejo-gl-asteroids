@@ -66,10 +66,10 @@ GLWindow &GL::GetGameWindow()
 
 void GL::RegisterCallbacks() const
 {
-	glutDisplayFunc(GLBackend::DisplayWrapper);
-	glutReshapeFunc(GLBackend::ReshapeWrapper);
-	glutKeyboardFunc(GLBackend::KeyboardWrapper);
-	glutKeyboardUpFunc(GLBackend::KeyboardUpWrapper);
+	glutDisplayFunc(GLBackend::DisplayCallback);
+	glutReshapeFunc(GLBackend::ReshapeCallback);
+	glutKeyboardFunc(GLBackend::KeyboardCallback);
+	glutKeyboardUpFunc(GLBackend::KeyboardUpCallback);
 }
 
 void GL::InitGlut(int _argc, char *_argv[]) const

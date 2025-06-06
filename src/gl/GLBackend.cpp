@@ -53,22 +53,22 @@ GLBackendEmitters &GLBackend::GetEmitters()
 	return emitters_;
 }
 
-void GLBackend::DisplayWrapper()
+void GLBackend::DisplayCallback()
 {
 	callbackInstance_->Display();
 }
 
-void GLBackend::ReshapeWrapper(const int _w, const int _h)
+void GLBackend::ReshapeCallback(const int _w, const int _h)
 {
 	callbackInstance_->Reshape(_w, _h);
 }
 
-void GLBackend::KeyboardWrapper(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::KeyboardCallback(const unsigned char _chr, const int _x, const int _y)
 {
 	callbackInstance_->Keyboard(_chr, _x, _y);
 }
 
-void GLBackend::KeyboardUpWrapper(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::KeyboardUpCallback(const unsigned char _chr, const int _x, const int _y)
 {
 	callbackInstance_->KeyboardUp(_chr, _x, _y);
 }
