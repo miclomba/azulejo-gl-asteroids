@@ -15,6 +15,7 @@ namespace
 	const int WIN_HEIGHT = 480;
 	const int INIT_WIN_X = 100;
 	const int INIT_WIN_Y = 100;
+	GLdouble PROJECTION_BUFFER[16];
 	const std::string _ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
@@ -107,8 +108,6 @@ void GL::InitClient() const
 
 void GL::Reshape(const int _w, const int _h)
 {
-	GLdouble projection[16];
-
 	//========================= DEFINE VIEWPORT ==============================*/
 	glViewport(0, 0, _w, _h);
 	glScissor(0, 0, _w, _h);
@@ -123,8 +122,8 @@ void GL::Reshape(const int _w, const int _h)
 		glOrtho(-10.0 * ((GLfloat)_w / (GLfloat)_h),
 				10.0 * ((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
 
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glLoadMatrixd(projection);
+	glGetDoublev(GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
+	glLoadMatrixd(PROJECTION_BUFFER);
 	/*========================= REDISPLAY ====================================*/
 	glMatrixMode(GL_MODELVIEW);
 	glutPostRedisplay();
