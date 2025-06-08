@@ -8,7 +8,8 @@
 using asteroids::GLEntity;
 using asteroids::GLEntityTask;
 
-GLEntityTask::GLEntityTask(std::function<GLEntity *()> lambda) : task_(std::make_shared<std::packaged_task<GLEntity *()>>(lambda))
+GLEntityTask::GLEntityTask(
+	std::function<GLEntity *()> lambda) : task_(std::make_shared<std::packaged_task<GLEntity *()>>(lambda))
 {
 }
 

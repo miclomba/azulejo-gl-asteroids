@@ -63,11 +63,22 @@ std::string Bullet::BulletPrefix()
 }
 
 Bullet::Bullet() : GLEntity(),
-				   bulletIndices_(ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4})),
-				   projectionMatrix_(Resource2DGLfloat(
-					   std::vector<std::vector<GLfloat>>(4, std::vector<GLfloat>(4)))),
+				   bulletIndices_(
+					   ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4})),
+				   projectionMatrix_(
+					   Resource2DGLfloat(
+						   std::vector<std::vector<GLfloat>>(4, std::vector<GLfloat>(4)))),
 
-				   bulletVertices_(Resource2DGLfloat({{-0.2f, -0.1f, 0.5f}, {0.2f, -0.0f, 0.5f}, {0.2f, 0.0f, 0.5f}, {-0.2f, 0.1f, 0.5f}, {-0.2f, -0.1f, 1.0f}, {0.2f, -0.0f, 1.0f}, {0.2f, 0.0f, 1.0f}, {-0.2f, 0.1f, 1.0f}}))
+				   bulletVertices_(
+					   Resource2DGLfloat(
+						   {{-0.2f, -0.1f, 0.5f},
+							{0.2f, -0.0f, 0.5f},
+							{0.2f, 0.0f, 0.5f},
+							{-0.2f, 0.1f, 0.5f},
+							{-0.2f, -0.1f, 1.0f},
+							{0.2f, -0.0f, 1.0f},
+							{0.2f, 0.0f, 1.0f},
+							{-0.2f, 0.1f, 1.0f}}))
 {
 }
 

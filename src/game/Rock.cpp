@@ -50,9 +50,30 @@ namespace
 
 	GLfloat PROJECTION_BUFFER[16];
 
-	const Resource2DGLfloat rockVerticesL({{-1.5f, -1.5f, 0.5f}, {1.5f, -1.5f, 0.5f}, {1.5f, 1.5f, 0.5f}, {-1.5f, 1.5f, 0.5f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}});
-	const Resource2DGLfloat rockVerticesM({{-1.0f, -1.0f, 0.5f}, {1.0f, -1.0f, 0.5f}, {1.0f, 1.0f, 0.5f}, {-1.0f, 1.0f, 0.5f}, {-0.75f, -0.75f, 1.0f}, {0.75f, -0.75f, 1.0f}, {0.75f, 0.75f, 1.0f}, {-0.75f, 0.75f, 1.0f}});
-	const Resource2DGLfloat rockVerticesS({{-0.5f, -0.5f, 0.5f}, {0.5f, -0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.25f, -0.25f, 1.0f}, {0.25f, -0.25f, 1.0f}, {0.25f, 0.25f, 1.0f}, {-0.25f, 0.25f, 1.0f}});
+	const Resource2DGLfloat rockVerticesL({{-1.5f, -1.5f, 0.5f},
+										   {1.5f, -1.5f, 0.5f},
+										   {1.5f, 1.5f, 0.5f},
+										   {-1.5f, 1.5f, 0.5f},
+										   {-1.0f, -1.0f, 1.0f},
+										   {1.0f, -1.0f, 1.0f},
+										   {1.0f, 1.0f, 1.0f},
+										   {-1.0f, 1.0f, 1.0f}});
+	const Resource2DGLfloat rockVerticesM({{-1.0f, -1.0f, 0.5f},
+										   {1.0f, -1.0f, 0.5f},
+										   {1.0f, 1.0f, 0.5f},
+										   {-1.0f, 1.0f, 0.5f},
+										   {-0.75f, -0.75f, 1.0f},
+										   {0.75f, -0.75f, 1.0f},
+										   {0.75f, 0.75f, 1.0f},
+										   {-0.75f, 0.75f, 1.0f}});
+	const Resource2DGLfloat rockVerticesS({{-0.5f, -0.5f, 0.5f},
+										   {0.5f, -0.5f, 0.5f},
+										   {0.5f, 0.5f, 0.5f},
+										   {-0.5f, 0.5f, 0.5f},
+										   {-0.25f, -0.25f, 1.0f},
+										   {0.25f, -0.25f, 1.0f},
+										   {0.25f, 0.25f, 1.0f},
+										   {-0.25f, 0.25f, 1.0f}});
 	ResourceGLubyte rockIndices({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4});
 
 	auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
@@ -94,15 +115,19 @@ void Rock::RegisterTabularizationResources(const std::string &key)
 		tabularizer->RegisterResource<GLubyte>(FormatKey(key + ROCK_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
 }
 
-Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : GLEntity(Resource2DGLfloat({{_x, 0.0f, 0.0f, 0.0f},
-																								 {_y, 0.0f, 0.0f, 0.0f},
-																								 {0.0f, 0.0f, 0.0f, 0.0f},
-																								 {1.0f, 0.0f, 0.0f, 0.0f}}),
-																			  Resource2DGLfloat({{1.0f, 0.0f, 0.0f, 0.0f},
-																								 {0.0f, 0.0f, 0.0f, 0.0f},
-																								 {0.0f, 0.0f, 0.0f, 0.0f},
-																								 {1.0f, 0.0f, 0.0f, 0.0f}})),
-																	 rockIndices_(ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4}))
+Rock::Rock(
+	const State _state,
+	const GLfloat _x,
+	const GLfloat _y) : GLEntity(Resource2DGLfloat({{_x, 0.0f, 0.0f, 0.0f},
+													{_y, 0.0f, 0.0f, 0.0f},
+													{0.0f, 0.0f, 0.0f, 0.0f},
+													{1.0f, 0.0f, 0.0f, 0.0f}}),
+								 Resource2DGLfloat({{1.0f, 0.0f, 0.0f, 0.0f},
+													{0.0f, 0.0f, 0.0f, 0.0f},
+													{0.0f, 0.0f, 0.0f, 0.0f},
+													{1.0f, 0.0f, 0.0f, 0.0f}})),
+						rockIndices_(
+							ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4}))
 {
 	state_ = _state;
 

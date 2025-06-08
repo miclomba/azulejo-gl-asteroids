@@ -22,25 +22,44 @@ namespace
 	const std::string ASTEROIDS_CONSUMERS_KEY = "AsteroidsConsumers";
 } // end namespace
 
-AsteroidsConsumers::AsteroidsConsumers(std::shared_ptr<Asteroids> asteroids) : Entity(),
-																			   leftArrowConsumer_(std::make_shared<Consumer>([asteroids]()
-																															 { asteroids->RotateLeft(); })),
-																			   rightArrowConsumer_(std::make_shared<Consumer>([asteroids]()
-																															  { asteroids->RotateRight(); })),
-																			   thrustConsumer_(std::make_shared<Consumer>([asteroids]()
-																														  { asteroids->Thrust(); })),
-																			   fireConsumer_(std::make_shared<Consumer>([asteroids]()
-																														{ asteroids->Fire(); })),
-																			   resetConsumer_(std::make_shared<Consumer>([asteroids]()
-																														 { asteroids->ResetGame(); })),
-																			   drawConsumer_(std::make_shared<Consumer>([asteroids]()
-																														{ asteroids->Draw(); })),
-																			   runConsumer_(std::make_shared<Consumer>([asteroids]()
-																													   { asteroids->Run(); })),
-																			   serializeConsumer_(std::make_shared<Consumer>([asteroids]()
-																															 { asteroids->Serialize(); })),
-																			   deserializeConsumer_(std::make_shared<Consumer>([asteroids]()
-																															   { asteroids->Deserialize(); }))
+AsteroidsConsumers::AsteroidsConsumers(
+	std::shared_ptr<Asteroids> asteroids) : Entity(),
+											leftArrowConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->RotateLeft(); })),
+											rightArrowConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->RotateRight(); })),
+											thrustConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Thrust(); })),
+											fireConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Fire(); })),
+											resetConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->ResetGame(); })),
+											drawConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Draw(); })),
+											runConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Run(); })),
+											serializeConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Serialize(); })),
+											deserializeConsumer_(
+												std::make_shared<Consumer>(
+													[asteroids]()
+													{ asteroids->Deserialize(); }))
 {
 	SetKey(ASTEROIDS_CONSUMERS_KEY);
 }
