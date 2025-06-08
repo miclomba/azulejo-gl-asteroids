@@ -40,6 +40,13 @@ namespace asteroids
         GLEntity();
 
         /**
+         * @brief Parameterized constructor.
+         * @param frame Matrix representing entity geometry
+         * @param unitVelocity Unit velocity matrix.
+         */
+        GLEntity(Resource2DGLfloat frame, Resource2DGLfloat unitVelocity);
+
+        /**
          * @brief Destructor for GLEntity.
          */
         virtual ~GLEntity();
@@ -182,10 +189,6 @@ namespace asteroids
         static void RegisterTabularizationResources(const std::string &key);
 
     protected:
-        Resource2DGLfloat S_; /**< Scale transformation matrix. */
-        Resource2DGLfloat T_; /**< Translation transformation matrix. */
-        Resource2DGLfloat R_; /**< Rotation transformation matrix. */
-
         /**
          * @brief Save the entity data to a property tree.
          * @param tree The property tree to save data into.
@@ -228,6 +231,11 @@ namespace asteroids
         GLfloat velocityAngle_ = 0.0; /**< Velocity angle. */
         GLfloat speed_ = 0.0;         /**< Speed of the entity. */
         GLfloat mass_ = 1.0;          /**< Mass of the entity. */
+
+    protected:
+        Resource2DGLfloat S_; /**< Scale transformation matrix. */
+        Resource2DGLfloat T_; /**< Translation transformation matrix. */
+        Resource2DGLfloat R_; /**< Rotation transformation matrix. */
     };
 
 } // end asteroids

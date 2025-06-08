@@ -15,59 +15,59 @@ using asteroids::Asteroids;
 using asteroids::AsteroidsConsumers;
 using entity::Entity;
 using events::EventConsumer;
+using Consumer = EventConsumer<void(void)>;
 
 namespace
 {
 	const std::string ASTEROIDS_CONSUMERS_KEY = "AsteroidsConsumers";
 } // end namespace
 
-AsteroidsConsumers::AsteroidsConsumers(std::shared_ptr<Asteroids> asteroids) : Entity()
+AsteroidsConsumers::AsteroidsConsumers(std::shared_ptr<Asteroids> asteroids) : Entity(),
+																			   leftArrowConsumer_(std::make_shared<Consumer>([asteroids]()
+																															 { asteroids->RotateLeft(); })),
+																			   rightArrowConsumer_(std::make_shared<Consumer>([asteroids]()
+																															  { asteroids->RotateRight(); })),
+																			   thrustConsumer_(std::make_shared<Consumer>([asteroids]()
+																														  { asteroids->Thrust(); })),
+																			   fireConsumer_(std::make_shared<Consumer>([asteroids]()
+																														{ asteroids->Fire(); })),
+																			   resetConsumer_(std::make_shared<Consumer>([asteroids]()
+																														 { asteroids->ResetGame(); })),
+																			   drawConsumer_(std::make_shared<Consumer>([asteroids]()
+																														{ asteroids->Draw(); })),
+																			   runConsumer_(std::make_shared<Consumer>([asteroids]()
+																													   { asteroids->Run(); })),
+																			   serializeConsumer_(std::make_shared<Consumer>([asteroids]()
+																															 { asteroids->Serialize(); })),
+																			   deserializeConsumer_(std::make_shared<Consumer>([asteroids]()
+																															   { asteroids->Deserialize(); }))
 {
 	SetKey(ASTEROIDS_CONSUMERS_KEY);
-
-	leftArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																	 { asteroids->RotateLeft(); });
-	rightArrowConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																	  { asteroids->RotateRight(); });
-	thrustConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																  { asteroids->Thrust(); });
-	fireConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																{ asteroids->Fire(); });
-	resetConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																 { asteroids->ResetGame(); });
-	drawConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																{ asteroids->Draw(); });
-	runConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-															   { asteroids->Run(); });
-	serializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																	 { asteroids->Serialize(); });
-	deserializeConsumer_ = std::make_shared<EventConsumer<void(void)>>([asteroids]()
-																	   { asteroids->Deserialize(); });
 }
 
 AsteroidsConsumers::~AsteroidsConsumers() = default;
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetLeftArrowConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetLeftArrowConsumer()
 {
 	return leftArrowConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetRightArrowConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetRightArrowConsumer()
 {
 	return rightArrowConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetThrustConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetThrustConsumer()
 {
 	return thrustConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetFireConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetFireConsumer()
 {
 	return fireConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetResetConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetResetConsumer()
 {
 	return resetConsumer_;
 }
@@ -77,17 +77,17 @@ std::shared_ptr<EventConsumer<void()>> AsteroidsConsumers::GetDrawConsumer()
 	return drawConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetRunConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetRunConsumer()
 {
 	return runConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetSerializeConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetSerializeConsumer()
 {
 	return serializeConsumer_;
 }
 
-std::shared_ptr<EventConsumer<void(void)>> AsteroidsConsumers::GetDeserializeConsumer()
+std::shared_ptr<Consumer> AsteroidsConsumers::GetDeserializeConsumer()
 {
 	return deserializeConsumer_;
 }

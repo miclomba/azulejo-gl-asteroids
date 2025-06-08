@@ -94,7 +94,15 @@ void Rock::RegisterTabularizationResources(const std::string &key)
 		tabularizer->RegisterResource<GLubyte>(FormatKey(key + ROCK_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
 }
 
-Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : Rock()
+Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : GLEntity(Resource2DGLfloat({{_x, 0.0f, 0.0f, 0.0f},
+																								 {_y, 0.0f, 0.0f, 0.0f},
+																								 {0.0f, 0.0f, 0.0f, 0.0f},
+																								 {1.0f, 0.0f, 0.0f, 0.0f}}),
+																			  Resource2DGLfloat({{1.0f, 0.0f, 0.0f, 0.0f},
+																								 {0.0f, 0.0f, 0.0f, 0.0f},
+																								 {0.0f, 0.0f, 0.0f, 0.0f},
+																								 {1.0f, 0.0f, 0.0f, 0.0f}})),
+																	 rockIndices_(ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4}))
 {
 	state_ = _state;
 
@@ -112,18 +120,6 @@ Rock::Rock(const State _state, const GLfloat _x, const GLfloat _y) : Rock()
 		rockVertices_ = rockVerticesM;
 	else
 		rockVertices_ = rockVerticesS;
-
-	rockIndices_ = rockIndices;
-
-	GetFrame() = Resource2DGLfloat({{_x, 0.0f, 0.0f, 0.0f},
-									{_y, 0.0f, 0.0f, 0.0f},
-									{0.0f, 0.0f, 0.0f, 0.0f},
-									{1.0f, 0.0f, 0.0f, 0.0f}});
-
-	GetUnitVelocity() = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, 0.0f},
-										   {0.0f, 0.0f, 0.0f, 0.0f},
-										   {0.0f, 0.0f, 0.0f, 0.0f},
-										   {1.0f, 0.0f, 0.0f, 0.0f}});
 }
 
 Rock::~Rock() = default;

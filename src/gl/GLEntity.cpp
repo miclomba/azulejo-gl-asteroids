@@ -49,17 +49,25 @@ namespace
 	{ return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
-GLEntity::GLEntity()
-{
-	frame_ = Resource2DGLfloat({{0.0, 0.0, 0.0, 0.0},
-								{0.0, 0.0, 0.0, 0.0},
-								{0.0, 0.0, 0.0, 0.0},
-								{0.0, 0.0, 0.0, 0.0}});
+GLEntity::GLEntity() : frame_(Resource2DGLfloat({{0.0, 0.0, 0.0, 0.0}, // NOTE: make sure frame_ appears first in the class
+												 {0.0, 0.0, 0.0, 0.0},
+												 {0.0, 0.0, 0.0, 0.0},
+												 {0.0, 0.0, 0.0, 0.0}})),
+					   unitVelocity_(frame_),
+					   S_(frame_),
+					   R_(frame_),
+					   T_(frame_)
 
-	unitVelocity_ = frame_;
-	S_ = frame_;
-	R_ = frame_;
-	T_ = frame_;
+{
+}
+
+GLEntity::GLEntity(Resource2DGLfloat frame, Resource2DGLfloat unitVelocity) : frame_(std::move(frame)), unitVelocity_(std::move(unitVelocity)),
+																			  S_(Resource2DGLfloat({{0.0, 0.0, 0.0, 0.0}, // NOTE: make sure S_ appears first in the class
+																									{0.0, 0.0, 0.0, 0.0},
+																									{0.0, 0.0, 0.0, 0.0},
+																									{0.0, 0.0, 0.0, 0.0}})),
+																			  T_(S_), R_(S_)
+{
 }
 
 void GLEntity::RegisterSerializationResources(const std::string &key)
