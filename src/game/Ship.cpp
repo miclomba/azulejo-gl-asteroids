@@ -78,23 +78,22 @@ std::string Ship::ShipKey()
 	return "Ship";
 }
 
-Ship::Ship() : GLEntity()
-{
-	SetVelocityAngle(M_PI / 2);
-
-	shipVertices_ = Resource2DGLfloat({{-0.5f, -0.5f, 0.5f}, {0.5f, -0.0f, 0.5f}, {0.5f, 0.0f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.5f, -0.5f, 1.0f}, {0.1f, -0.0f, 1.0f}, {0.1f, 0.0f, 1.0f}, {-0.5f, 0.5f, 1.0f}});
-
-	shipIndices_ = ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4});
-
-	unitOrientation_ = Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
-										  {1.0f, 0.0f, 0.0f, 0.0f},
-										  {0.0f, 0.0f, 0.0f, 0.0f},
-										  {1.0f, 0.0f, 0.0f, 0.0f}});
-
-	GetUnitVelocity() = Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
+Ship::Ship() : GLEntity(Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
+										   {0.0f, 0.0f, 0.0f, 0.0f},
+										   {0.0f, 0.0f, 0.0f, 0.0f},
+										   {0.0f, 0.0f, 0.0f, 0.0f}}),
+						Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
 										   {1.0f, 0.0f, 0.0f, 0.0f},
 										   {0.0f, 0.0f, 0.0f, 0.0f},
-										   {1.0f, 0.0f, 0.0f, 0.0f}});
+										   {1.0f, 0.0f, 0.0f, 0.0f}})),
+			   shipVertices_(Resource2DGLfloat({{-0.5f, -0.5f, 0.5f}, {0.5f, -0.0f, 0.5f}, {0.5f, 0.0f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.5f, -0.5f, 1.0f}, {0.1f, -0.0f, 1.0f}, {0.1f, 0.0f, 1.0f}, {-0.5f, 0.5f, 1.0f}})),
+			   shipIndices_(ResourceGLubyte({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4})),
+			   unitOrientation_(Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
+												   {1.0f, 0.0f, 0.0f, 0.0f},
+												   {0.0f, 0.0f, 0.0f, 0.0f},
+												   {1.0f, 0.0f, 0.0f, 0.0f}}))
+{
+	SetVelocityAngle(M_PI / 2);
 }
 
 void Ship::RegisterSerializationResources(const std::string &key)
