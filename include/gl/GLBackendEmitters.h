@@ -106,7 +106,7 @@ namespace asteroids
         std::shared_ptr<events::EventEmitter<void(void)>> runEmitter_;
         std::shared_ptr<events::EventEmitter<void(void)>> serializeEmitter_;
         std::shared_ptr<events::EventEmitter<void(void)>> deserializeEmitter_;
-        std::shared_ptr<events::EventEmitter<void()>> drawEmitter_;
+        std::shared_ptr<events::EventEmitter<void(void)>> drawEmitter_;
     };
 
 } // end namespace asteroids
