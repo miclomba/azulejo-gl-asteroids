@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string>
 
+#include <QApplication>
+
 #include "Events/EventChannel.h"
 
 #include "game/Asteroids.h"
@@ -61,7 +63,10 @@ void RegisterEvents(AsteroidsConsumers &frontend, GLBackend &backend, EventChann
 
 int main(int _argc, char *_argv[])
 {
-	GLBackend &backend = GLBackend::Get(_argc, _argv);
+	// We need QApplication created before any widgets are constructed to avoid SIGABRT
+	QApplication app(_argc, _argv);
+
+	GLBackend &backend = GLBackend::Get();
 
 	auto frontend = std::make_shared<Asteroids>();
 	AsteroidsConsumers frontendConsumers(frontend);
@@ -69,5 +74,7 @@ int main(int _argc, char *_argv[])
 
 	RegisterEvents(frontendConsumers, backend, channel);
 
-	backend.Run();
+	backend.Run(); // notify the frontend to start running
+
+	return app.exec();
 }

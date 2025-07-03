@@ -9,6 +9,8 @@
 #include <array>
 #include <memory>
 
+#include <QOpenGLFunctions>
+
 #include "configuration/config.h"
 
 namespace asteroids
@@ -18,17 +20,16 @@ namespace asteroids
      * @class GL
      * @brief A class responsible for managing the underlying graphics library.
      *
-     * This class initializes GLUT and handles rendering.
+     * This class initializes OpenGL and handles rendering.
      */
-    class ASTEROIDS_DLL_EXPORT GL
+    class ASTEROIDS_DLL_EXPORT GL : protected QOpenGLFunctions
     {
     public:
         /**
          * @brief Singleton Get function.
-         * @param _argc Number of command-line arguments.
-         * @param _argv Command-line argument values.
+         * @return the GL singleton reference.
          */
-        static GL &Get(int _argc = 0, char *_argv[] = nullptr);
+        static GL &Get();
 
         /**
          * @brief Destructor for GL.
@@ -41,64 +42,42 @@ namespace asteroids
         GL &operator=(GL &&) = delete;
 
         /**
-         * @brief GLUT display clear function.
+         * @brief Display clear function.
          */
         void DisplayClear();
 
         /**
-         * @brief GLUT display flush function.
+         * @brief Display flush function.
          */
         void DisplayFlush();
 
         /**
-         * @brief GLUT reshape function.
+         * @brief Reshape function.
          * @param _w Window width.
          * @param _h Window height.
          */
         void Reshape(const int _w, const int _h);
 
         /**
-         * @brief Start the main game loop.
+         * @brief Initialize OpenGL Function pointers.
          */
-        void Run();
+        void InitOpenGLFunctions();
 
     private:
         /**
          * @brief Constructor for GL.
-         * @param _argc Number of command-line arguments.
-         * @param _argv Command-line argument values.
          */
-        GL(int _argc, char *_argv[]);
-
-        /**
-         * @brief Timer callback function for periodic updates.
-         * @param _idx Timer index.
-         */
-        static void TimerCallback(int _idx);
-
-        // GLUT Initialization
-        /**
-         * @brief Initialize GLUT with command-line arguments.
-         * @param _argc Number of command-line arguments.
-         * @param _argv Command-line argument values.
-         */
-        void InitGlut(int _argc, char *_argv[]) const;
+        GL();
 
         /**
          * @brief Initialize the server component.
          */
-        void InitServer() const;
+        void InitServer();
 
         /**
          * @brief Initialize the client component.
          */
         void InitClient() const;
-
-        // GLUT callbacks
-        /**
-         * @brief Register GLUT callbacks.
-         */
-        void RegisterCallbacks() const;
 
         // Members
         static std::unique_ptr<GL> instance_;

@@ -7,55 +7,29 @@
 using asteroids::GL;
 using asteroids::GLBackend;
 
-namespace
-{
-	const int TIME = 25;
-	const int VAL = 0;
-	const int WIN_WIDTH = 600;
-	const int WIN_HEIGHT = 480;
-	const int INIT_WIN_X = 100;
-	const int INIT_WIN_Y = 100;
-	const std::string _ASTEROIDS_TITLE = "Asteroids";
-} // end namespace
-
 std::unique_ptr<GL> GL::instance_ = nullptr;
 
-GL &GL::Get(int _argc, char *_argv[])
+GL &GL::Get()
 {
 	if (!GL::instance_)
 	{
-		GL::instance_.reset(new GL(_argc, _argv));
+		GL::instance_.reset(new GL());
 	}
 	return *GL::instance_;
 }
 
 GL::~GL() = default;
 
-void GL::TimerCallback(int _idx)
-{
-	switch (_idx)
-	{
-	case 0:
-		glutPostRedisplay();
-		glutTimerFunc(25, TimerCallback, 0);
-		break;
-	default:
-		break;
-	}
-}
+GL::GL() = default;
 
-GL::GL(int _argc, char *_argv[])
+void GL::InitOpenGLFunctions()
 {
-	InitGlut(_argc, _argv);
-	RegisterCallbacks();
+	// Qt Initialize OpenGL Functions
+	initializeOpenGLFunctions();
+
 	InitServer();
 	InitClient();
 }
-
-void GL::Run()
-{
-	glutMainLoop();
-};
 
 void GL::DisplayClear()
 {
@@ -65,28 +39,9 @@ void GL::DisplayClear()
 void GL::DisplayFlush()
 {
 	glFlush();
-	glutSwapBuffers();
 }
 
-void GL::RegisterCallbacks() const
-{
-	glutDisplayFunc(GLBackend::DisplayCallback);
-	glutReshapeFunc(GLBackend::ReshapeCallback);
-	glutKeyboardFunc(GLBackend::KeyboardCallback);
-	glutKeyboardUpFunc(GLBackend::KeyboardUpCallback);
-}
-
-void GL::InitGlut(int _argc, char *_argv[]) const
-{
-	glutInit(&_argc, _argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowPosition(INIT_WIN_X, INIT_WIN_Y);
-	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	glutCreateWindow(_ASTEROIDS_TITLE.c_str());
-	glutTimerFunc(TIME, TimerCallback, VAL);
-}
-
-void GL::InitServer() const
+void GL::InitServer()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glShadeModel(GL_SMOOTH);
@@ -125,5 +80,4 @@ void GL::Reshape(const int _w, const int _h)
 
 	/*========================= REDISPLAY ====================================*/
 	glMatrixMode(GL_MODELVIEW);
-	glutPostRedisplay();
 }

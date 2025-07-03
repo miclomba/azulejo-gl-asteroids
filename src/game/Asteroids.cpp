@@ -377,22 +377,22 @@ void Asteroids::DrawGLEntities()
 
 void Asteroids::DrawGameInfo()
 {
-	glColor3f(0.0f, 1.0f, 1.0f);
+	// glColor3f(0.0f, 1.0f, 1.0f);
 
-	GLint i;
-	glRasterPos3f(7.5f, -9.0f, 0.0f);
+	// GLint i;
+	// glRasterPos3f(7.5f, -9.0f, 0.0f);
 
-	for (size_t i = 0; i < RESET.size(); ++i)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, RESET[i]);
+	// for (size_t i = 0; i < RESET.size(); ++i)
+	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, RESET[i]);
 
-	glRasterPos3f(-12.0f, 9.0f, 0.0f);
+	// glRasterPos3f(-12.0f, 9.0f, 0.0f);
 
-	for (size_t i = 0; i < SCORE.size(); ++i)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, SCORE[i]);
-	char amount[4];
-	i = snprintf(amount, sizeof(amount), "%d", score_);
-	for (i = 0; i < 4; i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
+	// for (size_t i = 0; i < SCORE.size(); ++i)
+	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, SCORE[i]);
+	// char amount[4];
+	// i = snprintf(amount, sizeof(amount), "%d", score_);
+	// for (i = 0; i < 4; i++)
+	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, amount[i]);
 }
 
 void Asteroids::Draw()

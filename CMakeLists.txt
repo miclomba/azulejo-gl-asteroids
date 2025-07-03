@@ -1,67 +1,39 @@
-cmake_minimum_required(VERSION "3.15") 
+cmake_minimum_required(VERSION "3.16") 
 
-project(GLAsteroids)
+project(GLAsteroids VERSION 1.0.0 LANGUAGES CXX)
 
+# Use C++17
 set(CMAKE_CXX_STANDARD 17)
+# Require the C++17 or new compiler
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (MSVC)
-set(CMAKE_CXX_FLAGS "/permissive- /EHsc /WX")
-add_definitions(-D_WIN32_WINNT=0x0A00)
-elseif(APPLE)
+# Find OpenGL
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-elseif(UNIX)
-find_package(OpenGL REQUIRED)
-find_package(X11 REQUIRED)
-endif()
 
-# # Find qt libraries
-# find_package(Qt6 REQUIRED COMPONENTS QuickControls2 Widgets OpenGL OpenGLWidgets QmlImportScanner)
-# # Enable auto meta object compiler and the resource compiler (for QML support)
-# set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTORCC ON)
+# Find Qt
+find_package(Qt6 REQUIRED COMPONENTS QuickControls2 Widgets OpenGL OpenGLWidgets QmlImportScanner)
+qt_standard_project_setup()
+# Enable auto meta object compiler and the resource compiler (for QML support)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 message(STATUS "VCPKG_INCL_DIR: $ENV{VCPKG_INCL_DIR}")
 message(STATUS "VCPKG_LINK_DIR: $ENV{VCPKG_LINK_DIR}")
 message(STATUS "X_INCL_DIR: $ENV{X_INCL_DIR}")
 message(STATUS "X_LINK_DIR: $ENV{X_LINK_DIR}")
-message(STATUS "X11_LIBRARIES: ${X11_LIBRARIES}")
-message(STATUS "X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 
-set(COMMON_INCLUDES
+include_directories(
 "${CMAKE_SOURCE_DIR}/include"
 "$ENV{X_INCL_DIR}"
 "$ENV{VCPKG_INCL_DIR}"
 )
 
-set(COMMON_LINK_DIRS
+link_directories(
 "$ENV{X_LINK_DIR}"
 "$ENV{VCPKG_LINK_DIR}"
 )
 
-if (MSVC OR APPLE)
-include_directories(
-"${COMMON_INCLUDES}"
-)
-elseif(UNIX)
-include_directories(
-"${COMMON_INCLUDES}"
-"${X11_INCLUDE_DIR}"
-)
-endif()
-
-if (MSVC OR APPLE)
-link_directories(
-"${COMMON_LINK_DIRS}"
-)
-elseif(UNIX)
-link_directories(
-"${COMMON_LINK_DIRS}"
-"${X11_LIBRARIES}"
-)
-endif()
-
-add_executable(${PROJECT_NAME}
+qt_add_executable(${PROJECT_NAME}
 "src/game/Asteroids.cpp" 
 "src/game/AsteroidsConsumers.cpp" 
 "src/game/Bullet.cpp"
@@ -72,10 +44,12 @@ add_executable(${PROJECT_NAME}
 "src/gl/GLBackendEmitters.cpp"
 "src/gl/GLEntity.cpp" 
 "src/gl/GLEntityTask.cpp"
-# "src/gl/GLWindow.cpp"
-"main.cpp"
 # Add Qt resources file
-# "resources/GLAsteroids.qrc"
+"include/gl/GL.h"
+"include/gl/GLBackend.h"
+"resources/GLAsteroids.qrc"
+# Add the main
+"main.cpp"
 )
 
 set(COMMON_DEPENDENCIES
@@ -86,32 +60,22 @@ set(COMMON_DEPENDENCIES
 "Resources" 
 )
 
-if (MSVC)
-target_link_libraries(${PROJECT_NAME}
+if (APPLE)
+target_link_libraries(${PROJECT_NAME} PRIVATE
 "${COMMON_DEPENDENCIES}" 
-"bcrypt"
-"boost_filesystem"
-"freeglutd"
-)
-elseif (APPLE)
-target_link_libraries(${PROJECT_NAME}
-"${COMMON_DEPENDENCIES}" 
-"GLUT::GLUT" 
 "OpenGL::GL"
 "boost_filesystem"
-# "Qt6::Quick"
-# "Qt6::QuickControls2"
-# "Qt6::Widgets"
-# "Qt6::OpenGL"
-# "Qt6::OpenGLWidgets"
+"Qt6::Quick"
+"Qt6::QuickControls2"
+"Qt6::Widgets"
+"Qt6::OpenGL"
+"Qt6::OpenGLWidgets"
 )
 elseif (UNIX)
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME} PRIVATE
 "${COMMON_DEPENDENCIES}" 
-"glut"
 "GL"
 "boost_filesystem"
-"${X11_LIBRARIES}"
 "m"
 "dl"
 "pthread"
@@ -120,4 +84,9 @@ target_link_libraries(${PROJECT_NAME}
 "Xxf86vm"
 )
 endif()
+
+# Create an application bundle
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE ON
+)
 

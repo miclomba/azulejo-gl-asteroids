@@ -9,6 +9,10 @@
 #include <array>
 #include <memory>
 
+#include <QKeyEvent>
+#include <QOpenGLWidget>
+#include <QTimer>
+
 #include "configuration/config.h"
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
@@ -20,17 +24,24 @@ namespace asteroids
      * @class GLBackend
      * @brief A class for managing OpenGL rendering and emitting input events to game logic.
      *
-     * The GLBackend class initializes GLUT, sets up callbacks, and emits signals for various game events.
+     * The GLBackend class initializes Qt OpenGL Widget, sets up callbacks, and emits signals for various game events.
      */
-    class ASTEROIDS_DLL_EXPORT GLBackend
+    class ASTEROIDS_DLL_EXPORT GLBackend : public QOpenGLWidget
     {
+        Q_OBJECT
+
+    private slots:
+        /**
+         * @brief on frame update slot
+         */
+        void onFrame();
+
     public:
         /**
          * @brief Singleton Get function.
-         * @param _argc Number of command-line arguments.
-         * @param _argv Command-line argument values.
+         * @return the GLBackend singleton.
          */
-        static GLBackend &Get(int _argc = 0, char *_argv[] = nullptr);
+        static GLBackend &Get();
 
         /**
          * @brief Destructor for the GLBackend class.
@@ -53,61 +64,40 @@ namespace asteroids
          */
         GLBackendEmitters &GetEmitters();
 
-        /**
-         * @brief Display callback for the underlying GL library.
-         */
-        static void DisplayCallback();
-
-        /**
-         * @brief Reshape callback for the underlying GL library.
-         */
-        static void ReshapeCallback(const int _w, const int _h);
-
-        /**
-         * @brief Keyboard callback for the underlying GL library.
-         */
-        static void KeyboardCallback(unsigned char _chr, int _x, int _y);
-
-        /**
-         * @brief KeyboardUp callback for the underlying GL library.
-         */
-        static void KeyboardUpCallback(const unsigned char _chr, const int _x, const int _y);
-
     private:
         /**
          * @brief Constructor for the GLBackend class.
-         * @param _argc The argument count passed to the GLUT initialization.
-         * @param _argv The argument vector passed to the GLUT initialization.
          */
-        GLBackend(int _argc, char *_argv[]);
+        GLBackend();
 
         /**
-         * @brief GLUT display function.
+         * @brief Initialize OpenGL function pointers for this class.
          */
-        void Display();
+        void initializeGL() override;
 
         /**
-         * @brief GLUT reshape function.
+         * @brief QOpenGLWidget paint function.
+         */
+        void paintGL() override;
+
+        /**
+         * @brief QOpenGLWidget resize function.
          * @param _w Window width.
          * @param _h Window height.
          */
-        void Reshape(const int _w, const int _h) const;
+        void resizeGL(const int _w, const int _h) override;
 
         /**
-         * @brief GLUT keyboard input function.
-         * @param _chr Pressed character.
-         * @param _x X-coordinate of the mouse.
-         * @param _y Y-coordinate of the mouse.
+         * @brief keyboard press event handler.
+         * @param event keyboard event.
          */
-        void Keyboard(const unsigned char _chr, const int _x, const int _y);
+        void keyPressEvent(QKeyEvent *event) override;
 
         /**
-         * @brief GLUT keyboard release function.
-         * @param _chr Released character.
-         * @param _x X-coordinate of the mouse.
-         * @param _y Y-coordinate of the mouse.
+         * @brief keyboard release event handler.
+         * @param event keyboard event.
          */
-        void KeyboardUp(const unsigned char _chr, const int _x, const int _y);
+        void keyReleaseEvent(QKeyEvent *event) override;
 
         /**
          * @brief Update the keyboard state.
@@ -120,6 +110,9 @@ namespace asteroids
 
         /** @brief Pointer to the callback instance for static functions. */
         static std::unique_ptr<GLBackend> callbackInstance_;
+
+        /** @brief a timer for periodically rendering this widget. */
+        std::unique_ptr<QTimer> frameTimer_;
     };
 
 } // end asteroids

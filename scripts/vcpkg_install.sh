@@ -15,12 +15,11 @@ case "$(uname -s)" in
 esac
 
 vcpkg install --classic \
+#  qtbase[widgets,opengl] \
+#  qtdeclarative \
   boost-filesystem \
   boost-asio \
   boost-property-tree \
   boost-lexical-cast \
   boost-uuid \
-#  qtbase[widgets,opengl] \
-#  qtdeclarative \
-  freeglut \
   --triplet "${TRIPLET}"

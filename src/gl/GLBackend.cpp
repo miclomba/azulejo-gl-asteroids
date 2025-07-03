@@ -5,6 +5,11 @@
 #include <string>
 #include <utility>
 
+#include <QKeyEvent>
+#include <QOpenGLFunctions>
+#include <QOpenGLWidget>
+#include <QTimer>
+
 #include "gl/GL.h"
 #include "gl/GLBackendEmitters.h"
 
@@ -15,6 +20,7 @@ using events::EventEmitter;
 
 namespace
 {
+	static constexpr int FRAME_MS = 20;
 	const int WIN_WIDTH = 600;
 	const int WIN_HEIGHT = 480;
 	const int NUMBER_KEYS = 256;
@@ -25,56 +31,66 @@ namespace
 
 std::unique_ptr<GLBackend> GLBackend::callbackInstance_ = nullptr;
 
-GLBackend &GLBackend::Get(int _argc, char *_argv[])
+GLBackend &GLBackend::Get()
 {
 	if (!GLBackend::callbackInstance_)
 	{
-		GLBackend::callbackInstance_.reset(new GLBackend(_argc, _argv));
+		GLBackend::callbackInstance_.reset(new GLBackend());
 	}
 	return *GLBackend::callbackInstance_;
 }
 
 GLBackend::~GLBackend() = default;
 
-GLBackend::GLBackend(int _argc, char *_argv[]) : keysPressed_({})
+GLBackend::GLBackend() : QOpenGLWidget(),
+						 frameTimer_(std::make_unique<QTimer>(this)),
+						 keysPressed_({})
 {
 	// Initialize the graphics library singleton
-	GL::Get(_argc, _argv);
+	GL::Get();
+
+	// Make this a repeating timer:
+	frameTimer_->setInterval(FRAME_MS);
+	frameTimer_->setSingleShot(false);
+
+	// connect QTimer to repaint
+	connect(frameTimer_.get(), &QTimer::timeout, this, &GLBackend::onFrame);
+
+	// initialize the window
+	setWindowTitle(QString::fromStdString(ASTEROIDS_TITLE));
+	setGeometry(INIT_WIN_X, INIT_WIN_Y, WIN_WIDTH, WIN_HEIGHT);
+	show();
 }
 
 void GLBackend::Run()
 {
 	emitters_.GetRunEmitter()->Signal()();
-
-	GL::Get().Run();
-};
+}
 
 GLBackendEmitters &GLBackend::GetEmitters()
 {
 	return emitters_;
 }
 
-void GLBackend::DisplayCallback()
+void GLBackend::initializeGL()
 {
-	callbackInstance_->Display();
+	GL::Get().InitOpenGLFunctions();
+
+	// make sure we can actually receive key events:
+	setFocusPolicy(Qt::StrongFocus);
+	setFocus();
+
+	// start the timer loop
+	frameTimer_->start();
 }
 
-void GLBackend::ReshapeCallback(const int _w, const int _h)
+void GLBackend::onFrame()
 {
-	callbackInstance_->Reshape(_w, _h);
+	// schedule paintGL() to repaint
+	update();
 }
 
-void GLBackend::KeyboardCallback(const unsigned char _chr, const int _x, const int _y)
-{
-	callbackInstance_->Keyboard(_chr, _x, _y);
-}
-
-void GLBackend::KeyboardUpCallback(const unsigned char _chr, const int _x, const int _y)
-{
-	callbackInstance_->KeyboardUp(_chr, _x, _y);
-}
-
-void GLBackend::Display()
+void GLBackend::paintGL()
 {
 	KeyboardUpdateState();
 
@@ -86,19 +102,40 @@ void GLBackend::Display()
 	gl.DisplayFlush();
 }
 
-void GLBackend::Reshape(const int _w, const int _h) const
+void GLBackend::resizeGL(const int _w, const int _h)
 {
-	GL::Get().Reshape(_w, _h);
+	// Qt’s backing FBO is actually (w * DPR) × (h * DPR)
+	const qreal dpr = devicePixelRatioF(); // typically 2.0 on Retina
+
+	int pw = qRound(_w * dpr);
+	int ph = qRound(_h * dpr);
+
+	GL::Get().Reshape(pw, ph);
 }
 
-void GLBackend::Keyboard(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::keyPressEvent(QKeyEvent *event)
 {
-	keysPressed_[_chr] = true;
+	if (event->key() == Qt::Key_Escape)
+	{
+		close();
+	}
+
+	QString txt = event->text();
+	if (!txt.isEmpty())
+	{
+		unsigned char c = txt.at(0).toLatin1();
+		keysPressed_[c] = true;
+	}
 }
 
-void GLBackend::KeyboardUp(const unsigned char _chr, const int _x, const int _y)
+void GLBackend::keyReleaseEvent(QKeyEvent *event)
 {
-	keysPressed_[_chr] = false;
+	auto txt = event->text();
+	if (!txt.isEmpty())
+	{
+		unsigned char c = txt.at(0).toLatin1();
+		keysPressed_[c] = false;
+	}
 }
 
 void GLBackend::KeyboardUpdateState()
