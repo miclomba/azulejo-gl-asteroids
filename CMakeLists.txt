@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION "3.12") 
+cmake_minimum_required(VERSION "3.15") 
 
-project("GLAsteroids")
+project(GLAsteroids)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -15,11 +15,14 @@ find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
 endif()
 
-message(STATUS "FREEGLUT_LINK_BIN: $ENV{FREEGLUT_LINK_BIN}")
-message(STATUS "FREEGLUT_LINK_LIB: $ENV{FREEGLUT_LINK_LIB}")
-message(STATUS "FREEGLUT_INCL_DIR: $ENV{FREEGLUT_INCL_DIR}")
-message(STATUS "BOOST_INCL_DIR: $ENV{BOOST_INCL_DIR}")
-message(STATUS "BOOST_LINK_DIR: $ENV{BOOST_LINK_DIR}")
+# # Find qt libraries
+# find_package(Qt6 REQUIRED COMPONENTS QuickControls2 Widgets OpenGL OpenGLWidgets QmlImportScanner)
+# # Enable auto meta object compiler and the resource compiler (for QML support)
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTORCC ON)
+
+message(STATUS "VCPKG_INCL_DIR: $ENV{VCPKG_INCL_DIR}")
+message(STATUS "VCPKG_LINK_DIR: $ENV{VCPKG_LINK_DIR}")
 message(STATUS "X_INCL_DIR: $ENV{X_INCL_DIR}")
 message(STATUS "X_LINK_DIR: $ENV{X_LINK_DIR}")
 message(STATUS "X11_LIBRARIES: ${X11_LIBRARIES}")
@@ -28,15 +31,12 @@ message(STATUS "X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 set(COMMON_INCLUDES
 "${CMAKE_SOURCE_DIR}/include"
 "$ENV{X_INCL_DIR}"
-"$ENV{BOOST_INCL_DIR}"
-"$ENV{FREEGLUT_INCL_DIR}"
+"$ENV{VCPKG_INCL_DIR}"
 )
 
 set(COMMON_LINK_DIRS
 "$ENV{X_LINK_DIR}"
-"$ENV{BOOST_LINK_DIR}" 
-"$ENV{FREEGLUT_LINK_BIN}"
-"$ENV{FREEGLUT_LINK_LIB}"
+"$ENV{VCPKG_LINK_DIR}"
 )
 
 if (MSVC OR APPLE)
@@ -61,7 +61,7 @@ link_directories(
 )
 endif()
 
-add_executable("${PROJECT_NAME}" 
+add_executable(${PROJECT_NAME}
 "src/game/Asteroids.cpp" 
 "src/game/AsteroidsConsumers.cpp" 
 "src/game/Bullet.cpp"
@@ -72,7 +72,10 @@ add_executable("${PROJECT_NAME}"
 "src/gl/GLBackendEmitters.cpp"
 "src/gl/GLEntity.cpp" 
 "src/gl/GLEntityTask.cpp"
+# "src/gl/GLWindow.cpp"
 "main.cpp"
+# Add Qt resources file
+# "resources/GLAsteroids.qrc"
 )
 
 set(COMMON_DEPENDENCIES
@@ -84,21 +87,26 @@ set(COMMON_DEPENDENCIES
 )
 
 if (MSVC)
-target_link_libraries("${PROJECT_NAME}" 
+target_link_libraries(${PROJECT_NAME}
 "${COMMON_DEPENDENCIES}" 
 "bcrypt"
-"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+"boost_filesystem"
 "freeglutd"
 )
 elseif (APPLE)
-target_link_libraries("${PROJECT_NAME}" 
+target_link_libraries(${PROJECT_NAME}
 "${COMMON_DEPENDENCIES}" 
 "GLUT::GLUT" 
 "OpenGL::GL"
-"boost_filesystem$ENV{BOOST_LIB_SUFFIX}"
+"boost_filesystem"
+# "Qt6::Quick"
+# "Qt6::QuickControls2"
+# "Qt6::Widgets"
+# "Qt6::OpenGL"
+# "Qt6::OpenGLWidgets"
 )
 elseif (UNIX)
-target_link_libraries("${PROJECT_NAME}" 
+target_link_libraries(${PROJECT_NAME} 
 "${COMMON_DEPENDENCIES}" 
 "glut"
 "GL"
@@ -112,3 +120,4 @@ target_link_libraries("${PROJECT_NAME}"
 "Xxf86vm"
 )
 endif()
+

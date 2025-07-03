@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="GLAsteroids.qml">../qml/GLAsteroids.qml</file>
+  </qresource>
+</RCC>

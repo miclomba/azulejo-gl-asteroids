@@ -2,12 +2,9 @@
     "cmake.buildDirectory": "${workspaceFolder}/out",
     "cmake.generator": "Ninja",
     "cmake.environment": {
-        "PATH": "${env.PATH};${workspaceFolder}/../azulejo-common-lib/out/install/X;${workspaceFolder}/vcpkg_installed/x64-osx/debug/lib",
-        "FREEGLUT_LINK_BIN": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
-        "FREEGLUT_LINK_LIB": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
-        "FREEGLUT_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
-        "BOOST_INCL_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/include",
-        "BOOST_LINK_DIR": "${workspaceFolder}/vcpkg_installed/x64-osx/lib",
+        "PATH": "${env.PATH};${workspaceFolder}/../azulejo-common-lib/out/install/X;${workspaceFolder}/../vcpkg/installed/x64-osx/debug/lib",
+        "VCPKG_INCL_DIR": "${workspaceFolder}/../vcpkg/installed/x64-osx/include",
+        "VCPKG_LINK_DIR": "${workspaceFolder}/../vcpkg/installed/x64-osx/lib",
         "X_INCL_DIR": "/usr/local/include",
         "X_LINK_DIR": "/usr/local/lib"
     },

@@ -1,6 +1,6 @@
 # azulejo-gl-asteroids
 
-![GLAsteroids.gif](./assets/GLAsteroids.gif)
+![GLAsteroids.gif](./resources/GLAsteroids.gif)
 
 ## How to Play
 
@@ -34,7 +34,7 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 1. Install `clang` by running: `xcode-select --install`
 2. Install build tools: `brew install cmake ninja autoconf automake autoconf-archive libtool pkg-config`
 3. FreeGLUT depends on `X11` so install `XQuartz` by running: `brew install --cask xquartz`
-4. Install dependencies: `vcpkg install --x-manifest-root=. --feature-flags=manifests`
+4. Istall dependencies: `./scripts/vcpkg_install.sh`
 5. Copy settings `cp .vscode/settings.mac.json .vscode/settings.json`
 6. Copy launch settings `cp .vscode/launch.mac.json .vscode/launch.json`
 
