@@ -109,7 +109,7 @@ namespace asteroids
         GLBackendEmitters emitters_;        /**< Handles input events and actions. */
 
         /** @brief Pointer to the callback instance for static functions. */
-        static std::unique_ptr<GLBackend> callbackInstance_;
+        static GLBackend *callbackInstance_;
 
         /** @brief a timer for periodically rendering this widget. */
         std::unique_ptr<QTimer> frameTimer_;

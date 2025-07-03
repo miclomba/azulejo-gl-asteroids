@@ -2,9 +2,11 @@
 #include <string>
 
 #include <QApplication>
+#include <QMainWindow>
 
 #include "Events/EventChannel.h"
 
+#include "configuration/config.h"
 #include "game/Asteroids.h"
 #include "game/AsteroidsConsumers.h"
 #include "gl/GLBackend.h"
@@ -66,7 +68,15 @@ int main(int _argc, char *_argv[])
 	// We need QApplication created before any widgets are constructed to avoid SIGABRT
 	QApplication app(_argc, _argv);
 
+	// Qt’s internals automatically add this window to its list of top-level widgets
+	// and start sending it paint and event callbacks once you call QApplication.exec().
+	QMainWindow window;
+
 	GLBackend &backend = GLBackend::Get();
+	backend.setParent(&window);
+	window.setCentralWidget(&backend);
+	window.setGeometry(INIT_WIN_X, INIT_WIN_Y, WIN_WIDTH, WIN_HEIGHT);
+	window.show();
 
 	auto frontend = std::make_shared<Asteroids>();
 	AsteroidsConsumers frontendConsumers(frontend);

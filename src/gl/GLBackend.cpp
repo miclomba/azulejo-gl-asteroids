@@ -21,21 +21,17 @@ using events::EventEmitter;
 namespace
 {
 	static constexpr int FRAME_MS = 20;
-	const int WIN_WIDTH = 600;
-	const int WIN_HEIGHT = 480;
 	const int NUMBER_KEYS = 256;
-	const int INIT_WIN_X = 100;
-	const int INIT_WIN_Y = 100;
 	const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
-std::unique_ptr<GLBackend> GLBackend::callbackInstance_ = nullptr;
+GLBackend *GLBackend::callbackInstance_ = nullptr;
 
 GLBackend &GLBackend::Get()
 {
 	if (!GLBackend::callbackInstance_)
 	{
-		GLBackend::callbackInstance_.reset(new GLBackend());
+		GLBackend::callbackInstance_ = new GLBackend();
 	}
 	return *GLBackend::callbackInstance_;
 }
@@ -115,11 +111,6 @@ void GLBackend::resizeGL(const int _w, const int _h)
 
 void GLBackend::keyPressEvent(QKeyEvent *event)
 {
-	if (event->key() == Qt::Key_Escape)
-	{
-		close();
-	}
-
 	QString txt = event->text();
 	if (!txt.isEmpty())
 	{

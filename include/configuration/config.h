@@ -28,4 +28,9 @@
 
 #define SAVE_TO_DB
 
+#define WIN_WIDTH (600)
+#define WIN_HEIGHT (480)
+#define INIT_WIN_X (100)
+#define INIT_WIN_Y (100)
+
 #endif // end config_h
