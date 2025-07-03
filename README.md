@@ -32,23 +32,14 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 0. Install `XCode`
 1. Install `clang` by running: `xcode-select --install`
-2. Install build tools: `brew install cmake ninja autoconf automake autoconf-archive libtool pkg-config`
+2. Install build tools: `./scripts/macos_install_dependencies.sh`
 3. Istall dependencies: `./scripts/vcpkg_install.sh`
 4. Copy settings `cp .vscode/settings.mac.json .vscode/settings.json`
 5. Copy launch settings `cp .vscode/launch.mac.json .vscode/launch.json`
 
 ### Ubuntu
 
-0. Install dependencies:
-
-```
-sudo apt install -y \
-  build-essential autoconf autoconf-archive automake libtool pkg-config cmake git unzip ninja-build curl \
-  libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncursesw5-dev libffi-dev \
-  libgdbm-dev liblzma-dev uuid-dev tk-dev xz-utils wget libgomp1
-  libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxrandr-dev libxi-dev libxmu-dev libxxf86vm-dev
-```
-
+0. Install dependencies: `./scripts/linux_install_dependencies.sh`
 1. Copy settings `cp .vscode/settings.linux.json .vscode/settings.json`
 2. Copy launch settings `cp .vscode/launch.linux.json .vscode/launch.json`
 
