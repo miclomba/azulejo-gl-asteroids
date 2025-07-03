@@ -20,7 +20,7 @@ vcpkg install --classic \
   boost-property-tree \
   boost-lexical-cast \
   boost-uuid \
+#  qtbase[widgets,opengl] \
+#  qtdeclarative \
   freeglut \
-  qtbase[widgets,opengl] \
-  qtdeclarative \
   --triplet "${TRIPLET}"
