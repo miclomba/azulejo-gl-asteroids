@@ -23,3 +23,6 @@ vcpkg install --classic \
   boost-lexical-cast \
   boost-uuid \
   --triplet "${TRIPLET}"
+
+  # Clear cached files and intermediate results
+./scripts/vcpkg_clean_intermediate.sh
