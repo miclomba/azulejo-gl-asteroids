@@ -7,7 +7,7 @@ PKGS=(
   # — Build & SCM tools
   build-essential
   autoconf autoconf-archive automake libtool pkg-config
-  cmake git unzip ninja-build curl
+  cmake git unzip ninja-build curl bison flex
 
   # — Security & crypto
   libssl-dev
