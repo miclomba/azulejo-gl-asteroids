@@ -1,5 +1,8 @@
 {
     "cmake.buildDirectory": "${workspaceFolder}/out",
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/../vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
     "cmake.generator": "Ninja",
     "cmake.environment": {
         "PATH": "${env.PATH};${workspaceFolder}/../azulejo-common-lib/out/install/X;${workspaceFolder}/../vcpkg/installed/x64-osx/debug/lib",

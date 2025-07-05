@@ -58,24 +58,23 @@ set(COMMON_DEPENDENCIES
 "Events" 
 "FilesystemAdapters" 
 "Resources" 
+"Qt6::Quick"
+"Qt6::QuickControls2"
+"Qt6::Widgets"
+"Qt6::OpenGL"
+"Qt6::OpenGLWidgets"
+"boost_filesystem"
 )
 
 if (APPLE)
 target_link_libraries(${PROJECT_NAME} PRIVATE
 "${COMMON_DEPENDENCIES}" 
 "OpenGL::GL"
-"boost_filesystem"
-"Qt6::Quick"
-"Qt6::QuickControls2"
-"Qt6::Widgets"
-"Qt6::OpenGL"
-"Qt6::OpenGLWidgets"
 )
 elseif (UNIX)
 target_link_libraries(${PROJECT_NAME} PRIVATE
 "${COMMON_DEPENDENCIES}" 
 "GL"
-"boost_filesystem"
 "m"
 "dl"
 "pthread"

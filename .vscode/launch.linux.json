@@ -5,7 +5,7 @@
             "name": "GLAsteroids",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/out/GLAsteroids.app/Contents/MacOS/GLAsteroids", 
+            "program": "${workspaceFolder}/out/GLAsteroids", 
             "args": [], // Add command-line arguments if needed
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}", // Set the working directory
