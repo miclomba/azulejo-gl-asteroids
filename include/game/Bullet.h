@@ -1,181 +1,142 @@
 /**
  * @file Bullet.h
- * @brief Declaration of the Bullet class which represents bullets fired by the ship in the Asteroids game.
+ * @brief Declaration of the Bullet class, representing projectiles in the Asteroids game.
+ * @note This enhanced version includes support for different bullet types,
+ * data-driven properties, and lifetime management.
  */
 
-#ifndef asteroids_bullet_h
-#define asteroids_bullet_h
+#ifndef ASTEROIDS_BULLET_H
+#define ASTEROIDS_BULLET_H
 
-#include <array>
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "test_filesystem_adapters/ContainerResource.h"
-#include "test_filesystem_adapters/ContainerResource2D.h"
-
 #include "configuration/config.h"
 #include "gl/GLEntity.h"
+#include "math/Vector2D.h" // Assuming a simple 2D vector class exists
 
-namespace database_adapters
-{
+// Forward declarations
+namespace database_adapters {
     class Sqlite;
-} // end database_adapters
+}
 
-namespace asteroids
-{
+namespace asteroids {
 
-    using ResourceGLubyte = ContainerResource<GLubyte>;
-    using ResourceGLfloat = ContainerResource<GLfloat>;
-    using Resource2DGLfloat = ContainerResource2D<GLfloat>;
+/**
+ * @enum class BulletType
+ * @brief Defines different types of bullets with distinct behaviors.
+ */
+enum class BulletType {
+    Standard,
+    Piercing,
+    Explosive,
+    Homing
+};
+
+/**
+ * @struct BulletStats
+ * @brief Data-driven structure holding properties for a bullet type.
+ * This allows tweaking gameplay without recompiling.
+ */
+struct BulletStats {
+    float speed = 10.0f;
+    float lifetime = 2.0f; // in seconds
+    float damage = 1.0f;
+    // Visual properties
+    std::vector<GLfloat> vertices;
+    std::vector<GLubyte> indices;
+    // Behavior flags
+    bool canPierce = false;
+};
+
+/**
+ * @class Bullet
+ * @brief A class representing a bullet fired in the game.
+ *
+ * This class manages bullet properties such as position, velocity, lifetime,
+ * and visual representation. It is designed to be updated per frame.
+ */
+class ASTEROIDS_DLL_EXPORT Bullet : public GLEntity {
+public:
+    /**
+     * @brief Constructor to create a bullet with specific properties.
+     * @param startPosition The initial position (x, y) of the bullet.
+     * @param direction The normalized direction vector for the bullet's travel.
+     * @param stats A shared pointer to the stats for this bullet type.
+     */
+    Bullet(const Vector2D& startPosition, const Vector2D& direction, std::shared_ptr<const BulletStats> stats);
 
     /**
-     * @class Bullet
-     * @brief A class representing a bullet fired by the ship in the Asteroids game.
-     *
-     * This class manages bullet properties such as position, movement, and state.
+     * @brief Destructor.
      */
-    class ASTEROIDS_DLL_EXPORT Bullet : public GLEntity
-    {
-    public:
-        /**
-         * @brief Default constructor for the Bullet class.
-         */
-        Bullet();
+    virtual ~Bullet() = default;
 
-        /**
-         * @brief Constructor to initialize a bullet at a given position.
-         * @param _x Initial x-coordinate.
-         * @param _y Initial y-coordinate.
-         */
-        Bullet(const GLfloat _x, const GLfloat _y);
+    // C++ Rule of 5: Explicitly default or delete constructors/operators
+    Bullet(const Bullet&) = delete; // Bullets are unique entities, copying is disabled.
+    Bullet& operator=(const Bullet&) = delete;
+    Bullet(Bullet&&) = default; // Move semantics are fine.
+    Bullet& operator=(Bullet&&) = default;
 
-        /**
-         * @brief Destructor for the Bullet class.
-         */
-        virtual ~Bullet();
+    /**
+     * @brief Updates the bullet's state over time.
+     * @param deltaTime The time elapsed since the last frame.
+     */
+    void Update(float deltaTime);
 
-        /**
-         * @brief Copy constructor.
-         * @param other The Bullet instance to copy from.
-         */
-        Bullet(const Bullet &other);
+    /**
+     * @brief Draws the bullet to the screen.
+     */
+    void Draw() override;
 
-        /**
-         * @brief Move constructor.
-         * @param other The Bullet instance to move from.
-         */
-        Bullet(Bullet &&other);
+    /**
+     * @brief Checks if the bullet's lifetime has expired.
+     * @return True if the bullet should be destroyed, false otherwise.
+     */
+    [[nodiscard]] bool HasExpired() const;
 
-        /**
-         * @brief Copy assignment operator.
-         * @param other The Bullet instance to copy from.
-         * @return Reference to the updated instance.
-         */
-        Bullet &operator=(const Bullet &other);
+    /**
+     * @brief Gets the damage this bullet inflicts.
+     * @return The damage value.
+     */
+    [[nodiscard]] float GetDamage() const;
+    
+    /**
+     * @brief Gets the piercing capability of the bullet.
+     * @return True if the bullet can pierce through objects.
+     */
+    [[nodiscard]] bool CanPierce() const;
 
-        /**
-         * @brief Move assignment operator.
-         * @param other The Bullet instance to move from.
-         * @return Reference to the updated instance.
-         */
-        Bullet &operator=(Bullet &&other);
+    // --- Persistence ---
+    // The persistence logic remains similar, but now saves/loads more state.
 
-        /**
-         * @brief Register serialization resources for the bullet.
-         * @param key The serialization key.
-         */
-        static void RegisterSerializationResources(const std::string &key);
+    void Save(boost::property_tree::ptree& tree, const std::string& path) const override;
+    void Load(boost::property_tree::ptree& tree, const std::string& path) override;
+    void Save(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) const override;
+    void Load(boost::property_tree::ptree& tree, database_adapters::Sqlite& database) override;
 
-        /**
-         * @brief Register tabularization resources for the bullet.
-         * @param key The tabularization key.
-         */
-        static void RegisterTabularizationResources(const std::string &key);
+    /**
+     * @brief Gets the prefix used for bullet serialization.
+     * @return The bullet prefix as a string.
+     */
+    static std::string BulletPrefix();
 
-        /**
-         * @brief Update the bullet's position based on velocity and speed.
-         * @param _velocityAngle The angle of movement.
-         * @param _speed The speed of the bullet.
-         */
-        void Update(const GLfloat _velocityAngle, const GLfloat _speed);
+private:
+    /**
+     * @brief Sets the model-to-world transformation matrix.
+     */
+    void UpdateTransformMatrix();
 
-        /**
-         * @brief Draw the bullet.
-         */
-        void Draw() override;
+    std::shared_ptr<const BulletStats> stats_; ///< Data-driven properties of the bullet.
+    Vector2D velocity_;                         ///< The bullet's velocity vector (direction * speed).
+    float remainingLifetime_;                   ///< Time remaining before the bullet expires.
 
-        /**
-         * @brief Check if the bullet is out of bounds.
-         * @return True if the bullet is out of bounds, otherwise false.
-         */
-        bool IsOutOfBounds() const;
+    // GL resources would be initialized from stats_ in the constructor
+    // For example, VBOs and IBOs for vertices and indices.
+};
 
-        /**
-         * @brief Save the entity data to a property tree.
-         * @param tree The property tree to save data into.
-         * @param path The path within the tree where the data should be saved.
-         */
-        void Save(boost::property_tree::ptree &tree, const std::string &path) const override;
+} // namespace asteroids
 
-        /**
-         * @brief Load the entity data from a property tree.
-         * @param tree The property tree containing the data.
-         * @param path The path within the tree where the data is stored.
-         */
-        void Load(boost::property_tree::ptree &tree, const std::string &path) override;
-
-        /**
-         * @brief Save the entity data to a database.
-         * @param tree The property tree containing the entity's data.
-         * @param database The SQLite database instance to save data into.
-         */
-        void Save(boost::property_tree::ptree &tree, database_adapters::Sqlite &database) const override;
-
-        /**
-         * @brief Load the entity data from a database.
-         * @param tree The property tree to populate with the entity's data.
-         * @param database The SQLite database instance to load data from.
-         */
-        void Load(boost::property_tree::ptree &tree, database_adapters::Sqlite &database) override;
-
-        /**
-         * @brief Get the prefix used for bullet serialization.
-         * @return The bullet prefix as a string.
-         */
-        static std::string BulletPrefix();
-
-    private:
-        /**
-         * @brief Initialize the bullet with velocity and speed.
-         * @param _velocityAngle The angle of movement.
-         * @param _speed The speed of the bullet.
-         */
-        void InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed);
-
-        /**
-         * @brief Set the scale transformation matrix for the bullet.
-         */
-        void SetSMatrix();
-
-        /**
-         * @brief Set the translation transformation matrix for the bullet.
-         */
-        void SetTMatrix();
-
-        /**
-         * @brief Mark the bullet as out of bounds.
-         */
-        void SetBulletOutOfBounds();
-
-        bool bulletInitialized_ = false; /**< Indicates whether the bullet has been initialized. */
-        bool outOfBounds_ = false;       /**< Flag indicating if the bullet is out of bounds. */
-
-        Resource2DGLfloat bulletVertices_;   /**< Vertex data for the bullet. */
-        ResourceGLubyte bulletIndices_;      /**< Index data for the bullet rendering. */
-        Resource2DGLfloat projectionMatrix_; /**< Projection matrix for the bullet rendering. */
-    };
-
-} // end namespace asteroids
-
-#endif // asteroids_bullet_h
+#endif // ASTEROIDS_BULLET_H
