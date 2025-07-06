@@ -24,6 +24,10 @@ Note: You can uninstall via: `azulejo-common-lib/uninstall.sh`
 - CMake Tools (by Microsoft)
 - C/C++ (by Microsoft)
 
+### Qt Creator
+
+0. Install `Qt Creator`
+
 ### VCPKG
 
 Install [vcpkg](https://github.com/microsoft/vcpkg).
@@ -54,8 +58,22 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 1. Run `CMake: Build`
 
+### On macOS or Ubuntu (Qt Creator)
+
+0. Run `Build > Run qmake`.
+1. Run `Build > Build All Projects`.
+
 ## Run
 
 ### On macOS or Ubuntu (VSCode)
 
 0. Run `Start Debugging` with `GLAsteroids` configuration
+
+### On macOS or Ubuntu (Qt Creator)
+
+0. In the `Projects` tab:
+- Under `Build & Run`:
+  - Choose the executable path in the `build` folder.
+- In the `Manage Kits`:
+  - Select a debugger (e.g. `gdb`)
+1. Run `Debug > Start Debugging`
