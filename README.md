@@ -49,15 +49,6 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 ## Build
 
-### On macOS or Ubuntu (VSCode)
-
-0. Run `CMake: Configure` command and use the appropriate compiler:
-
-- Clang (on macOS)
-- GCC (on Linux)
-
-1. Run `CMake: Build`
-
 ### On macOS or Ubuntu (Qt Creator)
 
 0. Run `Build > Run qmake`.
@@ -65,15 +56,13 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 ## Run
 
-### On macOS or Ubuntu (VSCode)
-
-0. Run `Start Debugging` with `GLAsteroids` configuration
-
 ### On macOS or Ubuntu (Qt Creator)
 
 0. In the `Projects` tab:
+
 - Under `Build & Run`:
   - Choose the executable path in the `build` folder.
 - In the `Manage Kits`:
   - Select a debugger (e.g. `gdb`)
+
 1. Run `Debug > Start Debugging`
