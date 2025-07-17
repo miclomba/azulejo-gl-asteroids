@@ -15,8 +15,6 @@ case "$(uname -s)" in
 esac
 
 vcpkg install --classic \
-#  qtbase[widgets,opengl] \
-#  qtdeclarative \
   boost-filesystem \
   boost-asio \
   boost-property-tree \

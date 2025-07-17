@@ -49,14 +49,27 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 ## Build
 
-### On macOS or Ubuntu (Qt Creator)
+### VSCode (macOS | Ubuntu)
+
+0. Run `CMake: Configure` command and use the appropriate compiler:
+
+- Clang (on macOS)
+- GCC (on Linux)
+
+1. Run `CMake: Build`
+
+### Qt Creator (macOS | Ubuntu)
 
 0. Run `Build > Run qmake`.
 1. Run `Build > Build All Projects`.
 
 ## Run
 
-### On macOS or Ubuntu (Qt Creator)
+### VSCode (macOS | Ubuntu)
+
+0. Run `Start Debugging` with `GL3DModeler` configuration
+
+### Qt Creator (macOS | Ubuntu)
 
 0. In the `Projects` tab:
 
