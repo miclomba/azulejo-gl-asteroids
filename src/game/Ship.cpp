@@ -58,7 +58,7 @@ namespace
 	const std::string TRUE_VAL = "true";
 
 	GLfloat PROJECTION_BUFFER[16];
-	GLint BULLET_COUNT = 5;
+	const GLint BULLET_COUNT = 5;
 
 	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
 	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
@@ -417,11 +417,10 @@ void Ship::Save(ptree &tree, const std::string &path) const
 		fs::create_directories(path);
 
 	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath(path);
 
-	serializer->Serialize(shipVertices_, SHIP_VERTICES_KEY);
-	serializer->Serialize(shipIndices_, SHIP_INDICES_KEY);
-	serializer->Serialize(unitOrientation_, UNIT_ORIENTATION_KEY);
+	serializer->Serialize(shipVertices_.Lock(), SHIP_VERTICES_KEY, path);
+	serializer->Serialize(shipIndices_.Lock(), SHIP_INDICES_KEY, path);
+	serializer->Serialize(unitOrientation_.Lock(), UNIT_ORIENTATION_KEY, path);
 
 	GLEntity::Save(tree, path);
 }
@@ -434,13 +433,12 @@ void Ship::Load(ptree &tree, const std::string &path)
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
 	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY, path);
 	shipVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());
-	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(SHIP_INDICES_KEY, path);
 	shipIndices_ = *static_cast<ResourceGLubyte *>(deserializedIndices.get());
-	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY);
+	std::unique_ptr<ISerializableResource> deserializedOrientation = deserializer->Deserialize(UNIT_ORIENTATION_KEY, path);
 	unitOrientation_ = *static_cast<Resource2DGLfloat *>(deserializedOrientation.get());
 }
 

@@ -310,10 +310,9 @@ void Rock::Save(boost::property_tree::ptree &tree, const std::string &path) cons
 		fs::create_directories(path);
 
 	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath(path);
 
-	serializer->Serialize(rockVertices_, ROCK_VERTICES_KEY);
-	serializer->Serialize(rockIndices_, ROCK_INDICES_KEY);
+	serializer->Serialize(rockVertices_.Lock(), ROCK_VERTICES_KEY, path);
+	serializer->Serialize(rockIndices_.Lock(), ROCK_INDICES_KEY, path);
 
 	GLEntity::Save(tree, path);
 }
@@ -329,11 +328,10 @@ void Rock::Load(boost::property_tree::ptree &tree, const std::string &path)
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
 	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY, path);
 	rockVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());
-	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(ROCK_INDICES_KEY, path);
 	rockIndices_ = *static_cast<ResourceGLubyte *>(deserializedIndices.get());
 }
 

@@ -230,11 +230,10 @@ void Bullet::Save(boost::property_tree::ptree &tree, const std::string &path) co
 		fs::create_directories(path);
 
 	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
-	serializer->SetSerializationPath(path);
 
-	serializer->Serialize(bulletVertices_, BULLET_VERTICES_KEY);
-	serializer->Serialize(bulletIndices_, BULLET_INDICES_KEY);
-	serializer->Serialize(projectionMatrix_, PROJECTION_MATRIX_KEY);
+	serializer->Serialize(bulletVertices_.Lock(), BULLET_VERTICES_KEY, path);
+	serializer->Serialize(bulletIndices_.Lock(), BULLET_INDICES_KEY, path);
+	serializer->Serialize(projectionMatrix_.Lock(), PROJECTION_MATRIX_KEY, path);
 
 	GLEntity::Save(tree, path);
 }
@@ -247,13 +246,12 @@ void Bullet::Load(boost::property_tree::ptree &tree, const std::string &path)
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
 	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
-	deserializer->SetSerializationPath(path);
 
-	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY, path);
 	bulletVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.release());
-	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY);
+	std::unique_ptr<ISerializableResource> deserializedIndices = deserializer->Deserialize(BULLET_INDICES_KEY, path);
 	bulletIndices_ = *static_cast<ResourceGLubyte *>(deserializedIndices.release());
-	std::unique_ptr<ISerializableResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY);
+	std::unique_ptr<ISerializableResource> deserializedProjection = deserializer->Deserialize(PROJECTION_MATRIX_KEY, path);
 	projectionMatrix_ = *static_cast<Resource2DGLfloat *>(deserializedProjection.release());
 }
 

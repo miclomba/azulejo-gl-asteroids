@@ -797,25 +797,22 @@ void Asteroids::ClearUnusedSerializationKeys()
 		if (key.find(ROCK_PREFIX) != std::string::npos)
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
-			RSerializer->SetSerializationPath((resourceFolder).string());
 			for (const std::string &resourceKey : ROCK_RESOURCES)
-				RSerializer->Unserialize(resourceKey);
+				RSerializer->Unserialize(resourceKey, resourceFolder.string());
 			fs::remove(resourceFolder);
 		}
 		else if (key.find(BULLET_PREFIX) != std::string::npos)
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / Ship::ShipKey() / key;
-			RSerializer->SetSerializationPath((resourceFolder).string());
 			for (const std::string &resourceKey : BULLET_RESOURCES)
-				RSerializer->Unserialize(resourceKey);
+				RSerializer->Unserialize(resourceKey, resourceFolder.string());
 			fs::remove(resourceFolder);
 		}
 		else
 		{
 			fs::path resourceFolder = SERIALIZATION_PATH.parent_path() / GetKey() / key;
-			RSerializer->SetSerializationPath((resourceFolder).string());
 			for (const std::string &resourceKey : SHIP_RESOURCES)
-				RSerializer->Unserialize(resourceKey);
+				RSerializer->Unserialize(resourceKey, resourceFolder.string());
 		}
 	}
 	keysToRemove_.clear();
