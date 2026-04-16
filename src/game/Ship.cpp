@@ -107,7 +107,7 @@ void Ship::RegisterSerializationResources(const std::string &key)
 {
 	GLEntity::RegisterSerializationResources(key);
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
 		deserializer->RegisterResource<GLfloat>(SHIP_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(SHIP_INDICES_KEY))
@@ -120,7 +120,7 @@ void Ship::RegisterTabularizationResources(const std::string &key)
 {
 	GLEntity::RegisterTabularizationResources(key);
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_VERTICES_KEY)))
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + SHIP_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_INDICES_KEY)))
@@ -147,9 +147,8 @@ Ship &Ship::operator=(Ship &&) = default;
 
 std::string Ship::GenerateUUID() const
 {
-	boost::uuids::uuid tag = boost::uuids::random_generator()();
-	std::string val = boost::lexical_cast<std::string>(tag);
-	return val;
+	const boost::uuids::uuid tag = boost::uuids::random_generator()();
+	return boost::lexical_cast<std::string>(tag);
 }
 
 Ship::SharedEntity &Ship::GetBullet(const std::string &key) const
@@ -181,12 +180,12 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 		return;
 
 	Resource2DGLfloat& unitVel = GetUnitVelocity();
-	GLfloat mass = GetMass();
+	const GLfloat mass = GetMass();
 	GLfloat speed = GetSpeed();
 	GLfloat velAngle = GetVelocityAngle();
 
-	GLfloat xComponentOrientation = _thrust * cos(orientationAngle_) / mass;
-	GLfloat yComponentOrientation = _thrust * sin(orientationAngle_) / mass;
+	const GLfloat xComponentOrientation = _thrust * cos(orientationAngle_) / mass;
+	const GLfloat yComponentOrientation = _thrust * sin(orientationAngle_) / mass;
 	GLfloat xComponentVelocity = speed * cos(velAngle);
 	GLfloat yComponentVelocity = speed * sin(velAngle);
 
@@ -238,12 +237,12 @@ void Ship::WrapAroundMoveShip()
 {
 	glGetFloatv(GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
 
-	GLfloat epsilon = 0.5f;
+	const GLfloat epsilon = 0.5f;
 
-	GLfloat right = (1 / fabs(PROJECTION_BUFFER[0]));
-	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(PROJECTION_BUFFER[5]));
-	GLfloat bottom = -1 * top;
+	const GLfloat right = (1 / fabs(PROJECTION_BUFFER[0]));
+	const GLfloat left = -1 * right;
+	const GLfloat top = (1 / fabs(PROJECTION_BUFFER[5]));
+	const GLfloat bottom = -1 * top;
 
 	Resource2DGLfloat& frame = GetFrame();
 	if (frame.GetData(0, 0) <= left - epsilon)
@@ -270,7 +269,7 @@ void Ship::WrapAroundMoveShip()
 
 void Ship::UpdateBulletTask(GLEntity *sharedBullet)
 {
-	Bullet *bullet = dynamic_cast<Bullet *>(sharedBullet);
+	Bullet * const bullet = dynamic_cast<Bullet *>(sharedBullet);
 	bullet->Update(orientationAngle_, GetSpeed());
 }
 
@@ -290,7 +289,7 @@ void Ship::UpdateBullets(
 	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
 	{
 		SharedEntity &sharedEntity = iter->second;
-		Bullet *bullet = dynamic_cast<Bullet *>(sharedEntity.get());
+		Bullet * const bullet = dynamic_cast<Bullet *>(sharedEntity.get());
 		if (bullet && bullet->IsOutOfBounds())
 		{
 			bulletsToRemove.push_back(bullet->GetKey());
@@ -306,7 +305,7 @@ void Ship::UpdateBullets(
 		}
 	}
 
-	for (std::string &bulletKey : bulletsToRemove)
+	for (const std::string &bulletKey : bulletsToRemove)
 		RemoveBullet(bulletKey, serializedKeys);
 }
 
@@ -341,7 +340,7 @@ void Ship::Update(
 {
 	RecomputeShipVelocity(_thrust);
 
-	GLfloat speed = GetSpeed();
+	const GLfloat speed = GetSpeed();
 	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
 							{0.0f, speed, 0.0f, 0.0f},
 							{0.0f, 0.0f, speed, 0.0f},
@@ -390,7 +389,7 @@ void Ship::Fire()
 	if (std::map<Key, SharedEntity> &bullets = GetAggregatedMembers(); bullets.size() > BulletNumber())
 		return;
 
-	std::string key = Bullet::BulletPrefix() + GenerateUUID();
+	const std::string key = Bullet::BulletPrefix() + GenerateUUID();
 
 	Resource2DGLfloat& frame = GetFrame();
 	SharedEntity bullet = std::make_shared<Bullet>(frame.GetData(0, 0), frame.GetData(1, 0));
@@ -429,7 +428,7 @@ void Ship::Save(ptree &tree, const std::string &path) const
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
-	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
+	ResourceSerializer * const serializer = ResourceSerializer::GetInstance();
 
 	serializer->Serialize(shipVertices_.Lock(), SHIP_VERTICES_KEY, path);
 	serializer->Serialize(shipIndices_.Lock(), SHIP_INDICES_KEY, path);
@@ -445,7 +444,7 @@ void Ship::Load(ptree &tree, const std::string &path)
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 
 	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(SHIP_VERTICES_KEY, path);
 	shipVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());
@@ -476,7 +475,7 @@ void Ship::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_VERTICES_KEY));
 	shipVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());

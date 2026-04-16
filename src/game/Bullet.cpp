@@ -86,7 +86,7 @@ void Bullet::RegisterSerializationResources(const std::string &key)
 {
 	GLEntity::RegisterSerializationResources(key);
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(BULLET_VERTICES_KEY))
 		deserializer->RegisterResource<GLfloat>(BULLET_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(BULLET_INDICES_KEY))
@@ -99,7 +99,7 @@ void Bullet::RegisterTabularizationResources(const std::string &key)
 {
 	GLEntity::RegisterTabularizationResources(key);
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_VERTICES_KEY)))
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + BULLET_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_INDICES_KEY)))
@@ -139,7 +139,7 @@ void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed
 
 void Bullet::SetSMatrix()
 {
-	GLfloat speed = GetSpeed();
+	const GLfloat speed = GetSpeed();
 	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
 							{0.0f, speed, 0.0f, 0.0f},
 							{0.0f, 0.0f, speed, 0.0f},
@@ -157,12 +157,12 @@ void Bullet::SetTMatrix()
 
 void Bullet::SetBulletOutOfBounds()
 {
-	GLfloat epsilon = 3.0f;
+	const GLfloat epsilon = 3.0f;
 
-	GLfloat right = (1 / fabs(static_cast<GLfloat *>(projectionMatrix_.Data())[0]));
-	GLfloat left = -1 * right;
-	GLfloat top = (1 / fabs(static_cast<GLfloat *>(projectionMatrix_.Data())[5]));
-	GLfloat bottom = -1 * top;
+	const GLfloat right = (1 / fabs(static_cast<GLfloat *>(projectionMatrix_.Data())[0]));
+	const GLfloat left = -1 * right;
+	const GLfloat top = (1 / fabs(static_cast<GLfloat *>(projectionMatrix_.Data())[5]));
+	const GLfloat bottom = -1 * top;
 
 	Resource2DGLfloat &frame = GetFrame();
 	if ((frame.GetData(0, 0) <= left - epsilon) || (frame.GetData(0, 0) >= right + epsilon) ||
@@ -230,7 +230,7 @@ void Bullet::Save(boost::property_tree::ptree &tree, const std::string &path) co
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
-	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
+	ResourceSerializer * const serializer = ResourceSerializer::GetInstance();
 
 	serializer->Serialize(bulletVertices_.Lock(), BULLET_VERTICES_KEY, path);
 	serializer->Serialize(bulletIndices_.Lock(), BULLET_INDICES_KEY, path);
@@ -246,7 +246,7 @@ void Bullet::Load(boost::property_tree::ptree &tree, const std::string &path)
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 
 	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(BULLET_VERTICES_KEY, path);
 	bulletVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.release());
@@ -261,7 +261,7 @@ void Bullet::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
 
-	ResourceTabularizer *tabularizer = ResourceTabularizer::GetInstance();
+	ResourceTabularizer * const tabularizer = ResourceTabularizer::GetInstance();
 
 	tabularizer->Tabularize(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	tabularizer->Tabularize(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
@@ -277,7 +277,7 @@ void Bullet::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 
 	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	bulletVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.release());

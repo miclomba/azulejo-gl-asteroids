@@ -97,7 +97,7 @@ void Rock::RegisterSerializationResources(const std::string &key)
 {
 	GLEntity::RegisterSerializationResources(key);
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
 		deserializer->RegisterResource<GLfloat>(ROCK_VERTICES_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 	if (!deserializer->HasSerializationKey(ROCK_INDICES_KEY))
@@ -108,7 +108,7 @@ void Rock::RegisterTabularizationResources(const std::string &key)
 {
 	GLEntity::RegisterTabularizationResources(key);
 
-	ResourceDetabularizer *tabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const tabularizer = ResourceDetabularizer::GetInstance();
 	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_VERTICES_KEY)))
 		tabularizer->RegisterResource<GLfloat>(FormatKey(key + ROCK_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_INDICES_KEY)))
@@ -193,11 +193,10 @@ void Rock::WrapAroundMoveRock()
 {
 	glGetFloatv(GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
 
-	GLfloat left, right, bottom, top;
-	right = (1 / fabs(PROJECTION_BUFFER[0]));
-	left = -1 * right;
-	top = (1 / fabs(PROJECTION_BUFFER[5]));
-	bottom = -1 * top;
+	const GLfloat right = (1 / fabs(PROJECTION_BUFFER[0]));
+	const GLfloat left = -1 * right;
+	const GLfloat top = (1 / fabs(PROJECTION_BUFFER[5]));
+	const GLfloat bottom = -1 * top;
 
 	Resource2DGLfloat &frame = GetFrame();
 	if (frame.GetData(0, 0) <= left - epsilon_)
@@ -245,7 +244,7 @@ void Rock::Update(const GLfloat _velocityAngle, const GLfloat _speed, const GLfl
 	InitializeRock(_velocityAngle, _speed, _spin);
 	UpdateSpin();
 
-	GLfloat speed = GetSpeed();
+	const GLfloat speed = GetSpeed();
 	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
 							{0.0f, speed, 0.0f, 0.0f},
 							{0.0f, 0.0f, speed, 0.0f},
@@ -311,7 +310,7 @@ void Rock::Save(boost::property_tree::ptree &tree, const std::string &path) cons
 	if (!fs::exists(path))
 		fs::create_directories(path);
 
-	ResourceSerializer *serializer = ResourceSerializer::GetInstance();
+	ResourceSerializer * const serializer = ResourceSerializer::GetInstance();
 
 	serializer->Serialize(rockVertices_.Lock(), ROCK_VERTICES_KEY, path);
 	serializer->Serialize(rockIndices_.Lock(), ROCK_INDICES_KEY, path);
@@ -329,7 +328,7 @@ void Rock::Load(boost::property_tree::ptree &tree, const std::string &path)
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
+	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 
 	std::unique_ptr<ISerializableResource> deserializedVertices = deserializer->Deserialize(ROCK_VERTICES_KEY, path);
 	rockVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());
@@ -345,7 +344,7 @@ void Rock::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 	tree.put(STATE_KEY, static_cast<int>(state_));
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
-	ResourceTabularizer *tabularizer = ResourceTabularizer::GetInstance();
+	ResourceTabularizer * const tabularizer = ResourceTabularizer::GetInstance();
 
 	tabularizer->Tabularize(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
 	tabularizer->Tabularize(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
@@ -363,7 +362,7 @@ void Rock::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 
 	std::unique_ptr<ITabularizableResource> detabularizedVertices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_VERTICES_KEY));
 	rockVertices_ = *static_cast<Resource2DGLfloat *>(detabularizedVertices.get());
