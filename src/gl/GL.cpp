@@ -72,11 +72,11 @@ void GL::Reshape(const int _w, const int _h)
 	glLoadIdentity();
 
 	if (_w <= _h)
-		glOrtho(-10.0, 10.0, -10.0 * ((GLfloat)_h / (GLfloat)_w),
-				10.0 * ((GLfloat)_h / (GLfloat)_w), 10, -10);
+		glOrtho(-10.0, 10.0, -10.0 * (static_cast<GLfloat>(_h) / static_cast<GLfloat>(_w)),
+				10.0 * (static_cast<GLfloat>(_h) / static_cast<GLfloat>(_w)), 10, -10);
 	else
-		glOrtho(-10.0 * ((GLfloat)_w / (GLfloat)_h),
-				10.0 * ((GLfloat)_w / (GLfloat)_h), -10.0, 10.0, 10, -10);
+		glOrtho(-10.0 * (static_cast<GLfloat>(_w) / static_cast<GLfloat>(_h)),
+				10.0 * (static_cast<GLfloat>(_w) / static_cast<GLfloat>(_h)), -10.0, 10.0, 10, -10);
 
 	/*========================= REDISPLAY ====================================*/
 	glMatrixMode(GL_MODELVIEW);

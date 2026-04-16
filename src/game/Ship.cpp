@@ -201,7 +201,7 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	if (speed > 5.0f)
 		SetSpeed(5.0f);
 
-	SetVelocityAngle((GLfloat)(atan(unitVel.GetData(1, 0) / unitVel.GetData(0, 0))));
+	SetVelocityAngle(static_cast<GLfloat>(atan(unitVel.GetData(1, 0) / unitVel.GetData(0, 0))));
 	velAngle = GetVelocityAngle();
 
 	if (unitVel.GetData(0, 0) < 0)
@@ -216,7 +216,7 @@ void Ship::ChangeShipOrientation()
 	glMultMatrixf(static_cast<GLfloat *>(R_.Data()));
 	glGetFloatv(GL_MODELVIEW_MATRIX, static_cast<GLfloat *>(unitOrientation_.Data()));
 
-	orientationAngle_ = (GLfloat)(atan(unitOrientation_.GetData(1, 0) /
+	orientationAngle_ = static_cast<GLfloat>(atan(unitOrientation_.GetData(1, 0) /
 									   unitOrientation_.GetData(0, 0)));
 	if (unitOrientation_.GetData(0, 0) < 0)
 		orientationAngle_ += M_PI;

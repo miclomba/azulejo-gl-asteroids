@@ -328,7 +328,7 @@ void Asteroids::UpdateRockTask(GLEntity *sharedRock)
 	Rock * const rock = dynamic_cast<Rock *>(sharedRock);
 	GLint randy = rand();
 	randy = (randy % 9) + 1;
-	rock->Update((GLfloat)(M_PI * randy / 5), (GLfloat)(randy % 3) / 100, (GLfloat)(randy % 6) / 100);
+	rock->Update(static_cast<GLfloat>(M_PI * randy / 5), static_cast<GLfloat>(randy % 3) / 100, static_cast<GLfloat>(randy % 6) / 100);
 };
 
 void Asteroids::UpdateShipTask(GLEntity *sharedShip, std::vector<std::future<GLEntity *>> &futures)
@@ -612,7 +612,7 @@ void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 
 	const GLfloat momentumMagnitude = sqrt(pow(xCompMomentumR, 2) + pow(yCompMomentumR, 2));
 
-	GLfloat momentumAngle = (GLfloat)(atan(yCompMomentumR / xCompMomentumR));
+	GLfloat momentumAngle = static_cast<GLfloat>(atan(yCompMomentumR / xCompMomentumR));
 	if (xCompMomentumR < 0)
 		momentumAngle += M_PI;
 	else if (yCompMomentumR < 0)
