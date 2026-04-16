@@ -43,7 +43,10 @@ link_directories(
 )
 
 # — find Qt6 modules (will pick up system Qt on macOS) —
-find_package(Qt6 REQUIRED COMPONENTS
+find_package(Qt6 REQUIRED 
+PATHS
+    "$ENV{HOME}/Qt/6.11.0/macos"
+COMPONENTS
     Core
     Gui
     Widgets

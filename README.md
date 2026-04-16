@@ -26,7 +26,9 @@ Note: You can uninstall via: `azulejo-common-lib/uninstall.sh`
 
 ### Qt Creator
 
-0. Install `Qt Creator`
+0. Install the open source [Qt Creator](https://www.qt.io/development/download-qt-installer-oss) in `~/Qt`. You will need a developer account to download.
+
+__NOTE__: Qt supported version is `6.11`. If you download a later version you may need to update the `CMakeLists.txt` file to reflect the new version number.
 
 ### VCPKG
 
@@ -67,7 +69,7 @@ Install [vcpkg](https://github.com/microsoft/vcpkg).
 
 ### VSCode (macOS | Ubuntu)
 
-0. Run `Start Debugging` with `GL3DModeler` configuration
+0. Run `Start Debugging` with `GLAsteroids` configuration
 
 ### Qt Creator (macOS | Ubuntu)
 
