@@ -32,7 +32,7 @@ __NOTE__: Qt supported version is `6.11`. If you download a later version you ma
 
 ### VCPKG
 
-Install [vcpkg](https://github.com/microsoft/vcpkg).
+Install [vcpkg](https://github.com/microsoft/vcpkg) adjacent to this repository directory.
 
 ### Mac OS
 
