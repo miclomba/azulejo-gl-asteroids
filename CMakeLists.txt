@@ -7,8 +7,8 @@ message(STATUS "VCPKG_LINK_DIR: $ENV{VCPKG_LINK_DIR}")
 message(STATUS "X_INCL_DIR: $ENV{X_INCL_DIR}")
 message(STATUS "X_LINK_DIR: $ENV{X_LINK_DIR}")
 
-# — Enable C++17 —
-set(CMAKE_CXX_STANDARD 17)
+# — Enable C++20 —
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # — enable automoc, autorcc, autouic for Qt6 —

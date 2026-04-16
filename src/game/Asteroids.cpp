@@ -256,8 +256,7 @@ Asteroids::SharedEntity &Asteroids::GetShip()
 
 void Asteroids::ClearGame()
 {
-	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key &key : rockKeys)
+	for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 	{
 		AddToRemoveKeys(key);
 		RemoveMember(key);
@@ -358,8 +357,7 @@ void Asteroids::DrawGLEntities()
 		boost::asio::post(threadPool_, task);
 	}
 
-	SharedEntity &sharedShip = GetShip();
-	if (sharedShip)
+	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
 		GLEntity *ship = dynamic_cast<GLEntity *>(sharedShip.get());
 		GLEntityTask task([ship, &bulletFutures, this]()
@@ -407,8 +405,7 @@ void Asteroids::Draw()
 
 void Asteroids::ClearRocks()
 {
-	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key &key : rockKeys)
+	for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 	{
 		AddToRemoveKeys(key);
 		SharedEntity &sharedRock = GetRock(key);
@@ -422,8 +419,7 @@ void Asteroids::ClearBullets()
 	if (!ship)
 		return;
 
-	std::vector<Key> bulletKeys = ship->GetBulletKeys();
-	for (Key &key : bulletKeys)
+	for (std::vector<Key> bulletKeys = ship->GetBulletKeys(); Key &key : bulletKeys)
 	{
 		AddToRemoveKeys(key);
 		SharedEntity &sharedBullet = ship->GetBullet(key);
@@ -446,11 +442,9 @@ void Asteroids::ClearShip()
 
 bool Asteroids::HasRocks()
 {
-	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key &key : rockKeys)
+	for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 	{
-		SharedEntity &sharedRock = GetRock(key);
-		if (sharedRock)
+		if (SharedEntity &sharedRock = GetRock(key); sharedRock)
 			return true;
 	}
 	return false;
@@ -472,10 +466,9 @@ void Asteroids::DetermineCollisions()
 	std::vector<std::pair<Bullet *, std::future<GLEntity *>>> bulletAndRockFuture;
 
 	Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
-	std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys();
 
 	std::vector<std::pair<Bullet *, Key>> collisionPairs;
-	for (Ship::Key &bulletKey : bulletKeys)
+	for (std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys(); Ship::Key &bulletKey : bulletKeys)
 	{
 		Ship::SharedEntity &sharedBullet = ship->GetBullet(bulletKey);
 		Bullet *bullet = dynamic_cast<Bullet *>(sharedBullet.get());
@@ -489,11 +482,10 @@ void Asteroids::DetermineCollisions()
 
 	for (std::pair<Bullet *, std::future<GLEntity *>> &bulletRock : bulletAndRockFuture)
 	{
-		Rock *rock = dynamic_cast<Rock *>(bulletRock.second.get());
-		Bullet *bullet = bulletRock.first;
-
-		if (rock)
+		if (Rock *rock = dynamic_cast<Rock *>(bulletRock.second.get()); rock) {
+			Bullet *bullet = bulletRock.first;
 			collisionPairs.push_back(std::make_pair(bullet, rock->GetKey()));
+		}
 	}
 
 	std::vector<std::future<GLEntity *>> collisionFutures;
@@ -543,8 +535,7 @@ Rock *Asteroids::Collision(Bullet *_bullet)
 	GLfloat epsilon;
 	GLfloat ray;
 
-	std::vector<Key> rockKeys = GetRockKeys();
-	for (Key &key : rockKeys)
+	for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 	{
 		SharedEntity &sharedRock = GetRock(key);
 		if (!sharedRock)
@@ -572,12 +563,10 @@ Rock *Asteroids::ShipCollision()
 	GLfloat epsilon;
 	GLfloat ray;
 
-	SharedEntity &sharedShip = GetShip();
-	if (sharedShip)
+	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
 		Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
-		std::vector<Key> rockKeys = GetRockKeys();
-		for (Key &key : rockKeys)
+		for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 		{
 			SharedEntity &sharedRock = GetRock(key);
 			if (!sharedRock)
@@ -719,8 +708,7 @@ void Asteroids::ResetThrustAndRotation()
 
 void Asteroids::Fire()
 {
-	SharedEntity &sharedShip = GetShip();
-	if (sharedShip)
+	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
 		Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
 		ship->Fire();
@@ -782,8 +770,7 @@ void Asteroids::AddToRemoveKeys(const std::string &key)
 void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
 {
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
-	const std::set<std::string> &outOfScopeBullets = ship->GetOutOfScopeBulletKeys();
-	for (const Key &key : outOfScopeBullets)
+	for (const std::set<std::string> &outOfScopeBullets = ship->GetOutOfScopeBulletKeys(); const Key &key : outOfScopeBullets)
 		AddToRemoveKeys(key);
 	ship->ClearOutOfScopeBulletKeys();
 }

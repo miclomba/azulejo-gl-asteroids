@@ -180,26 +180,35 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	if (fabs(_thrust - 0.0f) <= 0.00001f)
 		return;
 
-	GLfloat xComponentOrientation = _thrust * cos(orientationAngle_) / GetMass();
-	GLfloat yComponentOrientation = _thrust * sin(orientationAngle_) / GetMass();
-	GLfloat xComponentVelocity = GetSpeed() * cos(GetVelocityAngle());
-	GLfloat yComponentVelocity = GetSpeed() * sin(GetVelocityAngle());
+	Resource2DGLfloat& unitVel = GetUnitVelocity();
+	GLfloat mass = GetMass();
+	GLfloat speed = GetSpeed();
+	GLfloat velAngle = GetVelocityAngle();
+
+	GLfloat xComponentOrientation = _thrust * cos(orientationAngle_) / mass;
+	GLfloat yComponentOrientation = _thrust * sin(orientationAngle_) / mass;
+	GLfloat xComponentVelocity = speed * cos(velAngle);
+	GLfloat yComponentVelocity = speed * sin(velAngle);
 
 	xComponentVelocity += xComponentOrientation;
 	yComponentVelocity += yComponentOrientation;
 
 	SetSpeed(sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2)));
-	GetUnitVelocity().GetData(0, 0) = xComponentVelocity / GetSpeed();
-	GetUnitVelocity().GetData(1, 0) = yComponentVelocity / GetSpeed();
+	speed = GetSpeed();
 
-	if (GetSpeed() > 5.0f)
+	unitVel.GetData(0, 0) = xComponentVelocity / speed;
+	unitVel.GetData(1, 0) = yComponentVelocity / speed;
+
+	if (speed > 5.0f)
 		SetSpeed(5.0f);
 
-	SetVelocityAngle((GLfloat)(atan(GetUnitVelocity().GetData(1, 0) / GetUnitVelocity().GetData(0, 0))));
-	if (GetUnitVelocity().GetData(0, 0) < 0)
-		SetVelocityAngle(GetVelocityAngle() + M_PI);
-	else if (GetUnitVelocity().GetData(1, 0) < 0)
-		SetVelocityAngle(GetVelocityAngle() + 2 * M_PI);
+	SetVelocityAngle((GLfloat)(atan(unitVel.GetData(1, 0) / unitVel.GetData(0, 0))));
+	velAngle = GetVelocityAngle();
+
+	if (unitVel.GetData(0, 0) < 0)
+		SetVelocityAngle(velAngle + M_PI);
+	else if (unitVel.GetData(1, 0) < 0)
+		SetVelocityAngle(velAngle + 2 * M_PI);
 }
 
 void Ship::ChangeShipOrientation()
@@ -236,25 +245,26 @@ void Ship::WrapAroundMoveShip()
 	GLfloat top = (1 / fabs(PROJECTION_BUFFER[5]));
 	GLfloat bottom = -1 * top;
 
-	if (GetFrame().GetData(0, 0) <= left - epsilon)
+	Resource2DGLfloat& frame = GetFrame();
+	if (frame.GetData(0, 0) <= left - epsilon)
 	{
 		SetFrame(0, 0, right + epsilon);
-		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
+		SetFrame(1, 0, frame.GetData(1, 0) * -1);
 	}
-	else if (GetFrame().GetData(0, 0) >= right + epsilon)
+	else if (frame.GetData(0, 0) >= right + epsilon)
 	{
 		SetFrame(0, 0, left - epsilon);
-		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
+		SetFrame(1, 0, frame.GetData(1, 0) * -1);
 	}
-	else if (GetFrame().GetData(1, 0) >= top + epsilon)
+	else if (frame.GetData(1, 0) >= top + epsilon)
 	{
 		SetFrame(1, 0, bottom - epsilon);
-		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
+		SetFrame(0, 0, frame.GetData(0, 0) * -1);
 	}
-	else if (GetFrame().GetData(1, 0) <= bottom - epsilon)
+	else if (frame.GetData(1, 0) <= bottom - epsilon)
 	{
 		SetFrame(1, 0, top + epsilon);
-		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
+		SetFrame(0, 0, frame.GetData(0, 0) * -1);
 	}
 }
 
@@ -374,8 +384,7 @@ GLint Ship::BulletNumber()
 
 void Ship::Fire()
 {
-	std::map<Key, SharedEntity> &bullets = GetAggregatedMembers();
-	if (bullets.size() > BulletNumber())
+	if (std::map<Key, SharedEntity> &bullets = GetAggregatedMembers(); bullets.size() > BulletNumber())
 		return;
 
 	std::string key = Bullet::BulletPrefix() + GenerateUUID();

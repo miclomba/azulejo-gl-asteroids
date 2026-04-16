@@ -111,8 +111,7 @@ void GLBackend::resizeGL(const int _w, const int _h)
 
 void GLBackend::keyPressEvent(QKeyEvent *event)
 {
-	QString txt = event->text();
-	if (!txt.isEmpty())
+	if (QString txt = event->text(); !txt.isEmpty())
 	{
 		unsigned char c = txt.at(0).toLatin1();
 		keysPressed_[c] = true;
@@ -121,8 +120,7 @@ void GLBackend::keyPressEvent(QKeyEvent *event)
 
 void GLBackend::keyReleaseEvent(QKeyEvent *event)
 {
-	auto txt = event->text();
-	if (!txt.isEmpty())
+	if (auto txt = event->text(); !txt.isEmpty())
 	{
 		unsigned char c = txt.at(0).toLatin1();
 		keysPressed_[c] = false;
