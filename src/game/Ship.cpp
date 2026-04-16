@@ -324,7 +324,8 @@ void Ship::Draw()
 	glVertexPointer(3, GL_FLOAT, 0, shipVertices_.Data());
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame().GetData(0, 0), GetFrame().GetData(1, 0), GetFrame().GetData(2, 0));
+	Resource2DGLfloat& frame = GetFrame();
+	glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
 	glRotatef(orientationAngle_ * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
 
@@ -340,14 +341,16 @@ void Ship::Update(
 {
 	RecomputeShipVelocity(_thrust);
 
-	S_ = Resource2DGLfloat({{GetSpeed(), 0.0f, 0.0f, 0.0f},
-							{0.0f, GetSpeed(), 0.0f, 0.0f},
-							{0.0f, 0.0f, GetSpeed(), 0.0f},
+	GLfloat speed = GetSpeed();
+	S_ = Resource2DGLfloat({{speed, 0.0f, 0.0f, 0.0f},
+							{0.0f, speed, 0.0f, 0.0f},
+							{0.0f, 0.0f, speed, 0.0f},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 
-	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, GetFrame().GetData(0, 0)},
-							{0.0f, 1.0f, 0.0f, GetFrame().GetData(1, 0)},
-							{0.0f, 0.0f, 1.0f, GetFrame().GetData(2, 0)},
+	Resource2DGLfloat& frame = GetFrame();
+	T_ = Resource2DGLfloat({{1.0f, 0.0f, 0.0f, frame.GetData(0, 0)},
+							{0.0f, 1.0f, 0.0f, frame.GetData(1, 0)},
+							{0.0f, 0.0f, 1.0f, frame.GetData(2, 0)},
 							{0.0f, 0.0f, 0.0f, 1.0f}});
 
 	if (!(fabs(_orientationAngle - 0.0f) <= 0.00001f))
@@ -389,7 +392,8 @@ void Ship::Fire()
 
 	std::string key = Bullet::BulletPrefix() + GenerateUUID();
 
-	SharedEntity bullet = std::make_shared<Bullet>(GetFrame().GetData(0, 0), GetFrame().GetData(1, 0));
+	Resource2DGLfloat& frame = GetFrame();
+	SharedEntity bullet = std::make_shared<Bullet>(frame.GetData(0, 0), frame.GetData(1, 0));
 	bullet->SetKey(key);
 #ifndef SAVE_TO_DB
 	Bullet::RegisterSerializationResources(bullet->GetKey());

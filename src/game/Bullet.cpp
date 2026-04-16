@@ -199,7 +199,8 @@ void Bullet::Draw()
 		glVertexPointer(3, GL_FLOAT, 0, bulletVertices_.Data());
 		glColor3f(0.0f, 1.0f, 1.0f);
 		glLoadIdentity();
-		glTranslatef(GetFrame().GetData(0, 0), GetFrame().GetData(1, 0), GetFrame().GetData(2, 0));
+		Resource2DGLfloat& frame = GetFrame();
+		glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
 		glRotatef(GetVelocityAngle() * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data());
 	};

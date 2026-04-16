@@ -542,8 +542,10 @@ Rock *Asteroids::Collision(Bullet *_bullet)
 			continue;
 
 		Rock *rock = dynamic_cast<Rock *>(sharedRock.get());
-		ray = sqrt(pow(fabs(_bullet->GetFrame().GetData(0, 0) - rock->GetFrame().GetData(0, 0)), 2) +
-				   pow(fabs(_bullet->GetFrame().GetData(1, 0) - rock->GetFrame().GetData(1, 0)), 2));
+		Resource2DGLfloat& bulletFrame = _bullet->GetFrame();
+		Resource2DGLfloat& rockFrame = rock->GetFrame();
+		ray = sqrt(pow(fabs(bulletFrame.GetData(0, 0) - rockFrame.GetData(0, 0)), 2) +
+				   pow(fabs(bulletFrame.GetData(1, 0) - rockFrame.GetData(1, 0)), 2));
 
 		if (rock->GetState() == State::LARGE)
 			epsilon = 1.7f;
@@ -573,8 +575,10 @@ Rock *Asteroids::ShipCollision()
 				continue;
 
 			Rock *rock = dynamic_cast<Rock *>(sharedRock.get());
-			ray = sqrt(pow(fabs(ship->GetFrame().GetData(0, 0) - rock->GetFrame().GetData(0, 0)), 2) +
-					   pow(fabs(ship->GetFrame().GetData(1, 0) - rock->GetFrame().GetData(1, 0)), 2));
+			Resource2DGLfloat& shipFrame = ship->GetFrame();
+			Resource2DGLfloat& rockFrame = rock->GetFrame();
+			ray = sqrt(pow(fabs(shipFrame.GetData(0, 0) - rockFrame.GetData(0, 0)), 2) +
+					   pow(fabs(shipFrame.GetData(1, 0) - rockFrame.GetData(1, 0)), 2));
 
 			if (rock->GetState() == State::LARGE)
 				epsilon = 2.2f;
@@ -592,10 +596,17 @@ Rock *Asteroids::ShipCollision()
 
 void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 {
-	GLfloat xCompMomentumB = bullet->GetMass() * bullet->GetSpeed() * cos(bullet->GetVelocityAngle());
-	GLfloat yCompMomentumB = bullet->GetMass() * bullet->GetSpeed() * sin(bullet->GetVelocityAngle());
-	GLfloat xCompMomentumR = rock->GetMass() * rock->GetSpeed() * cos(rock->GetVelocityAngle());
-	GLfloat yCompMomentumR = rock->GetMass() * rock->GetSpeed() * sin(rock->GetVelocityAngle());
+	GLfloat bulletSpeed = bullet->GetSpeed();
+	GLfloat rockSpeed = rock->GetSpeed();
+	GLfloat bulletMass = bullet->GetMass();
+	GLfloat rockMass = rock->GetMass();
+	GLfloat bulletVelAngle = bullet->GetVelocityAngle();
+	GLfloat rockVelAngle = rock->GetVelocityAngle();
+
+	GLfloat xCompMomentumB = bulletMass * bulletSpeed * cos(bulletVelAngle);
+	GLfloat yCompMomentumB = bulletMass * bulletSpeed * sin(bulletVelAngle);
+	GLfloat xCompMomentumR = rockMass * rockSpeed * cos(rockVelAngle);
+	GLfloat yCompMomentumR = rockMass * rockSpeed * sin(rockVelAngle);
 
 	xCompMomentumR += xCompMomentumB;
 	yCompMomentumR += yCompMomentumB;
@@ -608,8 +619,8 @@ void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 	else if (yCompMomentumR < 0)
 		momentumAngle += 2 * M_PI;
 
-	rock->SetMass(rock->GetMass() + bullet->GetMass());
-	rock->SetSpeed(momentumMagnitude / rock->GetMass());
+	rock->SetMass(rockMass + bulletMass);
+	rock->SetSpeed(momentumMagnitude / rockMass);
 
 	rock->SetVelocityAngle(momentumAngle);
 
@@ -622,7 +633,8 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock *rock, cons
 	GLint massDenominator = halfMass ? 2 : 1;
 	GLfloat angleMultiplier = clockwise ? 1.0 : -1.0;
 
-	auto rock1 = std::make_shared<Rock>(rockSize, rock->GetFrame().GetData(0, 0), rock->GetFrame().GetData(1, 0));
+	Resource2DGLfloat& rockFrame = rock->GetFrame();
+	auto rock1 = std::make_shared<Rock>(rockSize, rockFrame.GetData(0, 0), rockFrame.GetData(1, 0));
 
 	rock1->SetKey(Rock::RockPrefix() + GenerateUUID());
 #ifndef SAVE_TO_DB
@@ -636,8 +648,9 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock *rock, cons
 	rock1->SetSpin(rock->GetSpin());
 	rock1->SetSpinEpsilon(rock->GetSpinEpsilon());
 	rock1->SetVelocityAngle(rock->GetVelocityAngle() + angleMultiplier * M_PI / 4);
-	rock1->SetUnitVelocity(0, 0, cos(rock1->GetVelocityAngle()));
-	rock1->SetUnitVelocity(1, 0, sin(rock1->GetVelocityAngle()));
+	GLfloat rock1VelAngle = rock1->GetVelocityAngle();
+	rock1->SetUnitVelocity(0, 0, cos(rock1VelAngle));
+	rock1->SetUnitVelocity(1, 0, sin(rock1VelAngle));
 	rock1->SetRockInitialized(true);
 
 	return rock1;

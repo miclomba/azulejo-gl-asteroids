@@ -161,8 +161,9 @@ void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, co
 	SetSpeed(GetSpeed() + _speed);
 	SetVelocityAngle(_velocityAngle);
 	/*==================== COMPUTE ROCK VELOCITY =========================*/
-	GetUnitVelocity().GetData(0, 0) = cos(_velocityAngle);
-	GetUnitVelocity().GetData(1, 0) = sin(_velocityAngle);
+	Resource2DGLfloat& unitVel = GetUnitVelocity();
+	unitVel.GetData(0, 0) = cos(_velocityAngle);
+	unitVel.GetData(1, 0) = sin(_velocityAngle);
 
 	spinEpsilon_ += _spin;
 	spinEpsilon_ *= spinDirection_;
@@ -202,22 +203,22 @@ void Rock::WrapAroundMoveRock()
 	if (frame.GetData(0, 0) <= left - epsilon_)
 	{
 		SetFrame(0, 0, right + epsilon_);
-		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
+		SetFrame(1, 0, frame.GetData(1, 0) * -1);
 	}
 	else if (frame.GetData(0, 0) >= right + epsilon_)
 	{
 		SetFrame(0, 0, left - epsilon_);
-		SetFrame(1, 0, GetFrame().GetData(1, 0) * -1);
+		SetFrame(1, 0, frame.GetData(1, 0) * -1);
 	}
 	else if (frame.GetData(1, 0) >= top + epsilon_)
 	{
 		SetFrame(1, 0, bottom - epsilon_);
-		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
+		SetFrame(0, 0, frame.GetData(0, 0) * -1);
 	}
 	else if (frame.GetData(1, 0) <= bottom - epsilon_)
 	{
 		SetFrame(1, 0, top + epsilon_);
-		SetFrame(0, 0, GetFrame().GetData(0, 0) * -1);
+		SetFrame(0, 0, frame.GetData(0, 0) * -1);
 	}
 }
 
@@ -231,7 +232,8 @@ void Rock::Draw()
 	glVertexPointer(3, GL_FLOAT, 0, rockVertices_.Data());
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glLoadIdentity();
-	glTranslatef(GetFrame().GetData(0, 0), GetFrame().GetData(1, 0), GetFrame().GetData(2, 0));
+	Resource2DGLfloat& frame = GetFrame();
+	glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
 	glRotatef(spin_ * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data());
 
