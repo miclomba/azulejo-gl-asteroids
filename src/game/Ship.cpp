@@ -280,7 +280,7 @@ void Ship::UpdateBulletTask(std::shared_ptr<Bullet> bullet)
 void Ship::UpdateBullets(
 	const std::set<std::string, std::less<>> &serializedKeys,
 	boost::asio::thread_pool &threadPool,
-	std::vector<std::future<GLEntity *>> &futures)
+	std::vector<std::future<std::shared_ptr<GLEntity>>> &futures)
 {
 	if (bulletFired_ == false)
 		return;
@@ -301,7 +301,7 @@ void Ship::UpdateBullets(
 		else if (bullet)
 		{
 			GLEntityTask task([this, bullet]()
-							  { UpdateBulletTask(bullet); return bullet.get(); });
+							  { UpdateBulletTask(bullet); return bullet; });
 			futures.push_back(task.GetFuture());
 			boost::asio::post(threadPool, task);
 
@@ -340,7 +340,7 @@ void Ship::Update(
 	const GLfloat _thrust,
 	const std::set<std::string, std::less<>> &serializedKeys,
 	boost::asio::thread_pool &threadPool,
-	std::vector<std::future<GLEntity *>> &futures)
+	std::vector<std::future<std::shared_ptr<GLEntity>>> &futures)
 {
 	RecomputeShipVelocity(_thrust);
 

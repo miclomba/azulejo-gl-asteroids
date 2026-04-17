@@ -108,7 +108,7 @@ namespace asteroids
             const GLfloat _thrust,
             const std::set<std::string, std::less<>> &serializedKeys,
             boost::asio::thread_pool &threadPool,
-            std::vector<std::future<GLEntity *>> &futures);
+            std::vector<std::future<std::shared_ptr<GLEntity>>> &futures);
 
         /**
          * @brief Draw the ship.
@@ -251,7 +251,7 @@ namespace asteroids
         void UpdateBullets(
             const std::set<std::string, std::less<>> &serializedKeys,
             boost::asio::thread_pool &threadPool,
-            std::vector<std::future<GLEntity *>> &futures);
+            std::vector<std::future<std::shared_ptr<GLEntity>>> &futures);
 
         /**
          * @brief Update the bullets per time step.

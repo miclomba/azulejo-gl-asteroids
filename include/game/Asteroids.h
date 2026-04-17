@@ -193,7 +193,7 @@ namespace asteroids
          * @brief Destroy or remove the Rock entity from the game.
          * @param rock The Rock entity.
          */
-        void DestroyRock(Rock *rock);
+        void DestroyRock(std::shared_ptr<Rock> rock);
 
         /**
          * @brief Destroy or remove the Bullet entity from the game.
@@ -217,7 +217,7 @@ namespace asteroids
          * @brief Split a rock into more smaller rocks.
          * @param rock The Rock entity to split.
          */
-        void BreakRock(Rock *rock);
+        void BreakRock(std::shared_ptr<Rock> rock);
 
         /**
          * @brief Verify if the game has rocks.
@@ -240,14 +240,14 @@ namespace asteroids
          * @param clockwise true if clockwise spinning; false if counter clockwise.
          * @return smart pointer to a Rock entity.
          */
-        std::shared_ptr<Rock> MakeRock(const State rockSize, Rock *rock, const bool halfMass, const bool clockwise);
+        std::shared_ptr<Rock> MakeRock(const State rockSize, std::shared_ptr<Rock> rock, const bool halfMass, const bool clockwise);
 
         /**
          * @brief Set the Rock's physics based on a collision with a Bullet.
          * @param ithBullet The ith bullet in the collision.
          * @param rock The Rock entity.
          */
-        void CalculateConservationOfMomentum(std::shared_ptr<Bullet> _ithBullet, Rock *rock);
+        void CalculateConservationOfMomentum(std::shared_ptr<Bullet> _ithBullet, std::shared_ptr<Rock> rock);
 
         /**
          * @brief Check for collisions between bullets and rocks, and between rocks and the ship.
@@ -258,14 +258,14 @@ namespace asteroids
          * @brief Get the Rock which collided with the Ship.
          * @return A Rock if there's a collision; nullptr otherwise.
          */
-        Rock *ShipCollision();
+        std::shared_ptr<Rock> ShipCollision();
 
         /**
          * @brief Get the Rock which collided with the given Bullet.
          * @param bullet The Bullet entity.
          * @return A Rock if there's a collision; nullptr otherwise.
          */
-        Rock *Collision(std::shared_ptr<Bullet> bullet);
+        std::shared_ptr<Rock> Collision(std::shared_ptr<Bullet> bullet);
 
         /**
          * @brief Process the collision by breaking or destroying the Rock and Bullet.
@@ -278,14 +278,14 @@ namespace asteroids
          * @brief Update the Rock per time step.
          * @param sharedRock The Rock entity.
          */
-        void UpdateRockTask(GLEntity *sharedRock);
+        void UpdateRockTask(std::shared_ptr<GLEntity> sharedRock);
 
         /**
          * @brief Update the Ship per time step.
          * @param sharedShip The Ship entity.
          * @param futures The datastructure tracking the futures used in parallel computing of bullet, rock, and ship collisions.
          */
-        void UpdateShipTask(std::shared_ptr<GLEntity> sharedShip, std::vector<std::future<GLEntity *>> &futures);
+        void UpdateShipTask(std::shared_ptr<GLEntity> sharedShip, std::vector<std::future<std::shared_ptr<GLEntity>>> &futures);
 
         /**
          * @brief Draw the game entities.
