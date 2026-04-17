@@ -96,12 +96,12 @@ namespace
 			const std::string nodeKey = keyValue.first;
 			const ptree node = keyValue.second;
 
-			if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+			if (nodeKey.starts_with(Rock::RockPrefix()))
 			{
 				Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
 				Rock::RegisterSerializationResources(nodeKey);
 			}
-			else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			else if (nodeKey.starts_with(Bullet::BulletPrefix()))
 			{
 				Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
 				Bullet::RegisterSerializationResources(nodeKey);
@@ -127,12 +127,12 @@ namespace
 			const std::string nodeKey = keyValue.first;
 			const ptree node = keyValue.second;
 
-			if (nodeKey.substr(0, Rock::RockPrefix().length()) == Rock::RockPrefix())
+			if (nodeKey.starts_with(Rock::RockPrefix()))
 			{
 				Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
 				Rock::RegisterTabularizationResources(nodeKey);
 			}
-			else if (nodeKey.substr(0, Bullet::BulletPrefix().length()) == Bullet::BulletPrefix())
+			else if (nodeKey.starts_with(Bullet::BulletPrefix()))
 			{
 				Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
 				Bullet::RegisterTabularizationResources(nodeKey);
