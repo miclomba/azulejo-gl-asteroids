@@ -199,7 +199,7 @@ namespace asteroids
          * @brief Destroy or remove the Bullet entity from the game.
          * @param rock The Bullet entity.
          */
-        void DestroyBullet(Bullet *bullet);
+        void DestroyBullet(std::shared_ptr<Bullet> bullet);
 
         /**
          * @brief Get the list of keys to serialize on game save.
@@ -247,7 +247,7 @@ namespace asteroids
          * @param ithBullet The ith bullet in the collision.
          * @param rock The Rock entity.
          */
-        void CalculateConservationOfMomentum(Bullet *_ithBullet, Rock *rock);
+        void CalculateConservationOfMomentum(std::shared_ptr<Bullet> _ithBullet, Rock *rock);
 
         /**
          * @brief Check for collisions between bullets and rocks, and between rocks and the ship.
@@ -265,14 +265,14 @@ namespace asteroids
          * @param bullet The Bullet entity.
          * @return A Rock if there's a collision; nullptr otherwise.
          */
-        Rock *Collision(Bullet *bullet);
+        Rock *Collision(std::shared_ptr<Bullet> bullet);
 
         /**
          * @brief Process the collision by breaking or destroying the Rock and Bullet.
          * @param bullet The Bullet entity.
          * @param rockKey The key of the Rock entity.
          */
-        void ProcessCollision(Bullet *bullet, const std::string_view rockKey);
+        void ProcessCollision(std::shared_ptr<Bullet> bullet, const std::string_view rockKey);
 
         /**
          * @brief Update the Rock per time step.

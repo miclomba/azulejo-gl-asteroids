@@ -464,15 +464,14 @@ void Asteroids::DetermineCollisions()
 	if (!sharedShip)
 		return;
 
-	std::vector<std::pair<Bullet *, std::future<GLEntity *>>> bulletAndRockFuture;
+	std::vector<std::pair<std::shared_ptr<Bullet>, std::future<GLEntity *>>> bulletAndRockFuture;
 
 	Ship * const ship = dynamic_cast<Ship *>(sharedShip.get());
 
-	std::vector<std::pair<Bullet *, Key>> collisionPairs;
 	for (std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys(); Ship::Key &bulletKey : bulletKeys)
 	{
 		Ship::SharedEntity &sharedBullet = ship->GetBullet(bulletKey);
-		Bullet * const bullet = dynamic_cast<Bullet *>(sharedBullet.get());
+		auto bullet = dynamic_pointer_cast<Bullet>(sharedBullet);
 
 		GLEntityTask task([bullet, this]()
 						  { return Collision(bullet); });
@@ -481,24 +480,24 @@ void Asteroids::DetermineCollisions()
 		boost::asio::post(threadPool_, task);
 	}
 
-	for (std::pair<Bullet *, std::future<GLEntity *>> &bulletRock : bulletAndRockFuture)
+	std::vector<std::pair<std::shared_ptr<Bullet>, Key>> collisionPairs;
+	for (std::pair<std::shared_ptr<Bullet>, std::future<GLEntity *>> &bulletRock : bulletAndRockFuture)
 	{
-		auto& [bulletPtr, entityFuture] = bulletRock;
+		auto& [bullet, entityFuture] = bulletRock;
 		if (Rock *rock = dynamic_cast<Rock *>(entityFuture.get()); rock) {
-			Bullet * const bullet = bulletPtr;
 			collisionPairs.push_back(std::make_pair(bullet, rock->GetKey()));
 		}
 	}
 
 	std::vector<std::future<GLEntity *>> collisionFutures;
 
-	for (std::pair<Bullet *, Key> &collisions : collisionPairs)
+	for (std::pair<std::shared_ptr<Bullet>, Key> &collisions : collisionPairs)
 	{
 		auto& [bullet, rockKey] = collisions;
 		if (HasRock(rockKey))
 		{
 			GLEntityTask task([bullet, rockKey, this]()
-							  { ProcessCollision(bullet, rockKey); return bullet; });
+							  { ProcessCollision(bullet, rockKey); return bullet.get(); });
 			collisionFutures.emplace_back(task.GetFuture());
 			boost::asio::post(threadPool_, task);
 		}
@@ -511,7 +510,7 @@ void Asteroids::DetermineCollisions()
 		ResetGame();
 }
 
-void Asteroids::ProcessCollision(Bullet *bullet, const std::string_view rockKey)
+void Asteroids::ProcessCollision(std::shared_ptr<Bullet> bullet, const std::string_view rockKey)
 {
 	{
 		std::lock_guard<std::mutex> lock(rockCollisionMutex_);
@@ -530,7 +529,7 @@ void Asteroids::ProcessCollision(Bullet *bullet, const std::string_view rockKey)
 	DestroyBullet(bullet);
 }
 
-Rock *Asteroids::Collision(Bullet *_bullet)
+Rock *Asteroids::Collision(std::shared_ptr<Bullet> _bullet)
 {
 	GLfloat epsilon{};
 
@@ -594,7 +593,7 @@ Rock *Asteroids::ShipCollision()
 	return nullptr;
 }
 
-void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
+void Asteroids::CalculateConservationOfMomentum(std::shared_ptr<Bullet> bullet, Rock *rock)
 {
 	const GLfloat bulletSpeed = bullet->GetSpeed();
 	const GLfloat rockSpeed = rock->GetSpeed();
@@ -681,7 +680,7 @@ void Asteroids::BreakRock(Rock *rock)
 #endif
 }
 
-void Asteroids::DestroyBullet(Bullet *bullet)
+void Asteroids::DestroyBullet(std::shared_ptr<Bullet> bullet)
 {
 	const std::string bulletKey = bullet->GetKey();
 	AddToRemoveKeys(bulletKey);

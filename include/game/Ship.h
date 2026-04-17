@@ -9,6 +9,7 @@
 #include <array>
 #include <future>
 #include <map>
+#include <memory>
 #include <numbers>
 #include <set>
 #include <string>
@@ -256,7 +257,7 @@ namespace asteroids
          * @brief Update the bullets per time step.
          * @param sharedBullet The entity to update.
          */
-        void UpdateBulletTask(GLEntity *sharedBullet);
+        void UpdateBulletTask(std::shared_ptr<Bullet> sharedBullet);
 
         mutable std::set<std::string, std::less<>> outOfScopeBulletKeys_;
 

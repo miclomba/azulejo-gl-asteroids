@@ -272,9 +272,8 @@ void Ship::WrapAroundMoveShip()
 	}
 }
 
-void Ship::UpdateBulletTask(GLEntity *sharedBullet)
+void Ship::UpdateBulletTask(std::shared_ptr<Bullet> bullet)
 {
-	Bullet * const bullet = dynamic_cast<Bullet *>(sharedBullet);
 	bullet->Update(orientationAngle_, GetSpeed());
 }
 
@@ -294,7 +293,7 @@ void Ship::UpdateBullets(
 	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
 	{
 		auto& [entityKey, sharedEntity] = *iter;
-		Bullet * const bullet = dynamic_cast<Bullet *>(sharedEntity.get());
+		auto const bullet = dynamic_pointer_cast<Bullet>(sharedEntity);
 		if (bullet && bullet->IsOutOfBounds())
 		{
 			bulletsToRemove.push_back(bullet->GetKey());
@@ -302,7 +301,7 @@ void Ship::UpdateBullets(
 		else if (bullet)
 		{
 			GLEntityTask task([this, bullet]()
-							  { UpdateBulletTask(bullet); return bullet; });
+							  { UpdateBulletTask(bullet); return bullet.get(); });
 			futures.push_back(task.GetFuture());
 			boost::asio::post(threadPool, task);
 
