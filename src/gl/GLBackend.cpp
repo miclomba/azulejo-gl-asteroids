@@ -25,17 +25,6 @@ const int NUMBER_KEYS = 256;
 const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
-GLBackend *GLBackend::callbackInstance_ = nullptr;
-
-GLBackend &GLBackend::Get()
-{
-	if (!GLBackend::callbackInstance_)
-	{
-		GLBackend::callbackInstance_ = new GLBackend();
-	}
-	return *GLBackend::callbackInstance_;
-}
-
 GLBackend::~GLBackend() = default;
 
 GLBackend::GLBackend() : QOpenGLWidget(),

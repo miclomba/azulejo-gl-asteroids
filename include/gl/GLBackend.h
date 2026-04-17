@@ -38,10 +38,9 @@ namespace asteroids
 
     public:
         /**
-         * @brief Singleton Get function.
-         * @return the GLBackend singleton.
+         * @brief Constructor for the GLBackend class.
          */
-        static GLBackend &Get();
+        GLBackend();
 
         /**
          * @brief Destructor for the GLBackend class.
@@ -65,11 +64,6 @@ namespace asteroids
         GLBackendEmitters &GetEmitters();
 
     private:
-        /**
-         * @brief Constructor for the GLBackend class.
-         */
-        GLBackend();
-
         /**
          * @brief Initialize OpenGL function pointers for this class.
          */
@@ -107,9 +101,6 @@ namespace asteroids
         // Members
         std::array<bool, 256> keysPressed_; /** @brief Array to track pressed keys. */
         GLBackendEmitters emitters_;        /**< Handles input events and actions. */
-
-        /** @brief Pointer to the callback instance for static functions. */
-        static GLBackend *callbackInstance_;
 
         /** @brief a timer for periodically rendering this widget. */
         std::unique_ptr<QTimer> frameTimer_;

@@ -72,7 +72,7 @@ int main(int _argc, char *_argv[])
 	// and start sending it paint and event callbacks once you call QApplication.exec().
 	QMainWindow window;
 
-	GLBackend &backend = GLBackend::Get();
+	GLBackend backend;
 	backend.setParent(&window);
 	window.setCentralWidget(&backend);
 	window.setGeometry(INIT_WIN_X, INIT_WIN_Y, WIN_WIDTH, WIN_HEIGHT);
