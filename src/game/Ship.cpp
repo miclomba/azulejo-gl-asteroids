@@ -134,9 +134,9 @@ void Ship::RegisterTabularizationResources(const std::string_view resourceKey)
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_ORIENTATION_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
-Ship::Ship(const Ship::Key &key) : Ship()
+Ship::Ship(const std::string_view key) : Ship()
 {
-	SetKey(key);
+	SetKey(std::string(key));
 #ifndef SAVE_TO_DB
 	Ship::RegisterSerializationResources(GetKey());
 #else
@@ -156,9 +156,9 @@ std::string Ship::GenerateUUID() const
 	return boost::lexical_cast<std::string>(tag);
 }
 
-Ship::SharedEntity &Ship::GetBullet(const std::string &key) const
+Ship::SharedEntity &Ship::GetBullet(const std::string_view key) const
 {
-	return ISerializableEntity::GetAggregatedMember(key);
+	return ISerializableEntity::GetAggregatedMember(std::string(key));
 }
 
 std::vector<Ship::Key> Ship::GetBulletKeys() const
@@ -166,7 +166,7 @@ std::vector<Ship::Key> Ship::GetBulletKeys() const
 	return GetAggregatedMemberKeys();
 }
 
-const std::set<Ship::Key> &Ship::GetOutOfScopeBulletKeys() const
+const std::set<Ship::Key, std::less<>> &Ship::GetOutOfScopeBulletKeys() const
 {
 	return outOfScopeBulletKeys_;
 }
@@ -279,7 +279,7 @@ void Ship::UpdateBulletTask(GLEntity *sharedBullet)
 }
 
 void Ship::UpdateBullets(
-	const std::set<std::string> &serializedKeys,
+	const std::set<std::string, std::less<>> &serializedKeys,
 	boost::asio::thread_pool &threadPool,
 	std::vector<std::future<GLEntity *>> &futures)
 {
@@ -339,7 +339,7 @@ void Ship::Draw()
 void Ship::Update(
 	const GLfloat _orientationAngle,
 	const GLfloat _thrust,
-	const std::set<std::string> &serializedKeys,
+	const std::set<std::string, std::less<>> &serializedKeys,
 	boost::asio::thread_pool &threadPool,
 	std::vector<std::future<GLEntity *>> &futures)
 {
@@ -370,11 +370,11 @@ void Ship::Update(
 	UpdateBullets(serializedKeys, threadPool, futures);
 }
 
-void Ship::RemoveBullet(const Ship::Key &key, const std::set<std::string> &serializedKeys)
+void Ship::RemoveBullet(const std::string_view key, const std::set<std::string, std::less<>> &serializedKeys)
 {
 	if (serializedKeys.find(key) != serializedKeys.cend())
-		outOfScopeBulletKeys_.insert(key);
-	RemoveMember(key);
+		outOfScopeBulletKeys_.insert(std::string(key));
+	RemoveMember(std::string(key));
 }
 
 void Ship::AddBullet(const SharedEntity &bullet)

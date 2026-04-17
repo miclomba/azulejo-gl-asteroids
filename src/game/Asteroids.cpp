@@ -9,6 +9,7 @@
 #include <numbers>
 #include <stdio.h>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -240,9 +241,9 @@ void Asteroids::Run()
 #endif
 }
 
-Asteroids::SharedEntity &Asteroids::GetRock(const std::string &key)
+Asteroids::SharedEntity &Asteroids::GetRock(const std::string_view key)
 {
-	return GetAggregatedMember(key);
+	return GetAggregatedMember(std::string(key));
 }
 
 std::vector<Asteroids::Key> Asteroids::GetRockKeys() const
@@ -450,7 +451,7 @@ bool Asteroids::HasRocks()
 	return false;
 }
 
-bool Asteroids::HasRock(const std::string &key) const
+bool Asteroids::HasRock(const std::string_view key) const
 {
 	std::vector<Key> rockKeys = GetRockKeys();
 	return std::any_of(rockKeys.begin(), rockKeys.end(), [&key](const std::string &rockKey)
@@ -510,7 +511,7 @@ void Asteroids::DetermineCollisions()
 		ResetGame();
 }
 
-void Asteroids::ProcessCollision(Bullet *bullet, const Key &rockKey)
+void Asteroids::ProcessCollision(Bullet *bullet, const std::string_view rockKey)
 {
 	{
 		std::lock_guard<std::mutex> lock(rockCollisionMutex_);
@@ -773,16 +774,16 @@ void Asteroids::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	thrust_ = std::stoi(tree.get_child(THRUST_KEY).data());
 }
 
-void Asteroids::AddToRemoveKeys(const std::string &key)
+void Asteroids::AddToRemoveKeys(const std::string_view key)
 {
 	if (keysSerialized_.find(key) != keysSerialized_.end())
-		keysToRemove_.insert(key);
+		keysToRemove_.insert(std::string(key));
 }
 
 void Asteroids::AddOutOfScopeBulletsToRemovalKeys()
 {
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
-	for (const std::set<std::string> &outOfScopeBullets = ship->GetOutOfScopeBulletKeys(); const Key &key : outOfScopeBullets)
+	for (const std::set<std::string, std::less<>> &outOfScopeBullets = ship->GetOutOfScopeBulletKeys(); const Key &key : outOfScopeBullets)
 		AddToRemoveKeys(key);
 	ship->ClearOutOfScopeBulletKeys();
 }
@@ -842,14 +843,14 @@ void Asteroids::ClearUnusedTabularizationKeys()
 	keysToRemove_.clear();
 }
 
-std::set<std::string> Asteroids::GetKeysToSerialize()
+std::set<std::string, std::less<>> Asteroids::GetKeysToSerialize()
 {
 	std::vector<std::string> keysSerialized = GetAggregatedMemberKeys();
 	auto ship = std::dynamic_pointer_cast<Ship>(GetShip());
 	std::vector<std::string> bulletsSerialized = ship->GetBulletKeys();
 	keysSerialized.insert(keysSerialized.end(), bulletsSerialized.begin(), bulletsSerialized.end());
 
-	std::set<std::string> keys;
+	std::set<std::string, std::less<>> keys;
 	keys.insert(keysSerialized.begin(), keysSerialized.end());
 	return keys;
 }

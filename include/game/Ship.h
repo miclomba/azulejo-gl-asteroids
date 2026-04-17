@@ -55,7 +55,7 @@ namespace asteroids
          * @brief Constructor that initializes the ship with a given key.
          * @param key The unique key identifier for the ship.
          */
-        Ship(const Ship::Key &key);
+        Ship(const std::string_view key);
 
         /**
          * @brief Destructor for the Ship class.
@@ -105,7 +105,7 @@ namespace asteroids
         void Update(
             const GLfloat _orientationAngle,
             const GLfloat _thrust,
-            const std::set<std::string> &serializedKeys,
+            const std::set<std::string, std::less<>> &serializedKeys,
             boost::asio::thread_pool &threadPool,
             std::vector<std::future<GLEntity *>> &futures);
 
@@ -130,7 +130,7 @@ namespace asteroids
          * @param key The key by which a Bullet is registered.
          * @return A Bullet entity.
          */
-        SharedEntity &GetBullet(const std::string &key) const;
+        SharedEntity &GetBullet(const std::string_view key) const;
 
         /**
          * @brief Get all Bullet entity by keys.
@@ -142,7 +142,7 @@ namespace asteroids
          * @brief Get all Bullet entity by keys which have gone out of scope.
          * @return All Bullet entity keys which have gone out of scope.
          */
-        const std::set<Key> &GetOutOfScopeBulletKeys() const;
+        const std::set<Key, std::less<>> &GetOutOfScopeBulletKeys() const;
 
         /**
          * @brief Clear all Bullet entity by keys which have gone out of scope.
@@ -153,7 +153,7 @@ namespace asteroids
          * @brief Remove a Bullet by entity key and clear serialized keys since the last save operation.
          * @param serializedKeys The entity keys which have been serialized last.
          */
-        void RemoveBullet(const Key &key, const std::set<std::string> &serializedKeys);
+        void RemoveBullet(const std::string_view key, const std::set<std::string, std::less<>> &serializedKeys);
 
         /**
          * @brief Add a Bullet by entity.
@@ -248,7 +248,7 @@ namespace asteroids
          * @param futures The vector of calculation futures to be returned.
          */
         void UpdateBullets(
-            const std::set<std::string> &serializedKeys,
+            const std::set<std::string, std::less<>> &serializedKeys,
             boost::asio::thread_pool &threadPool,
             std::vector<std::future<GLEntity *>> &futures);
 
@@ -258,7 +258,7 @@ namespace asteroids
          */
         void UpdateBulletTask(GLEntity *sharedBullet);
 
-        mutable std::set<std::string> outOfScopeBulletKeys_;
+        mutable std::set<std::string, std::less<>> outOfScopeBulletKeys_;
 
         bool bulletFired_{false};
         bool doRotate_{false};

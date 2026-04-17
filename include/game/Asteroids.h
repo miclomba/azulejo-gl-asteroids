@@ -10,6 +10,7 @@
 #include <mutex>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/asio/thread_pool.hpp>
@@ -145,7 +146,7 @@ namespace asteroids
          * @param key The key of the rock entity.
          * @return A rock entity.
          */
-        SharedEntity &GetRock(const std::string &key);
+        SharedEntity &GetRock(const std::string_view key);
 
         /**
          * @brief Get the aggregated rock entity keys.
@@ -204,13 +205,13 @@ namespace asteroids
          * @brief Get the list of keys to serialize on game save.
          * @return Set of entity keys.
          */
-        std::set<std::string> GetKeysToSerialize();
+        std::set<std::string, std::less<>> GetKeysToSerialize();
 
         /**
          * @brief Add a key to the list of entity keys to remove.
          * @param key The entity key to remove.
          */
-        void AddToRemoveKeys(const std::string &key);
+        void AddToRemoveKeys(const std::string_view key);
 
         /**
          * @brief Split a rock into more smaller rocks.
@@ -229,7 +230,7 @@ namespace asteroids
          * @param key Of the Rock entity.
          * @return true if the game has a Rock with the given key; false otherwise.
          */
-        bool HasRock(const std::string &key) const;
+        bool HasRock(const std::string_view key) const;
 
         /**
          * @brief Make a Rock entity.
@@ -271,7 +272,7 @@ namespace asteroids
          * @param bullet The Bullet entity.
          * @param rockKey The key of the Rock entity.
          */
-        void ProcessCollision(Bullet *bullet, const Key &rockKey);
+        void ProcessCollision(Bullet *bullet, const std::string_view rockKey);
 
         /**
          * @brief Update the Rock per time step.
@@ -301,8 +302,8 @@ namespace asteroids
          */
         void ResetThrustAndRotation();
 
-        std::set<std::string> keysToRemove_;
-        std::set<std::string> keysSerialized_;
+        std::set<std::string, std::less<>> keysToRemove_;
+        std::set<std::string, std::less<>> keysSerialized_;
 
         GLint score_{0};
         GLint rockCount_{0};
