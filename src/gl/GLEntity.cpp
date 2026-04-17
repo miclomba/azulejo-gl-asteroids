@@ -4,6 +4,7 @@
 #include <array>
 #include <numeric>
 #include <string>
+#include <string_view>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -34,19 +35,19 @@ using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
 {
-	const std::string FRAME_KEY = "frame";
-	const std::string UNIT_VELOCITY_KEY = "unit_velocity";
-	const std::string S_KEY = "S";
-	const std::string T_KEY = "T";
-	const std::string R_KEY = "R";
-	const std::string VELOCITY_ANGLE_KEY = "velocity_angle";
-	const std::string SPEED_KEY = "speed";
-	const std::string MASS_KEY = "mass";
+const std::string FRAME_KEY = "frame";
+const std::string UNIT_VELOCITY_KEY = "unit_velocity";
+const std::string S_KEY = "S";
+const std::string T_KEY = "T";
+const std::string R_KEY = "R";
+const std::string VELOCITY_ANGLE_KEY = "velocity_angle";
+const std::string SPEED_KEY = "speed";
+const std::string MASS_KEY = "mass";
 
-	auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 GLEntity::GLEntity() : frame_(Resource2DGLfloat({{0.0, 0.0, 0.0, 0.0}, // NOTE: make sure frame_ appears first in the class
@@ -73,7 +74,7 @@ GLEntity::GLEntity(
 {
 }
 
-void GLEntity::RegisterSerializationResources(const std::string &key)
+void GLEntity::RegisterSerializationResources(const std::string_view key)
 {
 	ResourceDeserializer *deserializer = ResourceDeserializer::GetInstance();
 
@@ -89,10 +90,11 @@ void GLEntity::RegisterSerializationResources(const std::string &key)
 		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void GLEntity::RegisterTabularizationResources(const std::string &key)
+void GLEntity::RegisterTabularizationResources(const std::string_view resourceKey)
 {
 	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
 
+	const std::string key(resourceKey);
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_VELOCITY_KEY)))
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_VELOCITY_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + FRAME_KEY)))

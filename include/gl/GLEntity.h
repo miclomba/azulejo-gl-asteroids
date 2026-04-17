@@ -9,6 +9,7 @@
 #include <array>
 #include <math.h>
 #include <string>
+#include <string_view>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -180,13 +181,13 @@ namespace asteroids
          * @brief Register serialization keys with the deserializer.
          * @param key The entity key.
          */
-        static void RegisterSerializationResources(const std::string &key);
+        static void RegisterSerializationResources(const std::string_view key);
 
         /**
          * @brief Register serialization keys with the detabularizer.
          * @param key The entity key.
          */
-        static void RegisterTabularizationResources(const std::string &key);
+        static void RegisterTabularizationResources(const std::string_view key);
 
     protected:
         /**

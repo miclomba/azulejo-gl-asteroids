@@ -12,6 +12,7 @@
 #include <numbers>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/asio/thread_pool.hpp>
@@ -85,13 +86,13 @@ namespace asteroids
          * @brief Register serialization resources for the ship.
          * @param key The serialization key.
          */
-        static void RegisterSerializationResources(const std::string &key);
+        static void RegisterSerializationResources(const std::string_view key);
 
         /**
          * @brief Register tabularization resources for the ship.
          * @param key The tabularization key.
          */
-        static void RegisterTabularizationResources(const std::string &key);
+        static void RegisterTabularizationResources(const std::string_view key);
 
         /**
          * @brief Update the ship's position, orientation, and bullets.

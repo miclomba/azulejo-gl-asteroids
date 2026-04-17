@@ -8,7 +8,6 @@
 
 #include <array>
 #include <memory>
-#include <string>
 
 #include "Entities/Entity.h"
 #include "Events/EventConsumer.h"

@@ -3,6 +3,7 @@
 #include <memory>
 #include <numbers>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/property_tree/ptree.hpp>
@@ -84,9 +85,9 @@ Bullet::Bullet() : GLEntity(),
 {
 }
 
-void Bullet::RegisterSerializationResources(const std::string &key)
+void Bullet::RegisterSerializationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterSerializationResources(key);
+	GLEntity::RegisterSerializationResources(resourceKey);
 
 	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(BULLET_VERTICES_KEY))
@@ -97,10 +98,11 @@ void Bullet::RegisterSerializationResources(const std::string &key)
 		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void Bullet::RegisterTabularizationResources(const std::string &key)
+void Bullet::RegisterTabularizationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(key);
+	GLEntity::RegisterTabularizationResources(resourceKey);
 
+	const std::string key{resourceKey};
 	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_VERTICES_KEY)))
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + BULLET_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);

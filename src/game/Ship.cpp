@@ -6,6 +6,7 @@
 #include <memory>
 #include <numbers>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/asio/post.hpp>
@@ -106,9 +107,9 @@ Ship::Ship() : GLEntity(Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
 	SetVelocityAngle(PI / 2);
 }
 
-void Ship::RegisterSerializationResources(const std::string &key)
+void Ship::RegisterSerializationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterSerializationResources(key);
+	GLEntity::RegisterSerializationResources(resourceKey);
 
 	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(SHIP_VERTICES_KEY))
@@ -119,10 +120,11 @@ void Ship::RegisterSerializationResources(const std::string &key)
 		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void Ship::RegisterTabularizationResources(const std::string &key)
+void Ship::RegisterTabularizationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(key);
+	GLEntity::RegisterTabularizationResources(resourceKey);
 
+	const std::string key{resourceKey};
 	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
 	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_VERTICES_KEY)))
 		detabularizer->RegisterResource<GLfloat>(FormatKey(key + SHIP_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);

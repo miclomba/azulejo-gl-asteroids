@@ -19,7 +19,7 @@ using Consumer = EventConsumer<void(void)>;
 
 namespace
 {
-	const std::string ASTEROIDS_CONSUMERS_KEY = "AsteroidsConsumers";
+const std::string ASTEROIDS_CONSUMERS_KEY = "AsteroidsConsumers";
 } // end namespace
 
 AsteroidsConsumers::AsteroidsConsumers(

@@ -4,6 +4,7 @@
 #include <memory>
 #include <numbers>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/property_tree/ptree.hpp>
@@ -95,9 +96,9 @@ std::string Rock::RockPrefix()
 
 Rock::Rock() = default;
 
-void Rock::RegisterSerializationResources(const std::string &key)
+void Rock::RegisterSerializationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterSerializationResources(key);
+	GLEntity::RegisterSerializationResources(resourceKey);
 
 	ResourceDeserializer * const deserializer = ResourceDeserializer::GetInstance();
 	if (!deserializer->HasSerializationKey(ROCK_VERTICES_KEY))
@@ -106,10 +107,11 @@ void Rock::RegisterSerializationResources(const std::string &key)
 		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
 }
 
-void Rock::RegisterTabularizationResources(const std::string &key)
+void Rock::RegisterTabularizationResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(key);
+	GLEntity::RegisterTabularizationResources(resourceKey);
 
+	const std::string key{resourceKey};
 	ResourceDetabularizer * const tabularizer = ResourceDetabularizer::GetInstance();
 	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_VERTICES_KEY)))
 		tabularizer->RegisterResource<GLfloat>(FormatKey(key + ROCK_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);

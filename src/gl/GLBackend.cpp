@@ -20,9 +20,9 @@ using events::EventEmitter;
 
 namespace
 {
-	static constexpr int FRAME_MS = 20;
-	const int NUMBER_KEYS = 256;
-	const std::string ASTEROIDS_TITLE = "Asteroids";
+static constexpr int FRAME_MS = 20;
+const int NUMBER_KEYS = 256;
+const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
 GLBackend *GLBackend::callbackInstance_ = nullptr;

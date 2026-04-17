@@ -2,7 +2,6 @@
 #include "gl/GLBackend.h"
 
 #include <algorithm>
-#include <string>
 
 using asteroids::GL;
 using asteroids::GLBackend;

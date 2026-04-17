@@ -9,6 +9,7 @@
 #include <array>
 #include <cstdlib>
 #include <string>
+#include <string_view>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -97,13 +98,13 @@ namespace asteroids
          * @brief Register serialization resources for the rock.
          * @param key The serialization key.
          */
-        static void RegisterSerializationResources(const std::string &key);
+        static void RegisterSerializationResources(const std::string_view key);
 
         /**
          * @brief Register tabularization resources for the rock.
          * @param key The tabularization key.
          */
-        static void RegisterTabularizationResources(const std::string &key);
+        static void RegisterTabularizationResources(const std::string_view key);
 
         /**
          * @brief Update the rock's position and spin.

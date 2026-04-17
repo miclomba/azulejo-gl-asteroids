@@ -8,6 +8,7 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -85,13 +86,13 @@ namespace asteroids
          * @brief Register serialization resources for the bullet.
          * @param key The serialization key.
          */
-        static void RegisterSerializationResources(const std::string &key);
+        static void RegisterSerializationResources(const std::string_view key);
 
         /**
          * @brief Register tabularization resources for the bullet.
          * @param key The tabularization key.
          */
-        static void RegisterTabularizationResources(const std::string &key);
+        static void RegisterTabularizationResources(const std::string_view key);
 
         /**
          * @brief Update the bullet's position based on velocity and speed.
