@@ -285,7 +285,7 @@ namespace asteroids
          * @param sharedShip The Ship entity.
          * @param futures The datastructure tracking the futures used in parallel computing of bullet, rock, and ship collisions.
          */
-        void UpdateShipTask(GLEntity *sharedShip, std::vector<std::future<GLEntity *>> &futures);
+        void UpdateShipTask(std::shared_ptr<GLEntity> sharedShip, std::vector<std::future<GLEntity *>> &futures);
 
         /**
          * @brief Draw the game entities.

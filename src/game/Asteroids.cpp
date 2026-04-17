@@ -168,7 +168,7 @@ std::vector<std::string> BulletResourceKeys(const std::string &key)
 	return keys;
 }
 
-void UntabularizeShipResources(Ship *ship)
+void UntabularizeShipResources(std::shared_ptr<Ship> ship)
 {
 	if (ship->GetFrame().GetDirty())
 		RTabularizer->Untabularize("Shipframe");
@@ -333,9 +333,9 @@ void Asteroids::UpdateRockTask(GLEntity *sharedRock)
 	rock->Update(static_cast<GLfloat>(PI * randy / 5), static_cast<GLfloat>(randy % 3) / 100, static_cast<GLfloat>(randy % 6) / 100);
 };
 
-void Asteroids::UpdateShipTask(GLEntity *sharedShip, std::vector<std::future<GLEntity *>> &futures)
+void Asteroids::UpdateShipTask(std::shared_ptr<GLEntity> sharedShip, std::vector<std::future<GLEntity *>> &futures)
 {
-	Ship * const ship = dynamic_cast<Ship *>(sharedShip);
+	auto ship = dynamic_pointer_cast<Ship>(sharedShip);
 	ship->Update(orientationAngle_, thrust_, keysSerialized_, threadPool_, futures);
 };
 
@@ -360,9 +360,9 @@ void Asteroids::DrawGLEntities()
 
 	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
-		GLEntity * const ship = dynamic_cast<GLEntity *>(sharedShip.get());
+		auto ship = dynamic_pointer_cast<GLEntity>(sharedShip);
 		GLEntityTask task([ship, &bulletFutures, this]()
-						  { UpdateShipTask(ship, bulletFutures); return ship; });
+						  { UpdateShipTask(ship, bulletFutures); return ship.get(); });
 		futures.push_back(task.GetFuture());
 
 		boost::asio::post(threadPool_, task);
@@ -416,7 +416,7 @@ void Asteroids::ClearRocks()
 
 void Asteroids::ClearBullets()
 {
-	Ship *const ship = dynamic_cast<Ship *>(GetShip().get());
+	auto ship = dynamic_pointer_cast<Ship>(GetShip());
 	if (!ship)
 		return;
 
@@ -466,7 +466,7 @@ void Asteroids::DetermineCollisions()
 
 	std::vector<std::pair<std::shared_ptr<Bullet>, std::future<GLEntity *>>> bulletAndRockFuture;
 
-	Ship * const ship = dynamic_cast<Ship *>(sharedShip.get());
+	auto ship = dynamic_pointer_cast<Ship>(sharedShip);
 
 	for (std::vector<Ship::Key> bulletKeys = ship->GetBulletKeys(); Ship::Key &bulletKey : bulletKeys)
 	{
@@ -565,7 +565,7 @@ Rock *Asteroids::ShipCollision()
 
 	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
-		Ship * const ship = dynamic_cast<Ship *>(sharedShip.get());
+		auto ship = dynamic_pointer_cast<Ship>(sharedShip);
 		for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 		{
 			SharedEntity &sharedRock = GetRock(key);
@@ -689,7 +689,7 @@ void Asteroids::DestroyBullet(std::shared_ptr<Bullet> bullet)
 	if (!sharedShip)
 		return;
 
-	Ship *ship = dynamic_cast<Ship *>(sharedShip.get());
+	auto ship = dynamic_pointer_cast<Ship>(sharedShip);
 
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(bulletKey);
@@ -722,7 +722,7 @@ void Asteroids::Fire()
 {
 	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
-		Ship * const ship = dynamic_cast<Ship *>(sharedShip.get());
+		auto ship = dynamic_pointer_cast<Ship>(sharedShip);
 		ship->Fire();
 	}
 }
@@ -835,7 +835,7 @@ void Asteroids::ClearUnusedTabularizationKeys()
 		}
 		else
 		{
-			Ship *ship = dynamic_cast<Ship *>(GetShip().get());
+			auto ship = dynamic_pointer_cast<Ship>(GetShip());
 			UntabularizeShipResources(ship);
 		}
 	}
