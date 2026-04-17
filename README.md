@@ -14,7 +14,8 @@
 
 Checkout [azulejo-common-lib](https://github.com/miclomba/azulejo-common-lib) then configure, build, and install it.
 
-Note: You can uninstall via: `azulejo-common-lib/uninstall.sh`
+__NOTE__: You can uninstall via: `azulejo-common-lib/uninstall.sh`
+__NOTE__: Source requires C++20 compilers.
 
 ### VSCode
 

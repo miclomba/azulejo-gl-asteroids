@@ -6,10 +6,6 @@
 #include <GL/gl.h>
 #endif
 
-#ifndef M_PI
-#define M_PI (3.14159265358979323846)
-#endif
-
 #ifndef BOOST_ALL_DYN_LINK
 #define BOOST_ALL_DYN_LINK
 #endif

@@ -1,6 +1,7 @@
 #include "game/Bullet.h"
 
 #include <memory>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -37,24 +38,25 @@ using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
 {
-	const GLfloat BULLET_SPEED_ = 0.5;
-	const std::string BULLET_INITIALIZED_KEY = "bullet_initialized";
-	const std::string OUT_OF_BOUNDS_KEY = "out_of_bounds";
-	const std::string BULLET_VERTICES_KEY = "bullet_vertices";
-	const std::string BULLET_INDICES_KEY = "bullet_indices";
-	const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
-	const std::string TRUE_VAL = "true";
+const double PI = std::numbers::pi;
+const GLfloat BULLET_SPEED_ = 0.5;
+const std::string BULLET_INITIALIZED_KEY = "bullet_initialized";
+const std::string OUT_OF_BOUNDS_KEY = "out_of_bounds";
+const std::string BULLET_VERTICES_KEY = "bullet_vertices";
+const std::string BULLET_INDICES_KEY = "bullet_indices";
+const std::string PROJECTION_MATRIX_KEY = "projection_matrix";
+const std::string TRUE_VAL = "true";
 
-	std::vector<std::vector<GLfloat>> BUFFER({std::vector<GLfloat>(16)});
+std::vector<std::vector<GLfloat>> BUFFER({std::vector<GLfloat>(16)});
 
-	auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Bullet::BulletPrefix()
@@ -201,7 +203,7 @@ void Bullet::Draw()
 		glLoadIdentity();
 		Resource2DGLfloat& frame = GetFrame();
 		glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
-		glRotatef(GetVelocityAngle() * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
+		glRotatef(GetVelocityAngle() * (180.0f / PI), 0.0f, 0.0f, 1.0f);
 		glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE, bulletIndices_.Data());
 	};
 

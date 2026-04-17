@@ -2,6 +2,7 @@
 
 #include <array>
 #include <memory>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -38,52 +39,53 @@ using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
 {
-	const std::string &INDEX_KEY = "index";
-	const std::string &SPIN_KEY = "spin";
-	const std::string &SPIN_EPSILON_KEY = "spin_epsilon";
-	const std::string &SPIN_DIRECTION_KEY = "spin_direction";
-	const std::string &STATE_KEY = "state";
-	const std::string &ROCK_INITIALIZED_KEY = "rock_initialized";
-	const std::string &ROCK_VERTICES_KEY = "rock_vertices";
-	const std::string &ROCK_INDICES_KEY = "rock_indices";
-	const std::string TRUE_VAL = "true";
+const double PI = std::numbers::pi;
+const std::string &INDEX_KEY = "index";
+const std::string &SPIN_KEY = "spin";
+const std::string &SPIN_EPSILON_KEY = "spin_epsilon";
+const std::string &SPIN_DIRECTION_KEY = "spin_direction";
+const std::string &STATE_KEY = "state";
+const std::string &ROCK_INITIALIZED_KEY = "rock_initialized";
+const std::string &ROCK_VERTICES_KEY = "rock_vertices";
+const std::string &ROCK_INDICES_KEY = "rock_indices";
+const std::string TRUE_VAL = "true";
 
-	GLfloat PROJECTION_BUFFER[16];
+GLfloat PROJECTION_BUFFER[16];
 
-	const Resource2DGLfloat rockVerticesL({{-1.5f, -1.5f, 0.5f},
-										   {1.5f, -1.5f, 0.5f},
-										   {1.5f, 1.5f, 0.5f},
-										   {-1.5f, 1.5f, 0.5f},
-										   {-1.0f, -1.0f, 1.0f},
-										   {1.0f, -1.0f, 1.0f},
-										   {1.0f, 1.0f, 1.0f},
-										   {-1.0f, 1.0f, 1.0f}});
-	const Resource2DGLfloat rockVerticesM({{-1.0f, -1.0f, 0.5f},
-										   {1.0f, -1.0f, 0.5f},
-										   {1.0f, 1.0f, 0.5f},
-										   {-1.0f, 1.0f, 0.5f},
-										   {-0.75f, -0.75f, 1.0f},
-										   {0.75f, -0.75f, 1.0f},
-										   {0.75f, 0.75f, 1.0f},
-										   {-0.75f, 0.75f, 1.0f}});
-	const Resource2DGLfloat rockVerticesS({{-0.5f, -0.5f, 0.5f},
-										   {0.5f, -0.5f, 0.5f},
-										   {0.5f, 0.5f, 0.5f},
-										   {-0.5f, 0.5f, 0.5f},
-										   {-0.25f, -0.25f, 1.0f},
-										   {0.25f, -0.25f, 1.0f},
-										   {0.25f, 0.25f, 1.0f},
-										   {-0.25f, 0.25f, 1.0f}});
-	ResourceGLubyte rockIndices({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4});
+const Resource2DGLfloat rockVerticesL({{-1.5f, -1.5f, 0.5f},
+										{1.5f, -1.5f, 0.5f},
+										{1.5f, 1.5f, 0.5f},
+										{-1.5f, 1.5f, 0.5f},
+										{-1.0f, -1.0f, 1.0f},
+										{1.0f, -1.0f, 1.0f},
+										{1.0f, 1.0f, 1.0f},
+										{-1.0f, 1.0f, 1.0f}});
+const Resource2DGLfloat rockVerticesM({{-1.0f, -1.0f, 0.5f},
+										{1.0f, -1.0f, 0.5f},
+										{1.0f, 1.0f, 0.5f},
+										{-1.0f, 1.0f, 0.5f},
+										{-0.75f, -0.75f, 1.0f},
+										{0.75f, -0.75f, 1.0f},
+										{0.75f, 0.75f, 1.0f},
+										{-0.75f, 0.75f, 1.0f}});
+const Resource2DGLfloat rockVerticesS({{-0.5f, -0.5f, 0.5f},
+										{0.5f, -0.5f, 0.5f},
+										{0.5f, 0.5f, 0.5f},
+										{-0.5f, 0.5f, 0.5f},
+										{-0.25f, -0.25f, 1.0f},
+										{0.25f, -0.25f, 1.0f},
+										{0.25f, 0.25f, 1.0f},
+										{-0.25f, 0.25f, 1.0f}});
+ResourceGLubyte rockIndices({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 5, 6, 7, 0, 1, 5, 4});
 
-	auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Rock::RockPrefix()
@@ -233,7 +235,7 @@ void Rock::Draw()
 	glLoadIdentity();
 	Resource2DGLfloat& frame = GetFrame();
 	glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
-	glRotatef(spin_ * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
+	glRotatef(spin_ * (180.0f / PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, rockIndices_.Data());
 
 	glPopMatrix();

@@ -9,6 +9,7 @@
 #include <array>
 #include <future>
 #include <map>
+#include <numbers>
 #include <set>
 #include <string>
 #include <vector>
@@ -260,7 +261,7 @@ namespace asteroids
 
         bool bulletFired_{false};
         bool doRotate_{false};
-        GLfloat orientationAngle_{static_cast<GLfloat>(M_PI) / 2};
+        GLfloat orientationAngle_{static_cast<GLfloat>(std::numbers::pi) / 2};
 
         Resource2DGLfloat unitOrientation_;
         Resource2DGLfloat shipVertices_;

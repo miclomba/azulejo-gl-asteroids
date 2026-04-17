@@ -4,6 +4,7 @@
 #include <future>
 #include <map>
 #include <memory>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -51,27 +52,28 @@ using Resource2DGLfloat = ContainerResource2D<GLfloat>;
 
 namespace
 {
-	const std::string SHIP_VERTICES_KEY = "ship_vertices";
-	const std::string SHIP_INDICES_KEY = "ship_indices";
-	const std::string UNIT_ORIENTATION_KEY = "unit_orientation";
-	const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
-	const std::string BULLET_FIRED_KEY = "bullet_fired";
-	const std::string TRUE_VAL = "true";
+const double PI = std::numbers::pi;
+const std::string SHIP_VERTICES_KEY = "ship_vertices";
+const std::string SHIP_INDICES_KEY = "ship_indices";
+const std::string UNIT_ORIENTATION_KEY = "unit_orientation";
+const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
+const std::string BULLET_FIRED_KEY = "bullet_fired";
+const std::string TRUE_VAL = "true";
 
-	GLfloat PROJECTION_BUFFER[16];
-	const GLint BULLET_COUNT = 5;
+GLfloat PROJECTION_BUFFER[16];
+const GLint BULLET_COUNT = 5;
 
-	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
-	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
+EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
+EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
 
-	auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<ResourceGLubyte>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
-	auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
-	{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<ResourceGLubyte>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+{ return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
 std::string Ship::ShipKey()
@@ -101,7 +103,7 @@ Ship::Ship() : GLEntity(Resource2DGLfloat({{0.0f, 0.0f, 0.0f, 0.0f},
 												   {0.0f, 0.0f, 0.0f, 0.0f},
 												   {1.0f, 0.0f, 0.0f, 0.0f}}))
 {
-	SetVelocityAngle(M_PI / 2);
+	SetVelocityAngle(PI / 2);
 }
 
 void Ship::RegisterSerializationResources(const std::string &key)
@@ -206,9 +208,9 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	velAngle = GetVelocityAngle();
 
 	if (unitVel.GetData(0, 0) < 0)
-		SetVelocityAngle(velAngle + M_PI);
+		SetVelocityAngle(velAngle + PI);
 	else if (unitVel.GetData(1, 0) < 0)
-		SetVelocityAngle(velAngle + 2 * M_PI);
+		SetVelocityAngle(velAngle + 2 * PI);
 }
 
 void Ship::ChangeShipOrientation()
@@ -220,9 +222,9 @@ void Ship::ChangeShipOrientation()
 	orientationAngle_ = static_cast<GLfloat>(atan(unitOrientation_.GetData(1, 0) /
 									   unitOrientation_.GetData(0, 0)));
 	if (unitOrientation_.GetData(0, 0) < 0)
-		orientationAngle_ += M_PI;
+		orientationAngle_ += PI;
 	else if (unitOrientation_.GetData(1, 0) < 0)
-		orientationAngle_ += 2 * M_PI;
+		orientationAngle_ += 2 * PI;
 }
 
 void Ship::MoveShip()
@@ -326,7 +328,7 @@ void Ship::Draw()
 	glLoadIdentity();
 	Resource2DGLfloat& frame = GetFrame();
 	glTranslatef(frame.GetData(0, 0), frame.GetData(1, 0), frame.GetData(2, 0));
-	glRotatef(orientationAngle_ * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
+	glRotatef(orientationAngle_ * (180.0f / PI), 0.0f, 0.0f, 1.0f);
 	glDrawElements(GL_LINE_LOOP, 24, GL_UNSIGNED_BYTE, shipIndices_.Data());
 
 	glPopMatrix();

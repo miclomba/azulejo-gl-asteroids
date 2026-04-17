@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <future>
 #include <memory>
+#include <numbers>
 #include <stdio.h>
 #include <string>
 #include <thread>
@@ -65,125 +66,126 @@ namespace pt = boost::property_tree;
 
 namespace
 {
-	const int ROCK_NUMBER = 6;
-	const std::string ASTEROIDS_KEY = "Asteroids";
-	const std::string SCORE_KEY = "score";
-	const std::string ROCK_COUNT_KEY = "rock_count";
-	const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
-	const std::string THRUST_KEY = "thrust";
-	const std::string ROCK_PREFIX = "Rock";
-	const std::string BULLET_PREFIX = "Bullet";
-	const std::vector<std::string> ROCK_RESOURCES = {"rock_vertices", "rock_indices", "frame", "unit_velocity", "S", "T", "R"};
-	const std::vector<std::string> BULLET_RESOURCES = {"bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R"};
-	const std::vector<std::string> SHIP_RESOURCES = {"frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation"};
+const double PI = std::numbers::pi;
+const int ROCK_NUMBER = 6;
+const std::string ASTEROIDS_KEY = "Asteroids";
+const std::string SCORE_KEY = "score";
+const std::string ROCK_COUNT_KEY = "rock_count";
+const std::string ORIENTATION_ANGLE_KEY = "orientation_angle";
+const std::string THRUST_KEY = "thrust";
+const std::string ROCK_PREFIX = "Rock";
+const std::string BULLET_PREFIX = "Bullet";
+const std::vector<std::string> ROCK_RESOURCES = {"rock_vertices", "rock_indices", "frame", "unit_velocity", "S", "T", "R"};
+const std::vector<std::string> BULLET_RESOURCES = {"bullet_vertices", "bullet_indices", "projection_matrix", "frame", "unit_velocity", "S", "T", "R"};
+const std::vector<std::string> SHIP_RESOURCES = {"frame", "unit_velocity", "S", "T", "R", "ship_vertices", "ship_indices", "unit_orientation"};
 
-	const std::string RESET = "Press X to RESET";
-	const std::string SCORE = "SCORE: ";
+const std::string RESET = "Press X to RESET";
+const std::string SCORE = "SCORE: ";
 
-	EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
-	EntitySerializer *const Serializer = EntitySerializer::GetInstance();
-	EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
-	EntityTabularizer *const Tabularizer = EntityTabularizer::GetInstance();
-	ResourceDeserializer *const RDeserializer = ResourceDeserializer::GetInstance();
-	ResourceSerializer *const RSerializer = ResourceSerializer::GetInstance();
-	ResourceDetabularizer *const RDetabularizer = ResourceDetabularizer::GetInstance();
-	ResourceTabularizer *const RTabularizer = ResourceTabularizer::GetInstance();
+EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
+EntitySerializer *const Serializer = EntitySerializer::GetInstance();
+EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
+EntityTabularizer *const Tabularizer = EntityTabularizer::GetInstance();
+ResourceDeserializer *const RDeserializer = ResourceDeserializer::GetInstance();
+ResourceSerializer *const RSerializer = ResourceSerializer::GetInstance();
+ResourceDetabularizer *const RDetabularizer = ResourceDetabularizer::GetInstance();
+ResourceTabularizer *const RTabularizer = ResourceTabularizer::GetInstance();
 
-	void RegisterEntitiesForSerialization(const ptree &tree)
+void RegisterEntitiesForSerialization(const ptree &tree)
+{
+	for (const std::pair<std::string, ptree> &keyValue : tree)
 	{
-		for (const std::pair<std::string, ptree> &keyValue : tree)
+		auto& [nodeKey, node] = keyValue;
+
+		if (nodeKey.starts_with(Rock::RockPrefix()))
 		{
-			auto& [nodeKey, node] = keyValue;
-
-			if (nodeKey.starts_with(Rock::RockPrefix()))
-			{
-				Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-				Rock::RegisterSerializationResources(nodeKey);
-			}
-			else if (nodeKey.starts_with(Bullet::BulletPrefix()))
-			{
-				Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-				Bullet::RegisterSerializationResources(nodeKey);
-			}
-			else if (nodeKey == Ship::ShipKey())
-			{
-				Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-				Ship::RegisterSerializationResources(nodeKey);
-			}
-			else if (nodeKey == ASTEROIDS_KEY)
-			{
-				Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-				Asteroids::RegisterSerializationResources(nodeKey);
-			}
-			RegisterEntitiesForSerialization(node);
+			Deserializer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+			Rock::RegisterSerializationResources(nodeKey);
 		}
-	}
-
-	void RegisterEntitiesForTabularization(const ptree &tree)
-	{
-		for (const std::pair<std::string, ptree> &keyValue : tree)
+		else if (nodeKey.starts_with(Bullet::BulletPrefix()))
 		{
-			auto& [nodeKey, node] = keyValue;
-
-			if (nodeKey.starts_with(Rock::RockPrefix()))
-			{
-				Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-				Rock::RegisterTabularizationResources(nodeKey);
-			}
-			else if (nodeKey.starts_with(Bullet::BulletPrefix()))
-			{
-				Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-				Bullet::RegisterTabularizationResources(nodeKey);
-			}
-			else if (nodeKey == Ship::ShipKey())
-			{
-				Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-				Ship::RegisterTabularizationResources(nodeKey);
-			}
-			else if (nodeKey == ASTEROIDS_KEY)
-			{
-				Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-				Asteroids::RegisterTabularizationResources(nodeKey);
-			}
-			RegisterEntitiesForTabularization(node);
+			Deserializer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+			Bullet::RegisterSerializationResources(nodeKey);
 		}
+		else if (nodeKey == Ship::ShipKey())
+		{
+			Deserializer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+			Ship::RegisterSerializationResources(nodeKey);
+		}
+		else if (nodeKey == ASTEROIDS_KEY)
+		{
+			Deserializer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+			Asteroids::RegisterSerializationResources(nodeKey);
+		}
+		RegisterEntitiesForSerialization(node);
 	}
+}
 
-	std::vector<std::string> RockResourceKeys(const std::string &key)
+void RegisterEntitiesForTabularization(const ptree &tree)
+{
+	for (const std::pair<std::string, ptree> &keyValue : tree)
 	{
-		std::vector<std::string> keys;
-		for (const std::string &suffix : ROCK_RESOURCES)
-			keys.push_back(FormatKey(key + suffix));
-		return keys;
-	}
+		auto& [nodeKey, node] = keyValue;
 
-	std::vector<std::string> BulletResourceKeys(const std::string &key)
-	{
-		std::vector<std::string> keys;
-		for (const std::string &suffix : BULLET_RESOURCES)
-			keys.push_back(FormatKey(key + suffix));
-		return keys;
+		if (nodeKey.starts_with(Rock::RockPrefix()))
+		{
+			Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
+			Rock::RegisterTabularizationResources(nodeKey);
+		}
+		else if (nodeKey.starts_with(Bullet::BulletPrefix()))
+		{
+			Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+			Bullet::RegisterTabularizationResources(nodeKey);
+		}
+		else if (nodeKey == Ship::ShipKey())
+		{
+			Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
+			Ship::RegisterTabularizationResources(nodeKey);
+		}
+		else if (nodeKey == ASTEROIDS_KEY)
+		{
+			Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+			Asteroids::RegisterTabularizationResources(nodeKey);
+		}
+		RegisterEntitiesForTabularization(node);
 	}
+}
 
-	void UntabularizeShipResources(Ship *ship)
-	{
-		if (ship->GetFrame().GetDirty())
-			RTabularizer->Untabularize("Shipframe");
-		if (ship->GetUnitVelocity().GetDirty())
-			RTabularizer->Untabularize("Shipunitvelocity");
-		if (ship->SMatrix().GetDirty())
-			RTabularizer->Untabularize("ShipS");
-		if (ship->TMatrix().GetDirty())
-			RTabularizer->Untabularize("ShipT");
-		if (ship->RMatrix().GetDirty())
-			RTabularizer->Untabularize("ShipR");
-		if (ship->GetShipVertices().GetDirty())
-			RTabularizer->Untabularize("Shipshipvertices");
-		if (ship->GetShipIndices().GetDirty())
-			RTabularizer->Untabularize("Shipshipindices");
-		if (ship->GetUnitOrientation().GetDirty())
-			RTabularizer->Untabularize("Shipunitorientation");
-	}
+std::vector<std::string> RockResourceKeys(const std::string &key)
+{
+	std::vector<std::string> keys;
+	for (const std::string &suffix : ROCK_RESOURCES)
+		keys.push_back(FormatKey(key + suffix));
+	return keys;
+}
+
+std::vector<std::string> BulletResourceKeys(const std::string &key)
+{
+	std::vector<std::string> keys;
+	for (const std::string &suffix : BULLET_RESOURCES)
+		keys.push_back(FormatKey(key + suffix));
+	return keys;
+}
+
+void UntabularizeShipResources(Ship *ship)
+{
+	if (ship->GetFrame().GetDirty())
+		RTabularizer->Untabularize("Shipframe");
+	if (ship->GetUnitVelocity().GetDirty())
+		RTabularizer->Untabularize("Shipunitvelocity");
+	if (ship->SMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipS");
+	if (ship->TMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipT");
+	if (ship->RMatrix().GetDirty())
+		RTabularizer->Untabularize("ShipR");
+	if (ship->GetShipVertices().GetDirty())
+		RTabularizer->Untabularize("Shipshipvertices");
+	if (ship->GetShipIndices().GetDirty())
+		RTabularizer->Untabularize("Shipshipindices");
+	if (ship->GetUnitOrientation().GetDirty())
+		RTabularizer->Untabularize("Shipunitorientation");
+}
 } // end namespace
 
 Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1)
@@ -327,7 +329,7 @@ void Asteroids::UpdateRockTask(GLEntity *sharedRock)
 	Rock * const rock = dynamic_cast<Rock *>(sharedRock);
 	GLint randy = rand();
 	randy = (randy % 9) + 1;
-	rock->Update(static_cast<GLfloat>(M_PI * randy / 5), static_cast<GLfloat>(randy % 3) / 100, static_cast<GLfloat>(randy % 6) / 100);
+	rock->Update(static_cast<GLfloat>(PI * randy / 5), static_cast<GLfloat>(randy % 3) / 100, static_cast<GLfloat>(randy % 6) / 100);
 };
 
 void Asteroids::UpdateShipTask(GLEntity *sharedShip, std::vector<std::future<GLEntity *>> &futures)
@@ -612,9 +614,9 @@ void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 
 	GLfloat momentumAngle = static_cast<GLfloat>(atan(yCompMomentumR / xCompMomentumR));
 	if (xCompMomentumR < 0)
-		momentumAngle += M_PI;
+		momentumAngle += PI;
 	else if (yCompMomentumR < 0)
-		momentumAngle += 2 * M_PI;
+		momentumAngle += 2 * PI;
 
 	rock->SetMass(rockMass + bulletMass);
 	rock->SetSpeed(momentumMagnitude / rockMass);
@@ -644,7 +646,7 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, Rock *rock, cons
 	rock1->SetSpeed(rock->GetSpeed());
 	rock1->SetSpin(rock->GetSpin());
 	rock1->SetSpinEpsilon(rock->GetSpinEpsilon());
-	rock1->SetVelocityAngle(rock->GetVelocityAngle() + angleMultiplier * M_PI / 4);
+	rock1->SetVelocityAngle(rock->GetVelocityAngle() + angleMultiplier * PI / 4);
 	const GLfloat rock1VelAngle = rock1->GetVelocityAngle();
 	rock1->SetUnitVelocity(0, 0, cos(rock1VelAngle));
 	rock1->SetUnitVelocity(1, 0, sin(rock1VelAngle));
