@@ -1,5 +1,6 @@
 #include "game/Ship.h"
 
+#include <cmath>
 #include <future>
 #include <map>
 #include <memory>
@@ -192,7 +193,7 @@ void Ship::RecomputeShipVelocity(const GLfloat _thrust)
 	xComponentVelocity += xComponentOrientation;
 	yComponentVelocity += yComponentOrientation;
 
-	SetSpeed(sqrt(pow(xComponentVelocity, 2) + pow(yComponentVelocity, 2)));
+	SetSpeed(std::hypot(xComponentVelocity, yComponentVelocity));
 	speed = GetSpeed();
 
 	unitVel.GetData(0, 0) = xComponentVelocity / speed;

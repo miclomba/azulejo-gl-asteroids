@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdlib>
 #include <future>
 #include <memory>
@@ -531,8 +532,7 @@ void Asteroids::ProcessCollision(Bullet *bullet, const Key &rockKey)
 
 Rock *Asteroids::Collision(Bullet *_bullet)
 {
-	GLfloat epsilon;
-	GLfloat ray;
+	GLfloat epsilon{};
 
 	for (std::vector<Key> rockKeys = GetRockKeys(); Key &key : rockKeys)
 	{
@@ -543,8 +543,9 @@ Rock *Asteroids::Collision(Bullet *_bullet)
 		Rock * const rock = dynamic_cast<Rock *>(sharedRock.get());
 		Resource2DGLfloat& bulletFrame = _bullet->GetFrame();
 		Resource2DGLfloat& rockFrame = rock->GetFrame();
-		ray = sqrt(pow(fabs(bulletFrame.GetData(0, 0) - rockFrame.GetData(0, 0)), 2) +
-				   pow(fabs(bulletFrame.GetData(1, 0) - rockFrame.GetData(1, 0)), 2));
+
+		GLfloat ray = std::hypot(fabs(bulletFrame.GetData(0, 0) - rockFrame.GetData(0, 0)), 
+						 fabs(bulletFrame.GetData(1, 0) - rockFrame.GetData(1, 0)));
 
 		if (rock->GetState() == State::LARGE)
 			epsilon = 1.7f;
@@ -561,8 +562,7 @@ Rock *Asteroids::Collision(Bullet *_bullet)
 
 Rock *Asteroids::ShipCollision()
 {
-	GLfloat epsilon;
-	GLfloat ray;
+	GLfloat epsilon{};
 
 	if (SharedEntity &sharedShip = GetShip(); sharedShip)
 	{
@@ -576,8 +576,9 @@ Rock *Asteroids::ShipCollision()
 			Rock * const rock = dynamic_cast<Rock *>(sharedRock.get());
 			Resource2DGLfloat& shipFrame = ship->GetFrame();
 			Resource2DGLfloat& rockFrame = rock->GetFrame();
-			ray = sqrt(pow(fabs(shipFrame.GetData(0, 0) - rockFrame.GetData(0, 0)), 2) +
-					   pow(fabs(shipFrame.GetData(1, 0) - rockFrame.GetData(1, 0)), 2));
+
+			GLfloat ray = std::hypot(fabs(shipFrame.GetData(0, 0) - rockFrame.GetData(0, 0)),
+							 fabs(shipFrame.GetData(1, 0) - rockFrame.GetData(1, 0)));
 
 			if (rock->GetState() == State::LARGE)
 				epsilon = 2.2f;
@@ -610,7 +611,7 @@ void Asteroids::CalculateConservationOfMomentum(Bullet *bullet, Rock *rock)
 	xCompMomentumR += xCompMomentumB;
 	yCompMomentumR += yCompMomentumB;
 
-	const GLfloat momentumMagnitude = sqrt(pow(xCompMomentumR, 2) + pow(yCompMomentumR, 2));
+	const GLfloat momentumMagnitude = std::hypot(xCompMomentumR, yCompMomentumR);
 
 	GLfloat momentumAngle = static_cast<GLfloat>(atan(yCompMomentumR / xCompMomentumR));
 	if (xCompMomentumR < 0)
