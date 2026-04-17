@@ -93,8 +93,7 @@ namespace
 	{
 		for (const std::pair<std::string, ptree> &keyValue : tree)
 		{
-			const std::string nodeKey = keyValue.first;
-			const ptree node = keyValue.second;
+			auto& [nodeKey, node] = keyValue;
 
 			if (nodeKey.starts_with(Rock::RockPrefix()))
 			{
@@ -124,8 +123,7 @@ namespace
 	{
 		for (const std::pair<std::string, ptree> &keyValue : tree)
 		{
-			const std::string nodeKey = keyValue.first;
-			const ptree node = keyValue.second;
+			auto& [nodeKey, node] = keyValue;
 
 			if (nodeKey.starts_with(Rock::RockPrefix()))
 			{
@@ -482,8 +480,9 @@ void Asteroids::DetermineCollisions()
 
 	for (std::pair<Bullet *, std::future<GLEntity *>> &bulletRock : bulletAndRockFuture)
 	{
-		if (Rock *rock = dynamic_cast<Rock *>(bulletRock.second.get()); rock) {
-			Bullet * const bullet = bulletRock.first;
+		auto& [bulletPtr, entityFuture] = bulletRock;
+		if (Rock *rock = dynamic_cast<Rock *>(entityFuture.get()); rock) {
+			Bullet * const bullet = bulletPtr;
 			collisionPairs.push_back(std::make_pair(bullet, rock->GetKey()));
 		}
 	}
@@ -492,11 +491,9 @@ void Asteroids::DetermineCollisions()
 
 	for (std::pair<Bullet *, Key> &collisions : collisionPairs)
 	{
-		if (HasRock(collisions.second))
+		auto& [bullet, rockKey] = collisions;
+		if (HasRock(rockKey))
 		{
-			Bullet * const bullet = collisions.first;
-			Key rockKey = collisions.second;
-
 			GLEntityTask task([bullet, rockKey, this]()
 							  { ProcessCollision(bullet, rockKey); return bullet; });
 			collisionFutures.emplace_back(task.GetFuture());
