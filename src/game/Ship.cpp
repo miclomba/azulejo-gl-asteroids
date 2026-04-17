@@ -288,7 +288,7 @@ void Ship::UpdateBullets(
 	std::vector<std::string> bulletsToRemove;
 	for (auto iter = bullets.begin(); iter != bullets.end(); ++iter)
 	{
-		SharedEntity &sharedEntity = iter->second;
+		auto& [entityKey, sharedEntity] = *iter;
 		Bullet * const bullet = dynamic_cast<Bullet *>(sharedEntity.get());
 		if (bullet && bullet->IsOutOfBounds())
 		{
