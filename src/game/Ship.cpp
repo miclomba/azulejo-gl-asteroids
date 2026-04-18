@@ -16,10 +16,10 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "DatabaseAdapters/EntityDetabularizer.h"
-#include "DatabaseAdapters/ITabularizableResource.h"
-#include "DatabaseAdapters/ResourceDetabularizer.h"
-#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "DatabaseAdapters/EntityLoader.h"
+#include "DatabaseAdapters/IPersistableResource.h"
+#include "DatabaseAdapters/ResourceLoader.h"
+#include "DatabaseAdapters/ResourcePersister.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
@@ -38,10 +38,10 @@ using asteroids::GLEntity;
 using asteroids::GLEntityTask;
 using asteroids::Ship;
 using boost::property_tree::ptree;
-using database_adapters::EntityDetabularizer;
-using database_adapters::ITabularizableResource;
-using database_adapters::ResourceDetabularizer;
-using database_adapters::ResourceTabularizer;
+using database_adapters::EntityLoader;
+using database_adapters::IPersistableResource;
+using database_adapters::ResourceLoader;
+using database_adapters::ResourcePersister;
 using database_adapters::Sqlite;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
@@ -65,15 +65,15 @@ GLfloat PROJECTION_BUFFER[16];
 const GLint BULLET_COUNT = 5;
 
 EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
-EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
+EntityLoader *const Loader = EntityLoader::GetInstance();
 
 auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<ResourceGLubyte>(); };
-auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<ResourceGLubyte>(); };
 auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
@@ -120,18 +120,18 @@ void Ship::RegisterSerializationResources(const std::string_view resourceKey)
 		deserializer->RegisterResource<GLfloat>(UNIT_ORIENTATION_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void Ship::RegisterTabularizationResources(const std::string_view resourceKey)
+void Ship::RegisterPersistenceResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(resourceKey);
+	GLEntity::RegisterPersistenceResources(resourceKey);
 
 	const std::string key{resourceKey};
-	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_VERTICES_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + SHIP_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + SHIP_INDICES_KEY)))
-		detabularizer->RegisterResource<GLubyte>(FormatKey(key + SHIP_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_ORIENTATION_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_ORIENTATION_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	ResourceLoader * const loader = ResourceLoader::GetInstance();
+	if (!loader->HasPersistenceKey(FormatKey(key + SHIP_VERTICES_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + SHIP_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + SHIP_INDICES_KEY)))
+		loader->RegisterResource<GLubyte>(FormatKey(key + SHIP_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + UNIT_ORIENTATION_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + UNIT_ORIENTATION_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
 Ship::Ship(const std::string_view key) : Ship()
@@ -140,7 +140,7 @@ Ship::Ship(const std::string_view key) : Ship()
 #ifndef SAVE_TO_DB
 	Ship::RegisterSerializationResources(GetKey());
 #else
-	Ship::RegisterTabularizationResources(GetKey());
+	Ship::RegisterPersistenceResources(GetKey());
 #endif
 }
 
@@ -380,7 +380,7 @@ void Ship::AddBullet(const SharedEntity &bullet)
 {
 	AggregateMember(bullet);
 	Deserializer->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
-	Detabularizer->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
+	Loader->GetRegistry().RegisterEntity<Bullet>(bullet->GetKey());
 }
 
 GLint Ship::BulletNumber()
@@ -401,7 +401,7 @@ void Ship::Fire()
 #ifndef SAVE_TO_DB
 	Bullet::RegisterSerializationResources(bullet->GetKey());
 #else
-	Bullet::RegisterTabularizationResources(bullet->GetKey());
+	Bullet::RegisterPersistenceResources(bullet->GetKey());
 #endif
 
 	bulletFired_ = true;
@@ -463,11 +463,11 @@ void Ship::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 	tree.put(BULLET_FIRED_KEY, bulletFired_);
 	tree.put(ORIENTATION_ANGLE_KEY, orientationAngle_);
 
-	ResourceTabularizer *tabularizer = ResourceTabularizer::GetInstance();
+	ResourcePersister *persister = ResourcePersister::GetInstance();
 
-	tabularizer->Tabularize(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
-	tabularizer->Tabularize(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
-	tabularizer->Tabularize(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
+	persister->Persist(shipVertices_, FormatKey(GetKey() + SHIP_VERTICES_KEY));
+	persister->Persist(shipIndices_, FormatKey(GetKey() + SHIP_INDICES_KEY));
+	persister->Persist(unitOrientation_, FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
 
 	GLEntity::Save(tree, database);
 }
@@ -479,12 +479,12 @@ void Ship::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	bulletFired_ = tree.get_child(BULLET_FIRED_KEY).data() == TRUE_VAL ? true : false;
 	orientationAngle_ = std::stof(tree.get_child(ORIENTATION_ANGLE_KEY).data());
 
-	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceLoader * const loader = ResourceLoader::GetInstance();
 
-	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_VERTICES_KEY));
+	std::unique_ptr<IPersistableResource> deserializedVertices = loader->Load(FormatKey(GetKey() + SHIP_VERTICES_KEY));
 	shipVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.get());
-	std::unique_ptr<ITabularizableResource> deserializedIndices = detabularizer->Detabularize(FormatKey(GetKey() + SHIP_INDICES_KEY));
+	std::unique_ptr<IPersistableResource> deserializedIndices = loader->Load(FormatKey(GetKey() + SHIP_INDICES_KEY));
 	shipIndices_ = *static_cast<ResourceGLubyte *>(deserializedIndices.get());
-	std::unique_ptr<ITabularizableResource> deserializedOrientation = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
+	std::unique_ptr<IPersistableResource> deserializedOrientation = loader->Load(FormatKey(GetKey() + UNIT_ORIENTATION_KEY));
 	unitOrientation_ = *static_cast<Resource2DGLfloat *>(deserializedOrientation.get());
 }

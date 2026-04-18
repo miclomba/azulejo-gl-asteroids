@@ -165,9 +165,9 @@ namespace asteroids
         void ClearUnusedSerializationKeys();
 
         /**
-         * @brief Clear unused tabularization keys.
+         * @brief Clear unused loading keys.
          */
-        void ClearUnusedTabularizationKeys();
+        void ClearUnusedPersistenceKeys();
 
         /**
          * @brief Clear or reset the game.

@@ -8,9 +8,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "DatabaseAdapters/ITabularizableResource.h"
-#include "DatabaseAdapters/ResourceDetabularizer.h"
-#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "DatabaseAdapters/IPersistableResource.h"
+#include "DatabaseAdapters/ResourceLoader.h"
+#include "DatabaseAdapters/ResourcePersister.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
@@ -25,9 +25,9 @@
 using asteroids::Bullet;
 using asteroids::GLEntity;
 using boost::property_tree::ptree;
-using database_adapters::ITabularizableResource;
-using database_adapters::ResourceDetabularizer;
-using database_adapters::ResourceTabularizer;
+using database_adapters::IPersistableResource;
+using database_adapters::ResourceLoader;
+using database_adapters::ResourcePersister;
 using database_adapters::Sqlite;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
@@ -52,11 +52,11 @@ std::vector<std::vector<GLfloat>> BUFFER({std::vector<GLfloat>(16)});
 
 auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<ResourceGLubyte>(); };
-auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<ResourceGLubyte>(); };
 auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
@@ -98,18 +98,18 @@ void Bullet::RegisterSerializationResources(const std::string_view resourceKey)
 		deserializer->RegisterResource<GLfloat>(PROJECTION_MATRIX_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void Bullet::RegisterTabularizationResources(const std::string_view resourceKey)
+void Bullet::RegisterPersistenceResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(resourceKey);
+	GLEntity::RegisterPersistenceResources(resourceKey);
 
 	const std::string key{resourceKey};
-	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_VERTICES_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + BULLET_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + BULLET_INDICES_KEY)))
-		detabularizer->RegisterResource<GLubyte>(FormatKey(key + BULLET_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + PROJECTION_MATRIX_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + PROJECTION_MATRIX_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	ResourceLoader * const loader = ResourceLoader::GetInstance();
+	if (!loader->HasPersistenceKey(FormatKey(key + BULLET_VERTICES_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + BULLET_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + BULLET_INDICES_KEY)))
+		loader->RegisterResource<GLubyte>(FormatKey(key + BULLET_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + PROJECTION_MATRIX_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + PROJECTION_MATRIX_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
 Bullet::Bullet(const GLfloat _x, const GLfloat _y) : Bullet()
@@ -265,11 +265,11 @@ void Bullet::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 	tree.put(BULLET_INITIALIZED_KEY, bulletInitialized_);
 	tree.put(OUT_OF_BOUNDS_KEY, outOfBounds_);
 
-	ResourceTabularizer * const tabularizer = ResourceTabularizer::GetInstance();
+	ResourcePersister * const persister = ResourcePersister::GetInstance();
 
-	tabularizer->Tabularize(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
-	tabularizer->Tabularize(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
-	tabularizer->Tabularize(projectionMatrix_, FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
+	persister->Persist(bulletVertices_, FormatKey(GetKey() + BULLET_VERTICES_KEY));
+	persister->Persist(bulletIndices_, FormatKey(GetKey() + BULLET_INDICES_KEY));
+	persister->Persist(projectionMatrix_, FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
 
 	GLEntity::Save(tree, database);
 }
@@ -281,12 +281,12 @@ void Bullet::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	bulletInitialized_ = tree.get_child(BULLET_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 	outOfBounds_ = tree.get_child(OUT_OF_BOUNDS_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceLoader * const loader = ResourceLoader::GetInstance();
 
-	std::unique_ptr<ITabularizableResource> deserializedVertices = detabularizer->Detabularize(FormatKey(GetKey() + BULLET_VERTICES_KEY));
+	std::unique_ptr<IPersistableResource> deserializedVertices = loader->Load(FormatKey(GetKey() + BULLET_VERTICES_KEY));
 	bulletVertices_ = *static_cast<Resource2DGLfloat *>(deserializedVertices.release());
-	std::unique_ptr<ITabularizableResource> deserializedIndices = detabularizer->Detabularize(FormatKey(GetKey() + BULLET_INDICES_KEY));
+	std::unique_ptr<IPersistableResource> deserializedIndices = loader->Load(FormatKey(GetKey() + BULLET_INDICES_KEY));
 	bulletIndices_ = *static_cast<ResourceGLubyte *>(deserializedIndices.release());
-	std::unique_ptr<ITabularizableResource> deserializedProjection = detabularizer->Detabularize(FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
+	std::unique_ptr<IPersistableResource> deserializedProjection = loader->Load(FormatKey(GetKey() + PROJECTION_MATRIX_KEY));
 	projectionMatrix_ = *static_cast<Resource2DGLfloat *>(deserializedProjection.release());
 }

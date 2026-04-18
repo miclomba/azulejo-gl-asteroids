@@ -101,10 +101,10 @@ namespace asteroids
         static void RegisterSerializationResources(const std::string_view key);
 
         /**
-         * @brief Register tabularization resources for the rock.
-         * @param key The tabularization key.
+         * @brief Register loading resources for the rock.
+         * @param key The loading key.
          */
-        static void RegisterTabularizationResources(const std::string_view key);
+        static void RegisterPersistenceResources(const std::string_view key);
 
         /**
          * @brief Update the rock's position and spin.

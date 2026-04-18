@@ -24,10 +24,10 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "DatabaseAdapters/EntityDetabularizer.h"
-#include "DatabaseAdapters/EntityTabularizer.h"
-#include "DatabaseAdapters/ResourceDetabularizer.h"
-#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "DatabaseAdapters/EntityLoader.h"
+#include "DatabaseAdapters/EntityPersister.h"
+#include "DatabaseAdapters/ResourceLoader.h"
+#include "DatabaseAdapters/ResourcePersister.h"
 #include "FilesystemAdapters/EntitySerializer.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
@@ -52,10 +52,10 @@ using asteroids::GLEntityTask;
 using asteroids::Rock;
 using asteroids::Ship;
 using asteroids::State;
-using database_adapters::EntityDetabularizer;
-using database_adapters::EntityTabularizer;
-using database_adapters::ResourceDetabularizer;
-using database_adapters::ResourceTabularizer;
+using database_adapters::EntityLoader;
+using database_adapters::EntityPersister;
+using database_adapters::ResourceLoader;
+using database_adapters::ResourcePersister;
 using database_adapters::Sqlite;
 using events::EventConsumer;
 using filesystem_adapters::EntityDeserializer;
@@ -85,12 +85,12 @@ const std::string SCORE = "SCORE: ";
 
 EntityDeserializer *const Deserializer = EntityDeserializer::GetInstance();
 EntitySerializer *const Serializer = EntitySerializer::GetInstance();
-EntityDetabularizer *const Detabularizer = EntityDetabularizer::GetInstance();
-EntityTabularizer *const Tabularizer = EntityTabularizer::GetInstance();
+EntityLoader *const Loader = EntityLoader::GetInstance();
+EntityPersister *const Persister = EntityPersister::GetInstance();
 ResourceDeserializer *const RDeserializer = ResourceDeserializer::GetInstance();
 ResourceSerializer *const RSerializer = ResourceSerializer::GetInstance();
-ResourceDetabularizer *const RDetabularizer = ResourceDetabularizer::GetInstance();
-ResourceTabularizer *const RTabularizer = ResourceTabularizer::GetInstance();
+ResourceLoader *const RLoader = ResourceLoader::GetInstance();
+ResourcePersister *const RPersister = ResourcePersister::GetInstance();
 
 void RegisterEntitiesForSerialization(const ptree &tree)
 {
@@ -122,7 +122,7 @@ void RegisterEntitiesForSerialization(const ptree &tree)
 	}
 }
 
-void RegisterEntitiesForTabularization(const ptree &tree)
+void RegisterEntitiesForPersistence(const ptree &tree)
 {
 	for (const std::pair<std::string, ptree> &keyValue : tree)
 	{
@@ -130,25 +130,25 @@ void RegisterEntitiesForTabularization(const ptree &tree)
 
 		if (nodeKey.starts_with(Rock::RockPrefix()))
 		{
-			Detabularizer->GetRegistry().RegisterEntity<Rock>(nodeKey);
-			Rock::RegisterTabularizationResources(nodeKey);
+			Loader->GetRegistry().RegisterEntity<Rock>(nodeKey);
+			Rock::RegisterPersistenceResources(nodeKey);
 		}
 		else if (nodeKey.starts_with(Bullet::BulletPrefix()))
 		{
-			Detabularizer->GetRegistry().RegisterEntity<Bullet>(nodeKey);
-			Bullet::RegisterTabularizationResources(nodeKey);
+			Loader->GetRegistry().RegisterEntity<Bullet>(nodeKey);
+			Bullet::RegisterPersistenceResources(nodeKey);
 		}
 		else if (nodeKey == Ship::ShipKey())
 		{
-			Detabularizer->GetRegistry().RegisterEntity<Ship>(nodeKey);
-			Ship::RegisterTabularizationResources(nodeKey);
+			Loader->GetRegistry().RegisterEntity<Ship>(nodeKey);
+			Ship::RegisterPersistenceResources(nodeKey);
 		}
 		else if (nodeKey == ASTEROIDS_KEY)
 		{
-			Detabularizer->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
-			Asteroids::RegisterTabularizationResources(nodeKey);
+			Loader->GetRegistry().RegisterEntity<Asteroids>(nodeKey);
+			Asteroids::RegisterPersistenceResources(nodeKey);
 		}
-		RegisterEntitiesForTabularization(node);
+		RegisterEntitiesForPersistence(node);
 	}
 }
 
@@ -168,24 +168,24 @@ std::vector<std::string> BulletResourceKeys(const std::string &key)
 	return keys;
 }
 
-void UntabularizeShipResources(std::shared_ptr<Ship> ship)
+void LoadShipResources(std::shared_ptr<Ship> ship)
 {
 	if (ship->GetFrame().GetDirty())
-		RTabularizer->Untabularize("Shipframe");
+		RPersister->Load("Shipframe");
 	if (ship->GetUnitVelocity().GetDirty())
-		RTabularizer->Untabularize("Shipunitvelocity");
+		RPersister->Load("Shipunitvelocity");
 	if (ship->SMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipS");
+		RPersister->Load("ShipS");
 	if (ship->TMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipT");
+		RPersister->Load("ShipT");
 	if (ship->RMatrix().GetDirty())
-		RTabularizer->Untabularize("ShipR");
+		RPersister->Load("ShipR");
 	if (ship->GetShipVertices().GetDirty())
-		RTabularizer->Untabularize("Shipshipvertices");
+		RPersister->Load("Shipshipvertices");
 	if (ship->GetShipIndices().GetDirty())
-		RTabularizer->Untabularize("Shipshipindices");
+		RPersister->Load("Shipshipindices");
 	if (ship->GetUnitOrientation().GetDirty())
-		RTabularizer->Untabularize("Shipunitorientation");
+		RPersister->Load("Shipunitorientation");
 }
 } // end namespace
 
@@ -198,8 +198,8 @@ Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? s
 	Asteroids::RegisterSerializationResources(GetKey());
 	Deserializer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #else
-	Asteroids::RegisterTabularizationResources(GetKey());
-	Detabularizer->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
+	Asteroids::RegisterPersistenceResources(GetKey());
+	Loader->GetRegistry().RegisterEntity<Ship>(Ship::ShipKey());
 #endif
 
 	ResetGame();
@@ -223,21 +223,21 @@ void Asteroids::Run()
 		Deserializer->LoadEntity(*this);
 	}
 #else
-	Detabularizer->GetRegistry().RegisterEntity<Asteroids>(ASTEROIDS_KEY);
-	Detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	RDetabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	if (Detabularizer->GetHierarchy().HasSerializationStructure())
+	Loader->GetRegistry().RegisterEntity<Asteroids>(ASTEROIDS_KEY);
+	Loader->OpenDatabase(ROOT_PATH / DB_NAME);
+	RLoader->OpenDatabase(ROOT_PATH / DB_NAME);
+	if (Loader->GetHierarchy().HasSerializationStructure())
 	{
 		ClearGame();
 
-		Detabularizer->GetRegistry().UnregisterAll();
+		Loader->GetRegistry().UnregisterAll();
 
-		RegisterEntitiesForTabularization(Detabularizer->GetHierarchy().GetSerializationStructure());
+		RegisterEntitiesForPersistence(Loader->GetHierarchy().GetSerializationStructure());
 
-		Detabularizer->LoadEntity(*this);
+		Loader->LoadEntity(*this);
 	}
-	Detabularizer->CloseDatabase();
-	RDetabularizer->CloseDatabase();
+	Loader->CloseDatabase();
+	RLoader->CloseDatabase();
 #endif
 }
 
@@ -285,8 +285,8 @@ void Asteroids::ResetGame()
 		Rock::RegisterSerializationResources(rock->GetKey());
 		Deserializer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
 #else
-		Rock::RegisterTabularizationResources(rock->GetKey());
-		Detabularizer->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
+		Rock::RegisterPersistenceResources(rock->GetKey());
+		Loader->GetRegistry().RegisterEntity<Rock>(rock->GetKey());
 #endif
 	};
 
@@ -297,7 +297,7 @@ void Asteroids::ResetGame()
 #ifndef SAVE_TO_DB
 		Ship::RegisterSerializationResources(sharedShip->GetKey());
 #else
-		Ship::RegisterTabularizationResources(sharedShip->GetKey());
+		Ship::RegisterPersistenceResources(sharedShip->GetKey());
 #endif
 	};
 
@@ -639,7 +639,7 @@ std::shared_ptr<Rock> Asteroids::MakeRock(const State rockSize, std::shared_ptr<
 #ifndef SAVE_TO_DB
 	Rock::RegisterSerializationResources(rock1->GetKey());
 #else
-	Rock::RegisterTabularizationResources(rock1->GetKey());
+	Rock::RegisterPersistenceResources(rock1->GetKey());
 #endif
 
 	rock1->SetMass(rock->GetMass() / massDenominator);
@@ -675,8 +675,8 @@ void Asteroids::BreakRock(std::shared_ptr<Rock> rock)
 	Deserializer->GetRegistry().RegisterEntity<Rock>(rock1->GetKey());
 	Deserializer->GetRegistry().RegisterEntity<Rock>(rock2->GetKey());
 #else
-	Detabularizer->GetRegistry().RegisterEntity<Rock>(rock1->GetKey());
-	Detabularizer->GetRegistry().RegisterEntity<Rock>(rock2->GetKey());
+	Loader->GetRegistry().RegisterEntity<Rock>(rock1->GetKey());
+	Loader->GetRegistry().RegisterEntity<Rock>(rock2->GetKey());
 #endif
 }
 
@@ -694,7 +694,7 @@ void Asteroids::DestroyBullet(std::shared_ptr<Bullet> bullet)
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(bulletKey);
 #else
-	Detabularizer->GetRegistry().UnregisterEntity(bulletKey);
+	Loader->GetRegistry().UnregisterEntity(bulletKey);
 #endif
 	ship->RemoveBullet(bulletKey, keysSerialized_);
 }
@@ -707,7 +707,7 @@ void Asteroids::DestroyRock(std::shared_ptr<Rock> rock)
 #ifndef SAVE_TO_DB
 	Deserializer->GetRegistry().UnregisterEntity(rockKey);
 #else
-	Detabularizer->GetRegistry().UnregisterEntity(rockKey);
+	Loader->GetRegistry().UnregisterEntity(rockKey);
 #endif
 	RemoveMember(rockKey);
 }
@@ -817,7 +817,7 @@ void Asteroids::ClearUnusedSerializationKeys()
 	keysToRemove_.clear();
 }
 
-void Asteroids::ClearUnusedTabularizationKeys()
+void Asteroids::ClearUnusedPersistenceKeys()
 {
 	AddOutOfScopeBulletsToRemovalKeys();
 
@@ -826,17 +826,17 @@ void Asteroids::ClearUnusedTabularizationKeys()
 		if (key.find(ROCK_PREFIX) != std::string::npos)
 		{
 			for (const std::string &resourceKey : RockResourceKeys(key))
-				RTabularizer->Untabularize(resourceKey);
+				RPersister->Load(resourceKey);
 		}
 		else if (key.find(BULLET_PREFIX) != std::string::npos)
 		{
 			for (const std::string &resourceKey : BulletResourceKeys(key))
-				RTabularizer->Untabularize(resourceKey);
+				RPersister->Load(resourceKey);
 		}
 		else
 		{
 			auto ship = dynamic_pointer_cast<Ship>(GetShip());
-			UntabularizeShipResources(ship);
+			LoadShipResources(ship);
 		}
 	}
 	keysToRemove_.clear();
@@ -861,15 +861,15 @@ void Asteroids::Serialize()
 	ClearUnusedSerializationKeys();
 	Serializer->Serialize(*this);
 #else
-	Tabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	RTabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
+	Persister->OpenDatabase(ROOT_PATH / DB_NAME);
+	RPersister->OpenDatabase(ROOT_PATH / DB_NAME);
 
-	ClearUnusedTabularizationKeys();
+	ClearUnusedPersistenceKeys();
 
-	Tabularizer->Tabularize(*this);
+	Persister->Persist(*this);
 
-	Tabularizer->CloseDatabase();
-	RTabularizer->CloseDatabase();
+	Persister->CloseDatabase();
+	RPersister->CloseDatabase();
 #endif
 
 	keysSerialized_ = GetKeysToSerialize();
@@ -885,13 +885,13 @@ void Asteroids::Deserialize()
 	RegisterEntitiesForSerialization(Deserializer->GetHierarchy().GetSerializationStructure());
 	Deserializer->LoadEntity(*this);
 #else
-	Detabularizer->GetRegistry().UnregisterAll();
-	Detabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	RDetabularizer->OpenDatabase(ROOT_PATH / DB_NAME);
-	RegisterEntitiesForTabularization(Detabularizer->GetHierarchy().GetSerializationStructure());
-	Detabularizer->LoadEntity(*this);
-	Detabularizer->CloseDatabase();
-	RDetabularizer->CloseDatabase();
+	Loader->GetRegistry().UnregisterAll();
+	Loader->OpenDatabase(ROOT_PATH / DB_NAME);
+	RLoader->OpenDatabase(ROOT_PATH / DB_NAME);
+	RegisterEntitiesForPersistence(Loader->GetHierarchy().GetSerializationStructure());
+	Loader->LoadEntity(*this);
+	Loader->CloseDatabase();
+	RLoader->CloseDatabase();
 #endif
 
 	keysSerialized_ = GetKeysToSerialize();

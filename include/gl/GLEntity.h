@@ -13,7 +13,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "DatabaseAdapters/ITabularizableEntity.h"
+#include "DatabaseAdapters/IPersistableEntity.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ISerializableEntity.h"
 #include "test_filesystem_adapters/ContainerResource2D.h"
@@ -29,10 +29,10 @@ namespace asteroids
      * @class GLEntity
      * @brief A class representing an OpenGL entity with scale, translation, and rotation transformations.
      *
-     * This class supports both serialization and database tabularization operations.
+     * This class supports both serialization and database loading operations.
      */
     class ASTEROIDS_DLL_EXPORT GLEntity : public filesystem_adapters::ISerializableEntity,
-                                          public database_adapters::ITabularizableEntity
+                                          public database_adapters::IPersistableEntity
     {
     public:
         /**
@@ -184,10 +184,10 @@ namespace asteroids
         static void RegisterSerializationResources(const std::string_view key);
 
         /**
-         * @brief Register serialization keys with the detabularizer.
+         * @brief Register serialization keys with the loader.
          * @param key The entity key.
          */
-        static void RegisterTabularizationResources(const std::string_view key);
+        static void RegisterPersistenceResources(const std::string_view key);
 
     protected:
         /**

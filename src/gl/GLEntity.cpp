@@ -8,9 +8,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "DatabaseAdapters/ITabularizableResource.h"
-#include "DatabaseAdapters/ResourceDetabularizer.h"
-#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "DatabaseAdapters/IPersistableResource.h"
+#include "DatabaseAdapters/ResourceLoader.h"
+#include "DatabaseAdapters/ResourcePersister.h"
 #include "FilesystemAdapters/EntityDeserializer.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
@@ -22,9 +22,9 @@
 
 using asteroids::GLEntity;
 using boost::property_tree::ptree;
-using database_adapters::ITabularizableResource;
-using database_adapters::ResourceDetabularizer;
-using database_adapters::ResourceTabularizer;
+using database_adapters::IPersistableResource;
+using database_adapters::ResourceLoader;
+using database_adapters::ResourcePersister;
 using entity::Entity;
 using filesystem_adapters::EntityDeserializer;
 using filesystem_adapters::ISerializableResource;
@@ -46,7 +46,7 @@ const std::string MASS_KEY = "mass";
 
 auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
@@ -90,21 +90,21 @@ void GLEntity::RegisterSerializationResources(const std::string_view key)
 		deserializer->RegisterResource<GLfloat>(T_KEY, RES2D_GLFLOAT_CONSTRUCTOR_S);
 }
 
-void GLEntity::RegisterTabularizationResources(const std::string_view resourceKey)
+void GLEntity::RegisterPersistenceResources(const std::string_view resourceKey)
 {
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceLoader *loader = ResourceLoader::GetInstance();
 
 	const std::string key(resourceKey);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + UNIT_VELOCITY_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + UNIT_VELOCITY_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + FRAME_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + FRAME_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + S_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + S_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + R_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + R_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!detabularizer->HasTabularizationKey(FormatKey(key + T_KEY)))
-		detabularizer->RegisterResource<GLfloat>(FormatKey(key + T_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + UNIT_VELOCITY_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + UNIT_VELOCITY_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + FRAME_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + FRAME_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + S_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + S_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + R_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + R_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!loader->HasPersistenceKey(FormatKey(key + T_KEY)))
+		loader->RegisterResource<GLfloat>(FormatKey(key + T_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
 GLEntity::~GLEntity() = default;
@@ -238,13 +238,13 @@ void GLEntity::Save(boost::property_tree::ptree &tree, database_adapters::Sqlite
 	tree.put(SPEED_KEY, speed_);
 	tree.put(MASS_KEY, mass_);
 
-	ResourceTabularizer *tabularizer = ResourceTabularizer::GetInstance();
+	ResourcePersister *persister = ResourcePersister::GetInstance();
 
-	tabularizer->Tabularize(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
-	tabularizer->Tabularize(frame_, FormatKey(GetKey() + FRAME_KEY));
-	tabularizer->Tabularize(S_, FormatKey(GetKey() + S_KEY));
-	tabularizer->Tabularize(R_, FormatKey(GetKey() + R_KEY));
-	tabularizer->Tabularize(T_, FormatKey(GetKey() + T_KEY));
+	persister->Persist(unitVelocity_, FormatKey(GetKey() + UNIT_VELOCITY_KEY));
+	persister->Persist(frame_, FormatKey(GetKey() + FRAME_KEY));
+	persister->Persist(S_, FormatKey(GetKey() + S_KEY));
+	persister->Persist(R_, FormatKey(GetKey() + R_KEY));
+	persister->Persist(T_, FormatKey(GetKey() + T_KEY));
 }
 
 void GLEntity::Load(boost::property_tree::ptree &tree, database_adapters::Sqlite &database)
@@ -253,16 +253,16 @@ void GLEntity::Load(boost::property_tree::ptree &tree, database_adapters::Sqlite
 	speed_ = std::stof(tree.get_child(SPEED_KEY).data());
 	mass_ = std::stof(tree.get_child(MASS_KEY).data());
 
-	ResourceDetabularizer *detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceLoader *loader = ResourceLoader::GetInstance();
 
-	std::unique_ptr<ITabularizableResource> deserializedUnitVelocity = detabularizer->Detabularize(FormatKey(GetKey() + UNIT_VELOCITY_KEY));
+	std::unique_ptr<IPersistableResource> deserializedUnitVelocity = loader->Load(FormatKey(GetKey() + UNIT_VELOCITY_KEY));
 	unitVelocity_ = *static_cast<Resource2DGLfloat *>(deserializedUnitVelocity.get());
-	std::unique_ptr<ITabularizableResource> deserializedFrame = detabularizer->Detabularize(FormatKey(GetKey() + FRAME_KEY));
+	std::unique_ptr<IPersistableResource> deserializedFrame = loader->Load(FormatKey(GetKey() + FRAME_KEY));
 	frame_ = *static_cast<Resource2DGLfloat *>(deserializedFrame.get());
-	std::unique_ptr<ITabularizableResource> deserializedS = detabularizer->Detabularize(FormatKey(GetKey() + S_KEY));
+	std::unique_ptr<IPersistableResource> deserializedS = loader->Load(FormatKey(GetKey() + S_KEY));
 	S_ = *static_cast<Resource2DGLfloat *>(deserializedS.get());
-	std::unique_ptr<ITabularizableResource> deserializedR = detabularizer->Detabularize(FormatKey(GetKey() + R_KEY));
+	std::unique_ptr<IPersistableResource> deserializedR = loader->Load(FormatKey(GetKey() + R_KEY));
 	R_ = *static_cast<Resource2DGLfloat *>(deserializedR.get());
-	std::unique_ptr<ITabularizableResource> deserializedT = detabularizer->Detabularize(FormatKey(GetKey() + T_KEY));
+	std::unique_ptr<IPersistableResource> deserializedT = loader->Load(FormatKey(GetKey() + T_KEY));
 	T_ = *static_cast<Resource2DGLfloat *>(deserializedT.get());
 }

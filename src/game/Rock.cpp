@@ -9,9 +9,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "DatabaseAdapters/ITabularizableResource.h"
-#include "DatabaseAdapters/ResourceDetabularizer.h"
-#include "DatabaseAdapters/ResourceTabularizer.h"
+#include "DatabaseAdapters/IPersistableResource.h"
+#include "DatabaseAdapters/ResourceLoader.h"
+#include "DatabaseAdapters/ResourcePersister.h"
 #include "DatabaseAdapters/Sqlite.h"
 #include "FilesystemAdapters/ISerializableResource.h"
 #include "FilesystemAdapters/ResourceDeserializer.h"
@@ -27,9 +27,9 @@ using asteroids::GLEntity;
 using asteroids::Rock;
 using asteroids::State;
 using boost::property_tree::ptree;
-using database_adapters::ITabularizableResource;
-using database_adapters::ResourceDetabularizer;
-using database_adapters::ResourceTabularizer;
+using database_adapters::IPersistableResource;
+using database_adapters::ResourceLoader;
+using database_adapters::ResourcePersister;
 using database_adapters::Sqlite;
 using filesystem_adapters::ISerializableResource;
 using filesystem_adapters::ResourceDeserializer;
@@ -81,11 +81,11 @@ ResourceGLubyte rockIndices({0, 3, 2, 1, 2, 3, 7, 6, 0, 4, 7, 3, 1, 2, 6, 5, 4, 
 
 auto RES_GLUBYTE_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<ResourceGLubyte>(); };
-auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES_GLUBYTE_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<ResourceGLubyte>(); };
 auto RES2D_GLFLOAT_CONSTRUCTOR_S = []() -> std::unique_ptr<ISerializableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
-auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<ITabularizableResource>
+auto RES2D_GLFLOAT_CONSTRUCTOR_T = []() -> std::unique_ptr<IPersistableResource>
 { return std::make_unique<Resource2DGLfloat>(); };
 } // end namespace
 
@@ -107,16 +107,16 @@ void Rock::RegisterSerializationResources(const std::string_view resourceKey)
 		deserializer->RegisterResource<GLubyte>(ROCK_INDICES_KEY, RES_GLUBYTE_CONSTRUCTOR_S);
 }
 
-void Rock::RegisterTabularizationResources(const std::string_view resourceKey)
+void Rock::RegisterPersistenceResources(const std::string_view resourceKey)
 {
-	GLEntity::RegisterTabularizationResources(resourceKey);
+	GLEntity::RegisterPersistenceResources(resourceKey);
 
 	const std::string key{resourceKey};
-	ResourceDetabularizer * const tabularizer = ResourceDetabularizer::GetInstance();
-	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_VERTICES_KEY)))
-		tabularizer->RegisterResource<GLfloat>(FormatKey(key + ROCK_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
-	if (!tabularizer->HasTabularizationKey(FormatKey(key + ROCK_INDICES_KEY)))
-		tabularizer->RegisterResource<GLubyte>(FormatKey(key + ROCK_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
+	ResourceLoader * const persister = ResourceLoader::GetInstance();
+	if (!persister->HasPersistenceKey(FormatKey(key + ROCK_VERTICES_KEY)))
+		persister->RegisterResource<GLfloat>(FormatKey(key + ROCK_VERTICES_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
+	if (!persister->HasPersistenceKey(FormatKey(key + ROCK_INDICES_KEY)))
+		persister->RegisterResource<GLubyte>(FormatKey(key + ROCK_INDICES_KEY), RES_GLUBYTE_CONSTRUCTOR_T);
 }
 
 Rock::Rock(
@@ -348,10 +348,10 @@ void Rock::Save(boost::property_tree::ptree &tree, Sqlite &database) const
 	tree.put(STATE_KEY, static_cast<int>(state_));
 	tree.put(ROCK_INITIALIZED_KEY, rockInitialized_);
 
-	ResourceTabularizer * const tabularizer = ResourceTabularizer::GetInstance();
+	ResourcePersister * const persister = ResourcePersister::GetInstance();
 
-	tabularizer->Tabularize(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
-	tabularizer->Tabularize(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
+	persister->Persist(rockVertices_, FormatKey(GetKey() + ROCK_VERTICES_KEY));
+	persister->Persist(rockIndices_, FormatKey(GetKey() + ROCK_INDICES_KEY));
 
 	GLEntity::Save(tree, database);
 }
@@ -366,10 +366,10 @@ void Rock::Load(boost::property_tree::ptree &tree, Sqlite &database)
 	state_ = static_cast<State>(std::stoi(tree.get_child(STATE_KEY).data()));
 	rockInitialized_ = tree.get_child(ROCK_INITIALIZED_KEY).data() == TRUE_VAL ? true : false;
 
-	ResourceDetabularizer * const detabularizer = ResourceDetabularizer::GetInstance();
+	ResourceLoader * const loader = ResourceLoader::GetInstance();
 
-	std::unique_ptr<ITabularizableResource> detabularizedVertices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_VERTICES_KEY));
-	rockVertices_ = *static_cast<Resource2DGLfloat *>(detabularizedVertices.get());
-	std::unique_ptr<ITabularizableResource> detabularizedIndices = detabularizer->Detabularize(FormatKey(GetKey() + ROCK_INDICES_KEY));
-	rockIndices_ = *static_cast<ResourceGLubyte *>(detabularizedIndices.get());
+	std::unique_ptr<IPersistableResource> loadedVertices = loader->Load(FormatKey(GetKey() + ROCK_VERTICES_KEY));
+	rockVertices_ = *static_cast<Resource2DGLfloat *>(loadedVertices.get());
+	std::unique_ptr<IPersistableResource> loadedIndices = loader->Load(FormatKey(GetKey() + ROCK_INDICES_KEY));
+	rockIndices_ = *static_cast<ResourceGLubyte *>(loadedIndices.get());
 }
