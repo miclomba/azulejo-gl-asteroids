@@ -23,6 +23,11 @@ elseif(APPLE)
     set(VCPKG_TRIPLET x64-osx)
 endif()
 
+message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "C++ flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "C++ flags (Debug): ${CMAKE_CXX_FLAGS_DEBUG}")
+message(STATUS "C++ flags (Release): ${CMAKE_CXX_FLAGS_RELEASE}")
+
 # — include paths —
 set(VCPKG_INCL_DIR_ENV $ENV{VCPKG_INCL_DIR})
 set(X_INCL_DIR_ENV    $ENV{X_INCL_DIR})
