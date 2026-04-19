@@ -107,11 +107,11 @@ void GLEntity::RegisterPersistenceResources(const std::string_view resourceKey)
 		loader->RegisterResource<GLfloat>(FormatKey(key + T_KEY), RES2D_GLFLOAT_CONSTRUCTOR_T);
 }
 
-GLEntity::~GLEntity() = default;
+GLEntity::~GLEntity() noexcept = default;
 GLEntity::GLEntity(const GLEntity &) = default;
-GLEntity::GLEntity(GLEntity &&) = default;
+GLEntity::GLEntity(GLEntity &&) noexcept = default;
 GLEntity &GLEntity::operator=(const GLEntity &) = default;
-GLEntity &GLEntity::operator=(GLEntity &&) = default;
+GLEntity &GLEntity::operator=(GLEntity &&) noexcept = default;
 
 void GLEntity::Draw()
 {

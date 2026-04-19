@@ -45,7 +45,7 @@ namespace asteroids
         /**
          * @brief Destructor for the GLBackend class.
          */
-        virtual ~GLBackend();
+        virtual ~GLBackend() noexcept;
 
         GLBackend(const GLBackend &) = delete;
         GLBackend(GLBackend &&) = delete;

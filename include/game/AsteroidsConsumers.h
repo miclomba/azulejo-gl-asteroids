@@ -36,7 +36,7 @@ namespace asteroids
         /**
          * @brief Destructor for AsteroidsConsumers.
          */
-        ~AsteroidsConsumers();
+        virtual ~AsteroidsConsumers() noexcept;
 
         AsteroidsConsumers(const AsteroidsConsumers &) = delete;
         AsteroidsConsumers(AsteroidsConsumers &&) = delete;

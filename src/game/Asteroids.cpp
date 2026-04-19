@@ -205,7 +205,7 @@ Asteroids::Asteroids() : threadPool_(std::thread::hardware_concurrency() > 1 ? s
 	ResetGame();
 }
 
-Asteroids::~Asteroids() = default;
+Asteroids::~Asteroids() noexcept = default;
 
 void Asteroids::Run()
 {

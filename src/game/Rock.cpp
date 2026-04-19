@@ -151,11 +151,11 @@ Rock::Rock(
 		rockVertices_ = rockVerticesS;
 }
 
-Rock::~Rock() = default;
+Rock::~Rock() noexcept= default;
 Rock::Rock(const Rock &) = default;
-Rock::Rock(Rock &&) = default;
+Rock::Rock(Rock &&) noexcept= default;
 Rock &Rock::operator=(const Rock &) = default;
-Rock &Rock::operator=(Rock &&) = default;
+Rock &Rock::operator=(Rock &&) noexcept = default;
 
 void Rock::InitializeRock(const GLfloat _velocityAngle, const GLfloat _speed, const GLfloat _spin)
 {

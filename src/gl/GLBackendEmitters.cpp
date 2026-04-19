@@ -17,7 +17,7 @@ namespace
 const std::string GL_BACKEND_EMITTERS_KEY = "GLBackendEmittersKey";
 } // end namespace
 
-GLBackendEmitters::~GLBackendEmitters() = default;
+GLBackendEmitters::~GLBackendEmitters() noexcept = default;
 
 GLBackendEmitters::GLBackendEmitters() : Entity(),
 										 leftArrowEmitter_(std::make_shared<Emitter>()),

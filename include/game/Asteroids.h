@@ -48,7 +48,7 @@ namespace asteroids
         /**
          * @brief Destructor for the Asteroids class.
          */
-        virtual ~Asteroids();
+        virtual ~Asteroids() noexcept;
 
         Asteroids(const Asteroids &) = delete;
         Asteroids(Asteroids &&) = delete;

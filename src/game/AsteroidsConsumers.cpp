@@ -64,7 +64,7 @@ AsteroidsConsumers::AsteroidsConsumers(
 	SetKey(ASTEROIDS_CONSUMERS_KEY);
 }
 
-AsteroidsConsumers::~AsteroidsConsumers() = default;
+AsteroidsConsumers::~AsteroidsConsumers() noexcept = default;
 
 std::shared_ptr<Consumer> AsteroidsConsumers::GetLeftArrowConsumer()
 {

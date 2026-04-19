@@ -34,7 +34,7 @@ namespace asteroids
         /**
          * @brief Destructor for GL.
          */
-        virtual ~GL();
+        virtual ~GL() noexcept;
 
         GL(const GL &) = delete;
         GL(GL &&) = delete;

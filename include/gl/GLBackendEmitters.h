@@ -34,7 +34,7 @@ namespace asteroids
         /**
          * @brief Destructor.
          */
-        virtual ~GLBackendEmitters();
+        virtual ~GLBackendEmitters() noexcept;
 
         GLBackendEmitters(const GLBackendEmitters &) = delete;
         GLBackendEmitters(GLBackendEmitters &&) = delete;

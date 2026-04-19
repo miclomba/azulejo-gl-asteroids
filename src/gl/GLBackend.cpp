@@ -25,7 +25,7 @@ const int NUMBER_KEYS = 256;
 const std::string ASTEROIDS_TITLE = "Asteroids";
 } // end namespace
 
-GLBackend::~GLBackend() = default;
+GLBackend::~GLBackend() noexcept = default;
 
 GLBackend::GLBackend() : QOpenGLWidget(),
 						 frameTimer_(std::make_unique<QTimer>(this)),

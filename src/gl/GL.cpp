@@ -17,7 +17,7 @@ GL &GL::Get()
 	return *GL::instance_;
 }
 
-GL::~GL() = default;
+GL::~GL() noexcept = default;
 
 GL::GL() = default;
 

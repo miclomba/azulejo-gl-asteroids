@@ -54,7 +54,7 @@ namespace asteroids
         /**
          * @brief Destructor for the Bullet class.
          */
-        virtual ~Bullet();
+        virtual ~Bullet() noexcept;
 
         /**
          * @brief Copy constructor.
@@ -66,7 +66,7 @@ namespace asteroids
          * @brief Move constructor.
          * @param other The Bullet instance to move from.
          */
-        Bullet(Bullet &&other);
+        Bullet(Bullet &&other) noexcept;
 
         /**
          * @brief Copy assignment operator.
@@ -80,7 +80,7 @@ namespace asteroids
          * @param other The Bullet instance to move from.
          * @return Reference to the updated instance.
          */
-        Bullet &operator=(Bullet &&other);
+        Bullet &operator=(Bullet &&other) noexcept;
 
         /**
          * @brief Register serialization resources for the bullet.

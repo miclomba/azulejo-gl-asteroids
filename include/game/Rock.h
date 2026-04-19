@@ -66,7 +66,7 @@ namespace asteroids
         /**
          * @brief Destructor for the Rock class.
          */
-        virtual ~Rock();
+        virtual ~Rock() noexcept;
 
         /**
          * @brief Copy constructor.
@@ -78,7 +78,7 @@ namespace asteroids
          * @brief Move constructor.
          * @param other The Rock instance to move from.
          */
-        Rock(Rock &&other);
+        Rock(Rock &&other) noexcept;
 
         /**
          * @brief Copy assignment operator.
@@ -92,7 +92,7 @@ namespace asteroids
          * @param other The Rock instance to move from.
          * @return Reference to the updated instance.
          */
-        Rock &operator=(Rock &&);
+        Rock &operator=(Rock &&) noexcept;
 
         /**
          * @brief Register serialization resources for the rock.

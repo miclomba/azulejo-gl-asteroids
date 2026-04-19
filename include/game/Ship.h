@@ -61,7 +61,7 @@ namespace asteroids
         /**
          * @brief Destructor for the Ship class.
          */
-        virtual ~Ship();
+        virtual ~Ship() noexcept;
 
         /**
          * @brief Copy constructor.
@@ -71,7 +71,7 @@ namespace asteroids
         /**
          * @brief Move constructor.
          */
-        Ship(Ship &&);
+        Ship(Ship &&) noexcept;
 
         /**
          * @brief Copy assignment.
@@ -81,7 +81,7 @@ namespace asteroids
         /**
          * @brief Move assignment.
          */
-        Ship &operator=(Ship &&);
+        Ship &operator=(Ship &&) noexcept;
 
         /**
          * @brief Register serialization resources for the ship.

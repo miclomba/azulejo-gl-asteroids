@@ -50,7 +50,7 @@ namespace asteroids
         /**
          * @brief Destructor for GLEntity.
          */
-        virtual ~GLEntity();
+        virtual ~GLEntity() noexcept;
 
         /**
          * @brief Copy constructor.
@@ -62,7 +62,7 @@ namespace asteroids
          * @brief Move constructor.
          * @param other The GLEntity instance to move from.
          */
-        GLEntity(GLEntity &&other);
+        GLEntity(GLEntity &&other) noexcept;
 
         /**
          * @brief Copy assignment operator.
@@ -76,7 +76,7 @@ namespace asteroids
          * @param other The GLEntity instance to move from.
          * @return Reference to the updated instance.
          */
-        GLEntity &operator=(GLEntity &&other);
+        GLEntity &operator=(GLEntity &&other) noexcept;
 
         /**
          * @brief Draw the entity using OpenGL.

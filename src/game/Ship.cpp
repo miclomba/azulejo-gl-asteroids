@@ -144,11 +144,11 @@ Ship::Ship(const std::string_view key) : Ship()
 #endif
 }
 
-Ship::~Ship() = default;
+Ship::~Ship() noexcept = default;
 Ship::Ship(const Ship &) = default;
-Ship::Ship(Ship &&) = default;
+Ship::Ship(Ship &&) noexcept = default;
 Ship &Ship::operator=(const Ship &) = default;
-Ship &Ship::operator=(Ship &&) = default;
+Ship &Ship::operator=(Ship &&) noexcept = default;
 
 std::string Ship::GenerateUUID() const
 {

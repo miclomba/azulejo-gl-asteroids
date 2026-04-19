@@ -127,11 +127,11 @@ Bullet::Bullet(const GLfloat _x, const GLfloat _y) : Bullet()
 									   {1.0f, 0.0f, 0.0f, 0.0f}}));
 }
 
-Bullet::~Bullet() = default;
+Bullet::~Bullet() noexcept = default;
 Bullet::Bullet(const Bullet &) = default;
-Bullet::Bullet(Bullet &&) = default;
+Bullet::Bullet(Bullet &&) noexcept = default;
 Bullet &Bullet::operator=(const Bullet &) = default;
-Bullet &Bullet::operator=(Bullet &&) = default;
+Bullet &Bullet::operator=(Bullet &&) noexcept = default;
 
 void Bullet::InitializeBullet(const GLfloat _velocityAngle, const GLfloat _speed)
 {
